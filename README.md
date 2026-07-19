@@ -20,7 +20,9 @@
 
 # 🌸 目前做了什么
 
-- 移除了 GMS 和 Firebase 追踪和统计模块
+- 移除了 GMS 和 Firebase 追踪统计模块
+
+- 移除了 CI 更新频道
 
 - ...
 
@@ -33,7 +35,7 @@
 
 Han1meViewer 是一个使用 Kotlin 开发的 Android 客户端，用于浏览、搜索、播放和管理 hanime 相关公开视频页面内容。当前项目以 Jetpack Compose、Navigation Compose、ViewModel、StateFlow、Retrofit、Jsoup、Room、WorkManager、Media3/JZVD/MPV 为主要技术栈，围绕视频浏览、详情播放、搜索、用户列表、下载管理、评论、订阅、设置和隐私保护等功能组织。
 
-本应用没有任何官方网站。GitHub Release 与 CI 构建产物是唯一下载及更新渠道。
+本应用没有任何官方网站。GitHub Release 是唯一下载及更新渠道。
 
 ## 📷 截图预览
 
@@ -147,15 +149,10 @@ DownloadScreen -> DownloadViewModel -> HanimeDownloadManagerV2 -> WorkManager Wo
 .\gradlew.bat :app:assembleDebug
 ```
 
-🔏 Release 构建需要本地或 CI 提供签名相关环境变量：
+🔏 Release 构建需要本地提供签名相关环境变量：
 
 - `KEYSTORE_PASSWORD`
 - `KEY_ALIAS`
-
-🔑 GitHub API Token 可通过环境变量或本地文件提供：
-
-- 环境变量：`HA_GITHUB_TOKEN`
-- 本地文件：`app/ha1_github_token.txt`
 
 ## ✅ 代码约定
 

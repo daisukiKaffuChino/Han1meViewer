@@ -1,9 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
 import Config.Version.createVersion
-import Config.Version.source
-import Config.isRelease
-import Config.lastCommitSha
 import com.android.build.api.variant.impl.VariantOutputImpl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -21,15 +18,6 @@ plugins {
 android {
     compileSdk = property("compile.sdk")?.toString()?.toIntOrNull()
 
-    val commitSha = if (isRelease) lastCommitSha else "b8eace8" // 方便调试
-
-    // 先 Github Secrets 再读取环境变量，若没有则读取本地文件
-
-    val githubToken = System.getenv("HA_GITHUB_TOKEN") ?: File(
-        projectDir, "ha1_github_token.txt"
-    ).checkIfExists()?.readText().orEmpty()
-
-
     defaultConfig {
         applicationId = "com.yenaly.han1meviewer"
         minSdk = property("min.sdk")?.toString()?.toIntOrNull()
@@ -40,12 +28,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "COMMIT_SHA", "\"$commitSha\"")
         buildConfigField("String", "VERSION_NAME", "\"${versionName}\"")
         buildConfigField("int", "VERSION_CODE", "$versionCode")
-        buildConfigField("String", "HA_GITHUB_TOKEN", "\"${githubToken}\"")
-        buildConfigField("String", "VERSION_SOURCE", "\"${source}\"")
-
         buildConfigField("int", "SEARCH_YEAR_RANGE_END", "${Config.thisYear}")
     }
     signingConfigs {
@@ -59,7 +43,7 @@ android {
 
     splits {
         abi {
-            isEnable = (gradle.startParameter.taskRequests.toString().contains("Release"))
+            isEnable = gradle.startParameter.taskRequests.toString().contains("Release")
             reset()
             include("arm64-v8a")
             isUniversalApk = false
@@ -76,24 +60,23 @@ android {
             )
             signingConfig = signingConfigs.getByName("release")
             manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher_new"
-
         }
 
         debug {
             isMinifyEnabled = false
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
             applicationIdSuffix = ".debug"
             manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher_debug"
         }
     }
     buildFeatures {
-        //noinspection DataBindingWithoutKapt
         dataBinding = true
         buildConfig = true
         viewBinding = true
-        compose  =  true
+        compose = true
     }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
@@ -116,12 +99,9 @@ kotlin {
     }
 }
 
-
 androidComponents {
     onVariants { variant ->
         variant.outputs.forEach { output ->
-
-            //  val apkName = "你的应用名_V${output.versionName.get()}_Build${output.versionCode.get()}_${variant.buildType}.apk"
             val apkName = "Han1meViewer-v${output.versionName.get()}.apk"
             (output as VariantOutputImpl).outputFileName = apkName
         }
@@ -138,13 +118,12 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.androidx.material.icons.extended)
-    // android related
 
     implementation(libs.bundles.android.base)
     implementation(libs.bundles.android.jetpack)
     implementation(libs.palette)
     implementation(libs.material)
-    //compose
+
     implementation(platform(libs.compose.compose.bom))
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.material3)
@@ -154,41 +133,29 @@ dependencies {
     androidTestImplementation(platform(libs.compose.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.compose.ui.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.material.icons.core)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
     implementation(libs.aboutlibraries.compose.m3)
     implementation(libs.compose.avatar.cropper)
-    // datetime
 
     implementation(libs.datetime)
-
-    // parse
-
     implementation(libs.serialization.json)
     implementation(libs.jsoup)
-
-    // network
 
     implementation(libs.retrofit)
     implementation(libs.converter.serialization)
     implementation(libs.okhttp)
     implementation(libs.okhttp.dns.over.https)
 
-    // pic
-
     implementation(libs.coil)
-
-
-    // video
 
     implementation(libs.jiaozi.video.player)
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.exoplayer.hls)
     implementation(libs.mpv.lib)
-
-    // view
 
     implementation(libs.multitype)
     implementation(libs.base.recyclerview.adapter.helper4)
@@ -198,20 +165,11 @@ dependencies {
     implementation(libs.circular.reveal.switch)
     implementation(libs.drawerlayout)
 
-    debugImplementation(libs.androidx.ui.test.manifest)
     ksp(libs.room.compiler)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     testImplementation(libs.junit)
-
     androidTestImplementation(libs.test.junit)
     androidTestImplementation(libs.test.espresso.core)
-
-    // debugImplementation(libs.leak.canary)
 }
-
-/**
- * This function is used to check if a file exists and is a file.
- */
-fun File.checkIfExists(): File? = if (exists() && isFile) this else null

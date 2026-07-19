@@ -59,7 +59,6 @@ fun HomeSettingsScreen(
     onCollapseDownloadedGroupChange: (Boolean) -> Unit,
     onSearchGridColumnsConfigChange: (SearchGridColumnsConfig) -> Unit,
     onHorizontalCardCountConfigChange: (HorizontalCardCountConfig) -> Unit,
-    onUseCIUpdateChannelChange: (Boolean) -> Unit,
     onUseLockScreenChange: (Boolean) -> Unit,
     onThemeColorChange: (String) -> Unit,
     onHomeCategoryPreferencesChange: (List<String>, Set<String>) -> Unit,
@@ -407,14 +406,6 @@ fun HomeSettingsScreen(
             )
         }
         item {
-            SettingSwitchItem(
-                title = stringResource(R.string.use_ci_update_channel),
-                checked = state.useCIUpdateChannel,
-                iconRes = R.drawable.ic_setting_ci,
-                onCheckedChange = onUseCIUpdateChannelChange,
-            )
-        }
-        item {
             SettingSliderItem(
                 title = stringResource(R.string.update_popup_interval_days),
                 summary = state.updatePopupIntervalSummary,
@@ -539,7 +530,6 @@ private fun HomeSettingsScreenPreview() {
                 disableComments = false,
                 collapseDownloadedGroup = false,
                 useDynamicColor = true,
-                useCIUpdateChannel = false,
                 useLockScreen = false,
                 fakeLauncherIconName = "Han1meViewer",
                 updateSummary = "已經是最新版本！",
@@ -573,7 +563,6 @@ private fun HomeSettingsScreenPreview() {
             onCollapseDownloadedGroupChange = {},
             onSearchGridColumnsConfigChange = {},
             onHorizontalCardCountConfigChange = {},
-            onUseCIUpdateChannelChange = {},
             onUseLockScreenChange = {},
             onThemeColorChange = {},
             onHomeCategoryPreferencesChange = { _, _ -> },

@@ -215,8 +215,6 @@ Some mirrors may not support login, may not share cookies, may fail verification
     <string name="account_or_password_wrong">Account or password may be incorrect</string>
     <string name="login_tips">This method can only keep you logged in for 2 hours… It\'s still recommended to log in via the webpage,\nbut the webpage doesn\'t use Hosts, so you might need VPN</string>
     <string name="update">Update</string>
-    <string name="use_ci_update_channel">Use CI Update Channel</string>
-    <string name="use_ci_update_channel_summary">CI Update channel can get the latest changes faster,\nbut stability is not guaranteed</string>
     <string name="update_popup_interval_days">Update Check Popup Interval (Days)</string>
     <string name="update_failed">Update Failed</string>
     <string name="update_download_background">Download Updates in Background</string>

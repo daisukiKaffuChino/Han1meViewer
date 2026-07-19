@@ -215,8 +215,6 @@
     <string name="account_or_password_wrong">账户或密码可能错误</string>
     <string name="login_tips">该方法只能保持登录 2 个小时… 还是推荐使用网页登录，\n但网页是不走 Hosts 的，所以可能需要 VPN</string>
     <string name="update">更新</string>
-    <string name="use_ci_update_channel">采用 CI 更新频道</string>
-    <string name="use_ci_update_channel_summary">CI 更新频道能更快地获取最新变更\n但不保证稳定性</string>
     <string name="update_popup_interval_days">检查更新弹窗间隔天数</string>
     <string name="update_failed">更新失败</string>
     <string name="update_download_background">在后台下载更新</string>

@@ -1,7 +1,6 @@
 package com.yenaly.han1meviewer.logic.network
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.yenaly.han1meviewer.BuildConfig
 import com.yenaly.han1meviewer.HA1_GITHUB_API_URL
 import com.yenaly.han1meviewer.HJson
 import com.yenaly.han1meviewer.Preferences
@@ -124,12 +123,6 @@ object ServiceCreator {
             .dns(GitHubDns)
             .addInterceptor(UserAgentInterceptor)
             .addInterceptor(UrlLoggingInterceptor())
-            .addInterceptor { chain ->
-                val request = chain.request().newBuilder().addHeader(
-                    "Authorization", "Bearer ${BuildConfig.HA_GITHUB_TOKEN}"
-                ).build()
-                return@addInterceptor chain.proceed(request)
-            }
             .build()
     }
 }

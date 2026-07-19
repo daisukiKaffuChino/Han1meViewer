@@ -87,9 +87,6 @@ object Preferences {
     val updatePopupIntervalDays
         get() = preferenceSp.getInt(SettingsPreferenceKeys.UPDATE_POPUP_INTERVAL_DAYS, 0)
 
-    val useCIUpdateChannel
-        get() = preferenceSp.getBoolean(SettingsPreferenceKeys.USE_CI_UPDATE_CHANNEL, false)
-
     // Check if show update dialog.
     @OptIn(ExperimentalTime::class)
     val isUpdateDialogVisible: Boolean

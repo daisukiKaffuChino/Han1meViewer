@@ -220,8 +220,6 @@
     <string name="account_or_password_wrong">アカウントまたはパスワードが間違っている可能性</string>
     <string name="login_tips">この方法ではログイン状態は2時間のみ保持… ウェブでのログインを推奨\nただしウェブはHostsを通さないので、VPNが必要かも</string>
     <string name="update">更新</string>
-    <string name="use_ci_update_channel">CI更新チャンネルを使用</string>
-    <string name="use_ci_update_channel_summary">CI更新チャンネルは最新変更をより早く取得可能\nただし安定性は保証しない</string>
     <string name="update_popup_interval_days">更新確認ポップアップ間隔（日）</string>
     <string name="update_failed">更新失敗</string>
     <string name="update_download_background">バックグラウンドで更新をダウンロード</string>
