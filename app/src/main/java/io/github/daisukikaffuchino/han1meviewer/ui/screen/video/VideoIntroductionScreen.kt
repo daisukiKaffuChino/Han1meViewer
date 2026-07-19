@@ -135,7 +135,6 @@ fun VideoIntroductionScreen(
     onDismissDownloadPrompt: () -> Unit,
     onConfirmDownloadPrompt: () -> Unit,
     onRequestOpenOfficialDownloadPage: () -> Unit,
-    onRequestOpenDownloadPermissionSettings: () -> Unit,
     onShare: () -> Unit,
     onCopyShareText: () -> Unit,
     onOpenWebPage: () -> Unit,
@@ -177,7 +176,6 @@ fun VideoIntroductionScreen(
                 onDismissDownloadPrompt = onDismissDownloadPrompt,
                 onConfirmDownloadPrompt = onConfirmDownloadPrompt,
                 onRequestOpenOfficialDownloadPage = onRequestOpenOfficialDownloadPage,
-                onRequestOpenDownloadPermissionSettings = onRequestOpenDownloadPermissionSettings,
                 onShare = onShare,
                 onCopyShareText = onCopyShareText,
                 onOpenWebPage = onOpenWebPage,
@@ -231,7 +229,6 @@ private fun VideoIntroductionContent(
     onDismissDownloadPrompt: () -> Unit,
     onConfirmDownloadPrompt: () -> Unit,
     onRequestOpenOfficialDownloadPage: () -> Unit,
-    onRequestOpenDownloadPermissionSettings: () -> Unit,
     onShare: () -> Unit,
     onCopyShareText: () -> Unit,
     onOpenWebPage: () -> Unit,
@@ -251,7 +248,6 @@ private fun VideoIntroductionContent(
     var showQuickCheckInDialog by remember { mutableStateOf(false) }
     var showMyListDialog by remember { mutableStateOf(false) }
     var showDownloadQualityDialog by remember { mutableStateOf(false) }
-    var showPermissionSettingsDialog by remember { mutableStateOf(false) }
 
     if (showDownloadQualityDialog) {
         DownloadQualityDialog(
@@ -277,16 +273,6 @@ private fun VideoIntroductionContent(
             onOpenOfficial = {
                 onDismissDownloadPrompt()
                 onRequestOpenOfficialDownloadPage()
-            },
-        )
-    }
-
-    if (showPermissionSettingsDialog) {
-        PermissionSettingsDialog(
-            onDismiss = { showPermissionSettingsDialog = false },
-            onConfirm = {
-                showPermissionSettingsDialog = false
-                onRequestOpenDownloadPermissionSettings()
             },
         )
     }
@@ -534,28 +520,6 @@ private fun DownloadConfirmDialog(
                 TextButton(onClick = onDismiss) {
                     Text(stringResource(R.string.no))
                 }
-            }
-        },
-    )
-}
-
-@Composable
-private fun PermissionSettingsDialog(
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.settings)) },
-        text = { Text(stringResource(R.string.storage_permission_settings_message)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(stringResource(R.string.go_to_settings))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -1347,7 +1311,6 @@ private fun VideoIntroductionScreenPreview() {
             onDismissDownloadPrompt = {},
             onConfirmDownloadPrompt = {},
             onRequestOpenOfficialDownloadPage = {},
-            onRequestOpenDownloadPermissionSettings = {},
             onShare = {},
             onCopyShareText = {},
             onOpenWebPage = {},
@@ -1388,7 +1351,6 @@ private fun VideoIntroductionScreenLoadingPreview() {
             onDismissDownloadPrompt = {},
             onConfirmDownloadPrompt = {},
             onRequestOpenOfficialDownloadPage = {},
-            onRequestOpenDownloadPermissionSettings = {},
             onShare = {},
             onCopyShareText = {},
             onOpenWebPage = {},
@@ -1429,7 +1391,6 @@ private fun VideoIntroductionScreenErrorPreview() {
             onDismissDownloadPrompt = {},
             onConfirmDownloadPrompt = {},
             onRequestOpenOfficialDownloadPage = {},
-            onRequestOpenDownloadPermissionSettings = {},
             onShare = {},
             onCopyShareText = {},
             onOpenWebPage = {},

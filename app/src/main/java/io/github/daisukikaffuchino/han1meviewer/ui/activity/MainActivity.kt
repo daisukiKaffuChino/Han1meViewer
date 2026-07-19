@@ -1,13 +1,11 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.activity
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.KeyguardManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.os.Build
@@ -25,7 +23,6 @@ import androidx.biometric.BiometricPrompt
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -39,7 +36,6 @@ import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logout
 import io.github.daisukikaffuchino.han1meviewer.ui.bridge.VideoPageHost
-import io.github.daisukikaffuchino.han1meviewer.PermissionRequester
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.navigateSafely
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.AccountRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.VideoRoute
@@ -60,7 +56,7 @@ import java.util.Locale
  * @author Yenaly Liew
  * @time 2022/06/08 008 17:35
  */
-class MainActivity : FrameActivity(), PermissionRequester {
+class MainActivity : FrameActivity() {
 
     val viewModel by viewModels<HomePageViewModel>()
 
@@ -70,7 +66,6 @@ class MainActivity : FrameActivity(), PermissionRequester {
     private var currentVideoHost: VideoPageHost? = null
 
     companion object {
-        private const val REQUEST_WRITE_EXTERNAL_STORAGE = 1234
         const val ACTION_TOGGLE_PLAY = "io.github.daisukikaffuchino.han1meviewer.ACTION_TOGGLE_PLAY"
     }
 
@@ -321,71 +316,6 @@ class MainActivity : FrameActivity(), PermissionRequester {
 
     fun registerCurrentVideoHost(host: VideoPageHost?) {
         currentVideoHost = host
-    }
-
-    private var onGranted: (() -> Unit)? = null
-    private var onDenied: (() -> Unit)? = null
-    private var onPermanentlyDenied: (() -> Unit)? = null
-    override fun requestStoragePermission(
-        onGranted: () -> Unit,
-        onDenied: () -> Unit,
-        onPermanentlyDenied: () -> Unit
-    ) {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            val permission = Manifest.permission.WRITE_EXTERNAL_STORAGE
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    permission
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                onGranted()
-            } else {
-                this.onGranted = onGranted
-                this.onDenied = onDenied
-                this.onPermanentlyDenied = onPermanentlyDenied
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(permission),
-                    REQUEST_WRITE_EXTERNAL_STORAGE
-                )
-            }
-        } else {
-            onGranted() // Android 10+ 不需要权限
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == REQUEST_WRITE_EXTERNAL_STORAGE) {
-            val permission = permissions.getOrNull(0)
-            val grantResult = grantResults.getOrNull(0)
-
-            if (permission == Manifest.permission.WRITE_EXTERNAL_STORAGE) {
-                when {
-                    grantResult == PackageManager.PERMISSION_GRANTED -> {
-                        onGranted?.invoke()
-                    }
-
-                    shouldShowRequestPermissionRationale(permission) -> {
-                        onDenied?.invoke()
-                    }
-
-                    else -> {
-                        // 永久拒绝（勾选“不再询问”）
-                        onPermanentlyDenied?.invoke()
-                    }
-                }
-                // 清除引用，防止内存泄露
-                onGranted = null
-                onDenied = null
-                onPermanentlyDenied = null
-            }
-        }
     }
 
     override fun onUserLeaveHint() {

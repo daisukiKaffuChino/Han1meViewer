@@ -169,16 +169,12 @@ internal fun isDeviceSecureCompat(context: Context): Boolean {
 
 internal fun isPipPermissionGranted(context: Context): Boolean {
     val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        val mode = appOps.unsafeCheckOpNoThrow(
-            AppOpsManager.OPSTR_PICTURE_IN_PICTURE,
-            Process.myUid(),
-            context.packageName,
-        )
-        mode == AppOpsManager.MODE_ALLOWED
-    } else {
-        true
-    }
+    val mode = appOps.unsafeCheckOpNoThrow(
+        AppOpsManager.OPSTR_PICTURE_IN_PICTURE,
+        Process.myUid(),
+        context.packageName,
+    )
+    return mode == AppOpsManager.MODE_ALLOWED
 }
 
 internal fun openPipPermissionSettings(context: Context) {

@@ -1,17 +1,10 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings
 
-import android.Manifest
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
-import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -19,9 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.core.content.ContextCompat
 import androidx.core.content.edit
-import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
@@ -62,41 +53,6 @@ fun DownloadSettingsRouteScreen(
             refreshKey++
         } else {
             context.showToast(R.string.no_directory_selected)
-        }
-    }
-
-    val requestPermission = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        if (granted) return@rememberLauncherForActivityResult
-        val permission = Manifest.permission.WRITE_EXTERNAL_STORAGE
-        if (activity.shouldShowRequestPermissionRationale(permission)) {
-            context.showToast(R.string.storage_permission_denied_toast)
-        } else {
-            AlertDialog.Builder(context)
-                .setTitle(R.string.permission_permanently_denied_title)
-                .setMessage(R.string.storage_permission_settings_message)
-                .setPositiveButton(R.string.go_to_settings) { _, _ ->
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = "package:${context.packageName}".toUri()
-                    }
-                    context.startActivity(intent)
-                }
-                .setNegativeButton(R.string.cancel, null)
-                .show()
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            val permission = Manifest.permission.WRITE_EXTERNAL_STORAGE
-            if (ContextCompat.checkSelfPermission(
-                    context,
-                    permission
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                requestPermission.launch(permission)
-            }
         }
     }
 

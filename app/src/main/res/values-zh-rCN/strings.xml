@@ -586,7 +586,7 @@
     <string name="pref_export_downloads_title">导出下载项</string>
     <string name="pref_export_downloads_summary">导出私有下载目录中的所有下载项到自定义目录</string>
     <string name="save_failed_title">保存失败</string>
-    <string name="save_failed_message">由于外部存储权限或其他原因，视频信息文件保存失败。\n已自动切换到应用私有路径。\n如果你是卸载重新安装的应用可尝试清理Download/Han1meViewer目录后在设置切换下载位置再试，否则将继续使用私有目录，并请在卸载或清除数据之前移出文件！</string>
+    <string name="save_failed_message">由于自定义下载路径无法访问或其他原因，视频信息文件保存失败。\n已自动切换到应用私有路径。\n如果你是卸载重新安装的应用可尝试清理Download/Han1meViewer目录后在设置切换下载位置再试，否则将继续使用私有目录，并请在卸载或清除数据之前移出文件！</string>
     <string name="download_category">下载设置</string>
     <string name="download_category_summary">点击可设置路径，长按可恢复默认路径</string>
     <string name="whats_wrong_with_him">你觉得他咋了？</string>
@@ -756,9 +756,6 @@
     <string name="announcement_list">公告列表</string>
     <string name="view_all">查看全部</string>
     <string name="open_menu">打开菜单</string>
-    <string name="permission_permanently_denied_title">权限被永久拒绝</string>
-    <string name="storage_permission_settings_message">请前往设置开启存储权限，以便保存下载内容。</string>
-    <string name="storage_permission_denied_toast">拒绝后将无法保存下载内容</string>
     <string name="widget_pin_not_supported_manual_add">部分 ROM 不支持引导式添加，请手动添加小组件</string>
     <string name="clarity">清晰度</string>
     <string name="success_value">成功：%1$s</string>

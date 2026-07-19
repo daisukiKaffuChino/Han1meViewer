@@ -13,20 +13,11 @@ object HFileManager {
 
 
     /**
-     * 获取 App 的下载主目录，如写入失败则切换为私有目录，
+     * 获取 App 的下载主目录。
      * 使用 [io.github.daisukikaffuchino.han1meviewer.util.SafFileManager] 可自定义目录
      */
     fun getAppDownloadFolder(context: Context): File {
-        return if (Preferences.isUsePrivateStorage) {
-            File(
-                context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), APP_NAME
-            )
-        } else {
-            File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                APP_NAME
-            )
-        }
+        return File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), APP_NAME)
     }
 
 

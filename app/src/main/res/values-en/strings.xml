@@ -580,7 +580,7 @@ Recommendations are as follows:\n
     <string name="pref_export_downloads_title">Export Download Items</string>
     <string name="pref_export_downloads_summary">Export all download items from private download directory to custom directory</string>
     <string name="save_failed_title">Save Failed</string>
-    <string name="save_failed_message">Due to external storage permissions or other reasons, the video info file failed to save.\nAutomatically switched to app private path.\nIf you reinstalled the app, try cleaning the Download/Han1meViewer directory and switch download location in settings. Otherwise, continue using private directory and please move out files before uninstalling or clearing data!</string>
+    <string name="save_failed_message">The video info file failed to save because the custom download path could not be accessed, or for another reason.\nAutomatically switched to the app private path.\nIf you reinstalled the app, try cleaning the Download/Han1meViewer directory and switch download location in settings. Otherwise, continue using the private directory and move files out before uninstalling or clearing data.</string>
     <string name="download_category">Download Settings</string>
     <string name="download_category_summary">Tap to set path, long press to reset to default</string>
     <string name="whats_wrong_with_him">What\'s his problem?</string>
@@ -750,9 +750,6 @@ Recommendations are as follows:\n
     <string name="announcement_list">Announcement List</string>
     <string name="view_all">View All</string>
     <string name="open_menu">Open menu</string>
-    <string name="permission_permanently_denied_title">Permission permanently denied</string>
-    <string name="storage_permission_settings_message">Please go to Settings and enable storage permission so downloads can be saved.</string>
-    <string name="storage_permission_denied_toast">Downloads cannot be saved without storage permission</string>
     <string name="widget_pin_not_supported_manual_add">Some ROMs do not support guided widget pinning. Please add the widget manually.</string>
     <string name="clarity">Clarity</string>
     <string name="success_value">Success: %1$s</string>

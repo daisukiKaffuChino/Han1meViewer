@@ -1,6 +1,5 @@
 @file:Suppress("UnstableApiUsage")
 
-import Config.Version.createVersion
 import com.android.build.api.variant.impl.VariantOutputImpl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -11,6 +10,7 @@ plugins {
     alias(libs.plugins.com.google.devtools.ksp)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.navigation.safeargs)
+    //noinspection NewerVersionAvailable
     id("com.mikepenz.aboutlibraries.plugin") version "14.2.0"
     id("com.github.ben-manes.versions") version "0.54.0"
 }

@@ -48,7 +48,6 @@ fun RenderVideoIntroductionContent(
     onPrepareDownload: (String, HanimeVideo?) -> Unit,
     onConfirmDownloadPrompt: (HanimeVideo?) -> Unit,
     onRequestOpenOfficialDownloadPage: () -> Unit,
-    onRequestOpenDownloadPermissionSettings: () -> Unit,
     onOpenWebPage: () -> Unit,
     onOpenOriginalComic: (String) -> Unit,
     onOpenShare: (String, String) -> Unit,
@@ -99,7 +98,6 @@ fun RenderVideoIntroductionContent(
                 onConfirmDownloadPrompt(video)
             },
             onRequestOpenOfficialDownloadPage = onRequestOpenOfficialDownloadPage,
-            onRequestOpenDownloadPermissionSettings = onRequestOpenDownloadPermissionSettings,
             onShare = {
                 onOpenShare(videoShareText, stringLongPressShare)
             },

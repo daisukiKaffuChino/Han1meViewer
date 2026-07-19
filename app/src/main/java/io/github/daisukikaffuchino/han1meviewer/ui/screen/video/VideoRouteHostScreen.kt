@@ -57,7 +57,6 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.bridge.VideoPageHost
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
-import io.github.daisukikaffuchino.han1meviewer.PermissionRequester
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.VideoRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.view.video.ExoMediaKernel
 import io.github.daisukikaffuchino.han1meviewer.ui.view.video.HJzvdStd
@@ -134,18 +133,9 @@ fun VideoRouteHostScreen(
             scope = scope,
             viewModel = viewModel,
             genres = genres,
-            requestStoragePermission = { onGranted, onDenied, onPermanentlyDenied ->
-                (activity as PermissionRequester).requestStoragePermission(
-                    onGranted = onGranted,
-                    onDenied = onDenied,
-                    onPermanentlyDenied = onPermanentlyDenied,
-                )
-            },
             onPendingDownloadPromptChange = { pendingDownloadPrompt = it },
             getCheckedQuality = { checkedQuality },
             setCheckedQuality = { checkedQuality = it },
-            onStoragePermissionDenied = { activity.navController.popBackStack() },
-            onDownloadPermissionDialogCancelled = { activity.navController.popBackStack() },
         )
     }
 
@@ -318,7 +308,6 @@ fun VideoRouteHostScreen(
                     video?.let { actions.confirmPendingDownload(it, pendingDownloadPrompt) }
                 },
                 onRequestOpenOfficialDownloadPage = actions::openOfficialDownloadPage,
-                onRequestOpenDownloadPermissionSettings = actions::openDownloadPermissionSettings,
                 onOpenWebPage = actions::openVideoWebPage,
                 onOpenOriginalComic = actions::openOriginalComic,
                 onOpenShare = { content, title -> shareText(content, title) },

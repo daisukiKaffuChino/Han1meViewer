@@ -585,7 +585,7 @@ hanime1.me以外のドメインは、特定の時間帯にhanime1.meにリダイ
     <string name="pref_export_downloads_title">ダウンロード項目エクスポート</string>
     <string name="pref_export_downloads_summary">プライベートダウンロードディレクトリ内の全ダウンロード項目をカスタムディレクトリにエクスポート</string>
     <string name="save_failed_title">保存失敗</string>
-    <string name="save_failed_message">外部ストレージ権限或其他原因により、動画情報ファイル保存失敗。\n自動でアプリプライベートパスに切替。\nアプリ再インストールの場合はDownload/Han1meViewerディレクトリ削除後、設定でダウンロード場所切替再試行。否则プライベートディレクトリ使用継続。アプリ削除或データクリア前にはファイル移出必須！</string>
+    <string name="save_failed_message">カスタムダウンロードパスにアクセスできない、またはその他の理由で、動画情報ファイルの保存に失敗しました。\n自動でアプリのプライベートパスに切り替えました。\nアプリを再インストールした場合は、Download/Han1meViewer ディレクトリを削除してから、設定でダウンロード場所を切り替えて再試行してください。それ以外の場合はプライベートディレクトリを使い続け、アンインストールまたはデータ削除前にファイルを移動してください。</string>
     <string name="download_category">ダウンロード設定</string>
     <string name="download_category_summary">タップでパス設定、長押しでデフォルトパス復元</string>
     <string name="whats_wrong_with_him">彼はどうかしましたか？</string>
@@ -755,9 +755,6 @@ hanime1.me以外のドメインは、特定の時間帯にhanime1.meにリダイ
     <string name="announcement_list">お知らせ一覧</string>
     <string name="view_all">すべて表示</string>
     <string name="open_menu">メニューを開く</string>
-    <string name="permission_permanently_denied_title">権限が恒久的に拒否されました</string>
-    <string name="storage_permission_settings_message">ダウンロード内容を保存するには、設定でストレージ権限を有効にしてください。</string>
-    <string name="storage_permission_denied_toast">ストレージ権限がないとダウンロードを保存できません</string>
     <string name="widget_pin_not_supported_manual_add">一部のROMはウィジェットのガイド付き追加に対応していません。手動で追加してください。</string>
     <string name="clarity">画質</string>
     <string name="success_value">成功：%1$s</string>

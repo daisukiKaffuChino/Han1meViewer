@@ -2,7 +2,6 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.video
 
 import android.content.Context
 import android.content.Intent
-import android.provider.Settings
 import android.widget.Toast
 import androidx.core.net.toUri
 import io.github.daisukikaffuchino.han1meviewer.HAdvancedSearch
@@ -36,16 +35,9 @@ class VideoRouteActions(
     private val scope: CoroutineScope,
     private val viewModel: VideoViewModel,
     private val genres: List<SearchOption>,
-    private val requestStoragePermission: (
-        onGranted: () -> Unit,
-        onDenied: () -> Unit,
-        onPermanentlyDenied: () -> Unit,
-    ) -> Unit,
     private val onPendingDownloadPromptChange: (DownloadPromptState?) -> Unit,
     private val getCheckedQuality: () -> String?,
     private val setCheckedQuality: (String?) -> Unit,
-    private val onStoragePermissionDenied: () -> Unit = {},
-    private val onDownloadPermissionDialogCancelled: () -> Unit = {},
 ) {
     fun openArtistSearch(artist: HanimeVideo.Artist) {
         val searchKey = genres.firstOrNull { option ->
@@ -166,20 +158,7 @@ class VideoRouteActions(
             showShortToast(R.string.no_video_links_found)
             return
         }
-        requestStoragePermission(
-            {
-                viewModel.findDownloadedHanime(viewModel.videoCode)
-            },
-            {
-                Toast.makeText(
-                    context,
-                    R.string.storage_permission_denied_toast,
-                    Toast.LENGTH_LONG,
-                ).show()
-                onStoragePermissionDenied()
-            },
-            { openDownloadPermissionSettings() },
-        )
+        viewModel.findDownloadedHanime(viewModel.videoCode)
     }
 
     fun confirmPendingDownload(
@@ -212,18 +191,4 @@ class VideoRouteActions(
         )
     }
 
-    fun openDownloadPermissionSettings() {
-        androidx.appcompat.app.AlertDialog.Builder(context)
-            .setTitle(R.string.permission_permanently_denied_title)
-            .setMessage(R.string.storage_permission_settings_message)
-            .setPositiveButton(R.string.go_to_settings) { _, _ ->
-                context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                    data = "package:${context.packageName}".toUri()
-                })
-            }
-            .setNegativeButton(R.string.cancel) { _, _ ->
-                onDownloadPermissionDialogCancelled()
-            }
-            .show()
-    }
 }

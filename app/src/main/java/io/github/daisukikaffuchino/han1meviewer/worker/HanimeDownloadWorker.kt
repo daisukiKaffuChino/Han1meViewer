@@ -5,7 +5,6 @@ import android.app.Notification
 import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.ParcelFileDescriptor
-import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -588,9 +587,7 @@ class HanimeDownloadWorker(
         return ForegroundInfo(
             downloadId, notification,
             // #issue-34: 這裡的參數是為了讓 Android 14 以上的系統可以正常顯示前景通知
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-            } else 0
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
         )
     }
 

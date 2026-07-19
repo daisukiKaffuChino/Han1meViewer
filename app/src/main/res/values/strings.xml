@@ -628,7 +628,7 @@
     <string name="pref_export_downloads_title">導出下載項</string>
     <string name="pref_export_downloads_summary">導出私有下載目錄中的所有下載項到自訂目錄</string>
     <string name="save_failed_title">保存失敗</string>
-    <string name="save_failed_message">由於外部儲存權限或其他原因，影片資訊檔案保存失敗。\n已自動切換到應用私有路徑。\n如果你是解除安裝重新安裝的應用可嘗試清理Download/Han1meViewer目錄後在設定切換下載位置再試，否則將繼續使用私有目錄，並請在解除安裝或清除資料之前移出檔案！</string>
+    <string name="save_failed_message">由於自訂下載路徑無法存取或其他原因，影片資訊檔案保存失敗。\n已自動切換到應用私有路徑。\n如果你是解除安裝重新安裝的應用可嘗試清理Download/Han1meViewer目錄後在設定切換下載位置再試，否則將繼續使用私有目錄，並請在解除安裝或清除資料之前移出檔案！</string>
     <string name="zero_percent" translatable="false">0%</string>
     <string name="download_category">下載設定</string>
     <string name="download_category_summary">點擊可設定路徑，長按可恢復預設路徑</string>
@@ -799,9 +799,6 @@
     <string name="announcement_list">公告列表</string>
     <string name="view_all">查看全部</string>
     <string name="open_menu">打開選單</string>
-    <string name="permission_permanently_denied_title">權限被永久拒絕</string>
-    <string name="storage_permission_settings_message">請前往設定開啟儲存權限，以便保存下載內容。</string>
-    <string name="storage_permission_denied_toast">拒絕後將無法保存下載內容</string>
     <string name="invalid_ip_or_port" translatable="false">Invalid IP(v4) or Port(0..65535)</string>
     <string name="widget_pin_not_supported_manual_add">部分 ROM 不支援引導式添加，請手動添加小工具</string>
     <string name="cookies_label" translatable="false">Cookies</string>

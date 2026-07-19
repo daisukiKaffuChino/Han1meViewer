@@ -311,7 +311,7 @@ DownloadScreen -> DownloadViewModel -> HanimeDownloadManagerV2 -> WorkManager ->
 - 长任务交给 WorkManager，避免 Activity 生命周期影响下载。
 - 下载进度落库，UI 通过数据库 Flow 获得刷新。
 - 前台服务通知由 Worker 维护。
-- 下载目录通过 SAF 相关工具处理，避免直接依赖旧外部存储权限。
+- 下载目录通过 SAF 相关工具处理，自定义目录访问统一走系统授权的 URI。
 - 下载完成后可走本地播放路径进入视频页。
 
 性能注意：
