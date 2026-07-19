@@ -29,23 +29,39 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.widget.AppCompatButton
 import androidx.annotation.IntRange
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.getSystemService
@@ -58,8 +74,6 @@ import androidx.core.view.updatePadding
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.findNavController
 import androidx.preference.PreferenceManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -70,14 +84,12 @@ import cn.jzvd.JZDataSource
 import cn.jzvd.JZMediaInterface
 import cn.jzvd.JZUtils
 import cn.jzvd.JzvdStd
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.color.MaterialColors
 import com.itxca.spannablex.spannable
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
-import io.github.daisukikaffuchino.han1meviewer.ui.adapter.HKeyframeRvAdapter
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HomeRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeTheme
 import io.github.daisukikaffuchino.han1meviewer.util.showAlertDialog
@@ -86,7 +98,7 @@ import com.yenaly.yenaly_libs.utils.appScreenWidth
 import com.yenaly.yenaly_libs.utils.findActivityOrNull
 import com.yenaly.yenaly_libs.utils.navBarHeight
 import com.yenaly.yenaly_libs.utils.statusBarHeight
-import com.yenaly.yenaly_libs.utils.unsafeLazy
+import com.yenaly.yenaly_libs.utils.showShortToast
 import com.yenaly.yenaly_libs.utils.view.removeItself
 import java.util.Timer
 import kotlin.math.absoluteValue
@@ -274,7 +286,7 @@ class HJzvdStd @JvmOverloads constructor(
     private lateinit var gestureLock: ImageView
     var gestureLocked = false
     var savedProgress: Long = 0L
-    private lateinit var btnResumeProgress: MaterialButton
+    private lateinit var btnResumeProgress: AppCompatButton
     private val handler = Handler(Looper.getMainLooper())
     private val hideResumeBtnRunnable  = Runnable {
         btnResumeProgress.visibility = GONE
@@ -286,13 +298,10 @@ class HJzvdStd @JvmOverloads constructor(
     var hKeyframe: HKeyframeEntity? = null
         set(value) {
             field = value
-            hKeyframeAdapter.submitList(value?.keyframes)
-            hKeyframeAdapter.isLocal = value?.let { it.author == null } ?: true
         }
 
     var videoCode: String? = null
 
-    private val hKeyframeAdapter: HKeyframeRvAdapter by unsafeLazy { initHKeyframeAdapter() }
     private val switchPlayerKernel = Preferences.switchPlayerKernel
     var onVideoStateChanged: ((state: Int) -> Unit)? = null
 
@@ -301,18 +310,6 @@ class HJzvdStd @JvmOverloads constructor(
      *
      * 但我還是最終用了 lazy，要不然首次 submitList 收不到
      */
-    private fun initHKeyframeAdapter() = run {
-        val videoCode = checkNotNull(this.videoCode) {
-            "If you want to use HKeyframeAdapter, you must set videoCode first."
-        }
-        HKeyframeRvAdapter(videoCode).apply {
-            setOnItemClickListener { _, _, position ->
-                val keyframe = getItem(position)
-                mediaInterface?.seekTo(keyframe.position)
-                startProgressTimer()
-            }
-        }
-    }
     private fun isNeedResumeProgress(): Boolean {
         return savedProgress > 5000 && Preferences.allowResumePlayback && !hasRestoredProgress
     }
@@ -825,6 +822,210 @@ class HJzvdStd @JvmOverloads constructor(
         }
     }
 
+    @Composable
+    private fun HKeyframePopupContent(
+        keyframes: List<HKeyframeEntity.Keyframe>,
+        isLocal: Boolean,
+        onSeek: (HKeyframeEntity.Keyframe) -> Unit,
+        onModify: (oldKeyframe: HKeyframeEntity.Keyframe, newKeyframe: HKeyframeEntity.Keyframe) -> Unit,
+        onDelete: (HKeyframeEntity.Keyframe) -> Unit,
+    ) {
+        val keyframeItems = remember(keyframes) { keyframes.toMutableStateList() }
+        var editingKeyframe by remember { mutableStateOf<HKeyframeEntity.Keyframe?>(null) }
+        var deletingKeyframe by remember { mutableStateOf<HKeyframeEntity.Keyframe?>(null) }
+
+        LazyColumn(
+            modifier = Modifier
+                .width(240.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
+                .padding(horizontal = 4.dp, vertical = 16.dp),
+        ) {
+            if (keyframeItems.isEmpty()) {
+                item {
+                    Text(
+                        text = stringResource(R.string.here_is_empty) + "\n" +
+                                stringResource(R.string.long_press_to_add_h_keyframe),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 24.dp),
+                    )
+                }
+            } else {
+                itemsIndexed(keyframeItems) { index, keyframe ->
+                    HKeyframePopupItem(
+                        index = index,
+                        keyframe = keyframe,
+                        isLocal = isLocal,
+                        onSeek = onSeek,
+                        onEdit = { editingKeyframe = keyframe },
+                        onDelete = { deletingKeyframe = keyframe },
+                    )
+                }
+            }
+        }
+
+        editingKeyframe?.let { keyframe ->
+            HKeyframeEditDialog(
+                keyframe = keyframe,
+                onConfirm = { newKeyframe ->
+                    onModify(keyframe, newKeyframe)
+                    val index = keyframeItems.indexOf(keyframe)
+                    if (index != -1) keyframeItems[index] = newKeyframe
+                    editingKeyframe = null
+                },
+                onDismiss = { editingKeyframe = null },
+            )
+        }
+
+        deletingKeyframe?.let { keyframe ->
+            AlertDialog(
+                onDismissRequest = { deletingKeyframe = null },
+                title = { Text(stringResource(R.string.sure_to_delete)) },
+                text = { Text(JZUtils.stringForTime(keyframe.position)) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            onDelete(keyframe)
+                            keyframeItems.remove(keyframe)
+                            deletingKeyframe = null
+                        },
+                    ) {
+                        Text(stringResource(R.string.confirm))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { deletingKeyframe = null }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                },
+            )
+        }
+    }
+
+    @Composable
+    private fun HKeyframePopupItem(
+        index: Int,
+        keyframe: HKeyframeEntity.Keyframe,
+        isLocal: Boolean,
+        onSeek: (HKeyframeEntity.Keyframe) -> Unit,
+        onEdit: () -> Unit,
+        onDelete: () -> Unit,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onSeek(keyframe) }
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = "#${index + 1}",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    text = JZUtils.stringForTime(keyframe.position),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            if (!keyframe.prompt.isNullOrBlank()) {
+                Text(
+                    text = keyframe.prompt.orEmpty(),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            if (isLocal) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                ) {
+                    TextButton(onClick = onEdit) {
+                        Text(stringResource(R.string.edit))
+                    }
+                    TextButton(onClick = onDelete) {
+                        Text(stringResource(R.string.delete))
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun HKeyframeEditDialog(
+        keyframe: HKeyframeEntity.Keyframe,
+        onConfirm: (HKeyframeEntity.Keyframe) -> Unit,
+        onDismiss: () -> Unit,
+    ) {
+        var prompt by remember(keyframe) { mutableStateOf(keyframe.prompt.orEmpty()) }
+        var position by remember(keyframe) { mutableStateOf(keyframe.position.toString()) }
+        var isPositionError by remember(keyframe) { mutableStateOf(false) }
+
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(stringResource(R.string.modify_h_keyframe)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    OutlinedTextField(
+                        value = position,
+                        onValueChange = {
+                            position = it
+                            isPositionError = false
+                        },
+                        label = { Text(stringResource(R.string.position_ms)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        isError = isPositionError,
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                    )
+                    OutlinedTextField(
+                        value = prompt,
+                        onValueChange = { prompt = it },
+                        label = { Text(stringResource(R.string.prompt)) },
+                        modifier = Modifier.fillMaxWidth(),
+                        maxLines = 3,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val newPosition = position.toLongOrNull()
+                        if (newPosition == null) {
+                            isPositionError = true
+                            return@TextButton
+                        }
+                        onConfirm(
+                            HKeyframeEntity.Keyframe(
+                                position = newPosition,
+                                prompt = prompt,
+                            )
+                        )
+                    },
+                ) {
+                    Text(stringResource(R.string.confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+        )
+    }
+
     override fun onLongClick(v: View): Boolean {
         return when (v.id) {
             R.id.tv_keyframe -> {
@@ -1276,50 +1477,35 @@ class HJzvdStd @JvmOverloads constructor(
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun clickHKeyframe(v: View) {
         onCLickUiToggleToClear()
-        val (contentView, rv) = createSidePanelRecyclerView(v.context)
-        val popup = PopupWindow(
-            contentView, JZUtils.dip2px(jzvdContext, 240f),
-            LayoutParams.MATCH_PARENT, true
-        ).apply {
-            this.contentView = contentView
-            animationStyle = cn.jzvd.R.style.pop_animation
-            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            isOutsideTouchable = true
-        }
-        rv.layoutManager = LinearLayoutManager(v.context)
-        val adapter = hKeyframeAdapter
-        rv.adapter = adapter
-        adapter.stateView = TextView(v.context).apply {
-            text = this@HJzvdStd.context.getString(R.string.here_is_empty) + "\n" +
-                    this@HJzvdStd.context.getString(R.string.long_press_to_add_h_keyframe)
-            gravity = Gravity.CENTER
-            setTextColor(Color.WHITE)
-            layoutParams = FrameLayout.LayoutParams(
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT,
+        val currentVideoCode = videoCode ?: return
+        showComposeSidePopup { _ ->
+            HKeyframePopupContent(
+                keyframes = hKeyframe?.keyframes.orEmpty(),
+                isLocal = hKeyframe?.let { it.author == null } ?: true,
+                onSeek = { keyframe ->
+                    mediaInterface?.seekTo(keyframe.position)
+                    startProgressTimer()
+                },
+                onModify = { oldKeyframe, newKeyframe ->
+                    context.findActivityOrNull<MainActivity>()?.viewModel?.modifyHKeyframe(
+                        currentVideoCode,
+                        oldKeyframe,
+                        newKeyframe,
+                    )
+                    showShortToast(R.string.modify_success)
+                },
+                onDelete = { keyframe ->
+                    context.findActivityOrNull<MainActivity>()?.viewModel?.removeHKeyframe(
+                        currentVideoCode,
+                        keyframe,
+                    )
+                    showShortToast(R.string.delete_success)
+                },
             )
         }
-        popup.showAtLocation(textureViewContainer, Gravity.END, 0, 0)
-    }
-
-    private fun createSidePanelRecyclerView(context: Context): Pair<FrameLayout, RecyclerView> {
-        val paddingHorizontal = JZUtils.dip2px(context, 4f)
-        val paddingVertical = JZUtils.dip2px(context, 16f)
-        val rv = RecyclerView(context).apply {
-            layoutParams = FrameLayout.LayoutParams(
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.WRAP_CONTENT,
-                Gravity.CENTER,
-            )
-        }
-        val wrapper = FrameLayout(context).apply {
-            setBackgroundResource(R.drawable.frosted_glass)
-            setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical)
-            addView(rv)
-        }
-        return wrapper to rv
     }
 
     /**
