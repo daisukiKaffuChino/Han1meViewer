@@ -3,8 +3,8 @@ package io.github.daisukikaffuchino.han1meviewer
 import android.annotation.SuppressLint
 import android.view.ViewGroup
 import androidx.core.view.updateLayoutParams
-import com.yenaly.yenaly_libs.utils.applicationContext
-import com.yenaly.yenaly_libs.utils.dp
+import io.github.daisukikaffuchino.utils.applicationContext
+import io.github.daisukikaffuchino.utils.dp
 
 /**
  * 用于计算视频封面的大小动态调整！
@@ -43,7 +43,7 @@ object VideoCoverSize {
     object Normal {
 
         /**
-         * 最少显示几个视频
+         * 最少显示几个视�?
          */
         private const val AT_LEAST = 2
 
@@ -68,7 +68,7 @@ object VideoCoverSize {
     object Simplified {
 
         /**
-         * 最少显示几个视频
+         * 最少显示几个视�?
          */
         private const val AT_LEAST = 3
 

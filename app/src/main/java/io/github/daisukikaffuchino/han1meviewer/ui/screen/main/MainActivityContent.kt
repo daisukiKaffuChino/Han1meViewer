@@ -31,7 +31,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.handleMainInt
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.navigateDrawerDestination
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeTheme
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomePageViewModel
-import com.yenaly.yenaly_libs.utils.showShortToast
+import io.github.daisukikaffuchino.utils.showShortToast
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 

@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.WorkManager
 import io.github.daisukikaffuchino.han1meviewer.worker.HanimeDownloadManager
 import io.github.daisukikaffuchino.han1meviewer.worker.HanimeDownloadWorker
-import com.yenaly.yenaly_libs.base.YenalyViewModel
-import com.yenaly.yenaly_libs.utils.application
+import io.github.daisukikaffuchino.utils.ApplicationViewModel
+import io.github.daisukikaffuchino.utils.application
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
  * @author Yenaly Liew
  * @time 2024/03/29 029 18:00
  */
-object AppViewModel : YenalyViewModel(application), IHCsrfToken {
+object AppViewModel : ApplicationViewModel(application), IHCsrfToken {
 
     /**
      * csrfToken 全局唯一，只需要在首页拉起或点击视频页时更新一下就可以了

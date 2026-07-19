@@ -8,14 +8,14 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import io.github.daisukikaffuchino.han1meviewer.R
-import com.yenaly.yenaly_libs.utils.awaitActivityResult
-import com.yenaly.yenaly_libs.utils.requestPermission
-import com.yenaly.yenaly_libs.utils.requireComponentActivity
-import com.yenaly.yenaly_libs.utils.showShortToast
+import io.github.daisukikaffuchino.utils.awaitActivityResult
+import io.github.daisukikaffuchino.utils.requestPermission
+import io.github.daisukikaffuchino.utils.requireComponentActivity
+import io.github.daisukikaffuchino.utils.showShortToast
 
 
 /**
- * 请求选择图片或视频
+ * 请求选择图片或视�?
  */
 suspend fun Context.pickVisualMedia(type: ActivityResultContracts.PickVisualMedia.VisualMediaType): Uri? =
     awaitActivityResult(
@@ -42,7 +42,7 @@ suspend fun Context.requestPostNotificationPermission(): Boolean {
 }
 
 /**
- * 顯示發送通知權限對話框
+ * 顯示發送通知權限對話�?
  */
 private suspend fun Context.showPostNotificationPermissionDialog(): Int {
     val dialog = requireComponentActivity().createAlertDialog {

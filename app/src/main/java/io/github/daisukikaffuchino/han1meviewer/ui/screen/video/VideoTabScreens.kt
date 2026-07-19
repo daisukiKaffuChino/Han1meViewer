@@ -177,12 +177,12 @@ fun RenderVideoCommentContent(
                 val childReportFlow = remember(viewModel.reportMessage) {
                     viewModel.reportMessage.map { message ->
                         val text = if (message.args.isNotEmpty()) {
-                            com.yenaly.yenaly_libs.utils.application.getString(
+                            io.github.daisukikaffuchino.utils.application.getString(
                                 message.resId,
                                 *message.args.toTypedArray()
                             )
                         } else {
-                            com.yenaly.yenaly_libs.utils.application.getString(message.resId)
+                            io.github.daisukikaffuchino.utils.application.getString(message.resId)
                         }
                         CommentMessage(text)
                     }

@@ -13,9 +13,9 @@ import io.github.daisukikaffuchino.han1meviewer.ui.view.video.HMediaKernel
 import io.github.daisukikaffuchino.han1meviewer.util.CookieString
 import io.github.daisukikaffuchino.han1meviewer.util.SafFileManager
 import io.github.daisukikaffuchino.han1meviewer.worker.HanimeDownloadManager
-import com.yenaly.yenaly_libs.utils.applicationContext
-import com.yenaly.yenaly_libs.utils.getSpValue
-import com.yenaly.yenaly_libs.utils.putSpValue
+import io.github.daisukikaffuchino.utils.applicationContext
+import io.github.daisukikaffuchino.utils.getSpValue
+import io.github.daisukikaffuchino.utils.putSpValue
 import kotlinx.coroutines.flow.MutableStateFlow
 
 object Preferences {
@@ -32,7 +32,7 @@ object Preferences {
     // app 相關
 
     /**
-     * 是否登入，一般跟[loginCookie]一起賦值
+     * 是否登入，一般跟[loginCookie]一起賦�?
      */
     var isAlreadyLogin: Boolean
         get() = getSpValue(ALREADY_LOGIN, false)
@@ -301,27 +301,27 @@ object Preferences {
         get() = preferenceSp.getBoolean(SettingsPreferenceKeys.TABLET_MODE, false)
 
     /**
-     * MPV播放器设置
+     * MPV播放器设�?
      */
     val mpvProfile: String // 预设模式
         get() = preferenceSp.getString(SettingsPreferenceKeys.MPV_PROFILE, "fast") ?: "fast"
 
-    val enableGPUNextRenderer: Boolean // gpu-next 渲染器
+    val enableGPUNextRenderer: Boolean // gpu-next 渲染�?
         get() = preferenceSp.getBoolean(SettingsPreferenceKeys.ENABLE_GPU_NEXT_RENDERER, false)
 
     val mpvInterpolation: Boolean  // 插帧相关
         get() = preferenceSp.getBoolean(SettingsPreferenceKeys.MPV_INTERPOLATION, false)
 
-    val mpvDeband: Boolean  // 去色带
+    val mpvDeband: Boolean  // 去色�?
         get() = preferenceSp.getBoolean(SettingsPreferenceKeys.MPV_DEBAND, true)
 
-    val mpvFramedrop: Boolean  // GPU 繁忙时允许丢帧
+    val mpvFramedrop: Boolean  // GPU 繁忙时允许丢�?
         get() = preferenceSp.getBoolean(SettingsPreferenceKeys.MPV_FRAMEDROP, true)
 
     val mpvHwdec: String  // 硬件解码
         get() = preferenceSp.getString(SettingsPreferenceKeys.MPV_HWDEC, "Auto")?: "Auto"
 
-    val mpvCacheSecs: Int  // 预缓存秒数
+    val mpvCacheSecs: Int  // 预缓存秒�?
         get() = preferenceSp.getInt(SettingsPreferenceKeys.MPV_CACHE_SECS, 60)
 
     val mpvTlsVerify: Boolean  // 忽略证书验证

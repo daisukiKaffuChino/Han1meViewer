@@ -11,9 +11,9 @@ import io.github.daisukikaffuchino.han1meviewer.FILE_PROVIDER_AUTHORITY
 import io.github.daisukikaffuchino.han1meviewer.HFileManager
 import io.github.daisukikaffuchino.han1meviewer.HJson
 import io.github.daisukikaffuchino.han1meviewer.R
-import com.yenaly.yenaly_libs.utils.application
-import com.yenaly.yenaly_libs.utils.applicationContext
-import com.yenaly.yenaly_libs.utils.showShortToast
+import io.github.daisukikaffuchino.utils.application
+import io.github.daisukikaffuchino.utils.applicationContext
+import io.github.daisukikaffuchino.utils.showShortToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext

@@ -22,7 +22,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
-import com.yenaly.yenaly_libs.utils.findActivity
+import io.github.daisukikaffuchino.utils.findActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

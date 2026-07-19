@@ -8,14 +8,14 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListType
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
-import com.yenaly.yenaly_libs.base.YenalyViewModel
+import io.github.daisukikaffuchino.utils.ApplicationViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-abstract class MyListSubViewModel(application: Application) : YenalyViewModel(application) {
+abstract class MyListSubViewModel(application: Application) : ApplicationViewModel(application) {
 
     protected val itemsStateFlow: MutableStateFlow<PageLoadingState<MyListItems<HanimeInfo>>> =
         MutableStateFlow(PageLoadingState.Loading)

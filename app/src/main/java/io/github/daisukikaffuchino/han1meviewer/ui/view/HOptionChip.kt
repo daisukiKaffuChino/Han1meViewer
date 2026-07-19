@@ -12,7 +12,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.updatePadding
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import com.google.android.material.color.MaterialColors
-import com.yenaly.yenaly_libs.utils.dp
+import io.github.daisukikaffuchino.utils.dp
 import kotlinx.parcelize.Parcelize
 
 class HOptionChip @JvmOverloads constructor(

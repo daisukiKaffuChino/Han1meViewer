@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.util
 
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
-import com.yenaly.yenaly_libs.utils.LanguageHelper
+import io.github.daisukikaffuchino.utils.LanguageHelper
 
 object TagLocalizer {
 

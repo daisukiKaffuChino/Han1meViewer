@@ -17,8 +17,8 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomePageScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomeUiEvent
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.LocalSearchHistoryQuery
-import com.yenaly.yenaly_libs.utils.copyTextToClipboard
-import com.yenaly.yenaly_libs.utils.showShortToast
+import io.github.daisukikaffuchino.utils.copyTextToClipboard
+import io.github.daisukikaffuchino.utils.showShortToast
 import kotlinx.coroutines.flow.first
 
 @Composable

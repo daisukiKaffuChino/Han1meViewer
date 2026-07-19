@@ -29,9 +29,9 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.HKeyframeSett
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.HKeyframesScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.SharedHKeyframesScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.SettingsViewModel
-import com.yenaly.yenaly_libs.utils.copyToClipboard
-import com.yenaly.yenaly_libs.utils.decodeFromStringByBase64
-import com.yenaly.yenaly_libs.utils.showShortToast
+import io.github.daisukikaffuchino.utils.copyToClipboard
+import io.github.daisukikaffuchino.utils.decodeFromStringByBase64
+import io.github.daisukikaffuchino.utils.showShortToast
 import kotlinx.serialization.json.Json
 
 private const val H_KEYFRAMES_ENABLE = "h_keyframes_enable"

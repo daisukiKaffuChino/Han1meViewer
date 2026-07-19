@@ -20,9 +20,9 @@ import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.view.video.HJzvdStd
-import com.yenaly.yenaly_libs.utils.formatBytesPerSecond
-import com.yenaly.yenaly_libs.utils.formatFileSizeV2
-import com.yenaly.yenaly_libs.utils.showShortToast
+import io.github.daisukikaffuchino.utils.formatBytesPerSecond
+import io.github.daisukikaffuchino.utils.formatFileSizeV2
+import io.github.daisukikaffuchino.utils.showShortToast
 
 internal fun saveBoolean(key: String, value: Boolean) {
     Preferences.preferenceSp.edit { putBoolean(key, value) }

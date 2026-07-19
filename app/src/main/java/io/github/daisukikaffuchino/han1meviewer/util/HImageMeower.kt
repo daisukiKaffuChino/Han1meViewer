@@ -7,7 +7,7 @@ import coil.imageLoader
 import coil.request.ErrorResult
 import coil.request.ImageRequest
 import coil.request.ImageResult
-import com.yenaly.yenaly_libs.utils.applicationContext
+import io.github.daisukikaffuchino.utils.applicationContext
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HDns
 import okhttp3.OkHttpClient
 import java.lang.ref.WeakReference

@@ -12,7 +12,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.creatorcenter.CreatorCenterUiState
-import com.yenaly.yenaly_libs.base.YenalyViewModel
+import io.github.daisukikaffuchino.utils.ApplicationViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class CreatorCenterViewModel(application: Application) : YenalyViewModel(application) {
+class CreatorCenterViewModel(application: Application) : ApplicationViewModel(application) {
 
     private val _selectedTab = MutableStateFlow(CreatorTab.Uploaded)
 

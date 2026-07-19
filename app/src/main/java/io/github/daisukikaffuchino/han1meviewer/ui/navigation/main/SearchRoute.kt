@@ -12,8 +12,8 @@ import io.github.daisukikaffuchino.han1meviewer.getHanimeShareText
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.search.AdvancedSearchSheet
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.search.SearchScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.SearchViewModel
-import com.yenaly.yenaly_libs.utils.copyTextToClipboard
-import com.yenaly.yenaly_libs.utils.showShortToast
+import io.github.daisukikaffuchino.utils.copyTextToClipboard
+import io.github.daisukikaffuchino.utils.showShortToast
 import kotlinx.serialization.json.Json
 
 @Composable

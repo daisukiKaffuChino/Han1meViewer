@@ -36,7 +36,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.video.CommentMessage
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.video.CommentScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.CommentViewModel
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.PreviewCommentPrefetcher
-import com.yenaly.yenaly_libs.utils.application
+import io.github.daisukikaffuchino.utils.application
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 

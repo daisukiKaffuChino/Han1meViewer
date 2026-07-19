@@ -11,8 +11,8 @@ import androidx.appcompat.app.AlertDialog
 import com.google.android.material.color.MaterialColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.github.daisukikaffuchino.han1meviewer.R
-import com.yenaly.yenaly_libs.utils.activity
-import com.yenaly.yenaly_libs.utils.dpF
+import io.github.daisukikaffuchino.utils.activity
+import io.github.daisukikaffuchino.utils.dpF
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
@@ -30,7 +30,7 @@ fun Context.getDialogDefaultDrawable(): Drawable {
 }
 
 /**
- * 注意：占用了 setOnDismissListener，
+ * 注意：占用了 setOnDismissListener�?
  * 使用时不要忘了这一点！
  */
 fun AlertDialog.createDecorBlurEffect(dismissListener: DialogInterface.OnDismissListener? = null) {

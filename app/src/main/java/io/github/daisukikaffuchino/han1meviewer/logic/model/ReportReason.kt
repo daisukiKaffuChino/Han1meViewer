@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.model
 
 import android.os.Parcelable
-import com.yenaly.yenaly_libs.utils.LanguageHelper
+import io.github.daisukikaffuchino.utils.LanguageHelper
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

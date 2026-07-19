@@ -23,8 +23,8 @@ import io.github.daisukikaffuchino.han1meviewer.util.SafFileManager.checkSafPerm
 import io.github.daisukikaffuchino.han1meviewer.util.SafFileManager.scanAndImportHanimeDownloads
 import io.github.daisukikaffuchino.han1meviewer.util.openDownloadedHanimeVideoLocally
 import io.github.daisukikaffuchino.han1meviewer.worker.HanimeDownloadManager
-import com.yenaly.yenaly_libs.utils.application
-import com.yenaly.yenaly_libs.utils.showLongToast
+import io.github.daisukikaffuchino.utils.application
+import io.github.daisukikaffuchino.utils.showLongToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

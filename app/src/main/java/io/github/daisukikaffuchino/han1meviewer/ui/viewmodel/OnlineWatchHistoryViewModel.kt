@@ -10,7 +10,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.OnlineWatchHistorySo
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel.csrfToken
-import com.yenaly.yenaly_libs.base.YenalyViewModel
+import io.github.daisukikaffuchino.utils.ApplicationViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class OnlineWatchHistoryViewModel(application: Application) : YenalyViewModel(application) {
+class OnlineWatchHistoryViewModel(application: Application) : ApplicationViewModel(application) {
 
     private val _state = MutableStateFlow<PageLoadingState<MyListItems<HanimeInfo>>>(PageLoadingState.Loading)
     val state = _state.asStateFlow()

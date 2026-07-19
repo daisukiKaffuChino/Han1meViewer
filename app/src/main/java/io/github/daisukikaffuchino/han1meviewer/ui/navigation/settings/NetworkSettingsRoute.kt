@@ -36,9 +36,9 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.DohTestResult
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.NetworkSettingsScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.NetworkSettingsUiState
 import io.github.daisukikaffuchino.han1meviewer.util.showAlertDialog
-import com.yenaly.yenaly_libs.ActivityManager
-import com.yenaly.yenaly_libs.utils.applicationContext
-import com.yenaly.yenaly_libs.utils.showShortToast
+import io.github.daisukikaffuchino.utils.ActivityManager
+import io.github.daisukikaffuchino.utils.applicationContext
+import io.github.daisukikaffuchino.utils.showShortToast
 import okhttp3.Request
 import java.net.InetAddress
 import java.util.concurrent.Executors

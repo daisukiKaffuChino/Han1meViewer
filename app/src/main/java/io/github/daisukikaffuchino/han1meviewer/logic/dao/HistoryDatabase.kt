@@ -10,7 +10,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HanimeAdvancedSearchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.SearchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.WatchHistoryEntity
-import com.yenaly.yenaly_libs.utils.applicationContext
+import io.github.daisukikaffuchino.utils.applicationContext
 
 /**
  * @project Hanime1
@@ -55,7 +55,7 @@ abstract class HistoryDatabase : RoomDatabase() {
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
                 val url = cursor.getString(cursor.getColumnIndexOrThrow("redirectLink"))
                 val videoCode =
-                    url.substringAfter("v=") // 不用 String.toVideoCode() 的原因是，防止該拓展函數因不可抗力改變導致 migrate 失敗
+                    url.substringAfter("v=") // 不用 String.toVideoCode() 的原因是，防止該拓展函數因不可抗力改變導�?migrate 失敗
                 val values = contentValuesOf("redirectLink" to videoCode)
                 db.update(
                     "WatchHistoryEntity",

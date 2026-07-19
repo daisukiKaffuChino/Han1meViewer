@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.model
 
 import io.github.daisukikaffuchino.han1meviewer.ResolutionLinkMap
-import com.yenaly.yenaly_libs.utils.mapToArray
+import io.github.daisukikaffuchino.utils.mapToArray
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -84,7 +84,7 @@ data class HanimeVideo(
         }
     }
 
-    // 為保證兼容性，不能直接用天數
+    // 為保證兼容性，不能直接用天�?
     val uploadTimeMillis: Long
         get() = uploadTime?.let {
             it.toEpochDays() * 24 * 60 * 60 * 1000

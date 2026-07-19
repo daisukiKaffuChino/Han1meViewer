@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.util
 
-import com.yenaly.yenaly_libs.utils.LanguageHelper
+import io.github.daisukikaffuchino.utils.LanguageHelper
 import java.math.BigDecimal
 import java.util.Locale
 

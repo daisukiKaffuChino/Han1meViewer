@@ -20,9 +20,9 @@ import io.github.daisukikaffuchino.han1meviewer.util.requestPostNotificationPerm
 import io.github.daisukikaffuchino.han1meviewer.util.showAlertDialog
 import io.github.daisukikaffuchino.han1meviewer.worker.HanimeDownloadManager
 import io.github.daisukikaffuchino.han1meviewer.worker.HanimeDownloadWorker
-import com.yenaly.yenaly_libs.utils.browse
-import com.yenaly.yenaly_libs.utils.copyToClipboard
-import com.yenaly.yenaly_libs.utils.showShortToast
+import io.github.daisukikaffuchino.utils.browse
+import io.github.daisukikaffuchino.utils.copyToClipboard
+import io.github.daisukikaffuchino.utils.showShortToast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

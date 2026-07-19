@@ -14,7 +14,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.WatchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.DownloadGroupEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeDownloadEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
-import com.yenaly.yenaly_libs.utils.applicationContext
+import io.github.daisukikaffuchino.utils.applicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -86,7 +86,7 @@ object DatabaseRepo {
                             if (e is FileNotFoundException) {
                                 Log.w("HKeyframe", "未找到关键帧文件: $videoCode.json")
                             } else {
-                                Log.e("HKeyframe", "读取关键帧失败: ${e.message}", e)
+                                Log.e("HKeyframe", "读取关键帧失�? ${e.message}", e)
                             }
                         }
                     } else {
@@ -215,7 +215,7 @@ object DatabaseRepo {
             hanimeDownloadDao.loadAllDownloadingHanime()
 
         /**
-         * 查询所有视频，并且每个视频要有当前他在的分类
+         * 查询所有视频，并且每个视频要有当前他在的分�?
          */
         fun loadAllDownloadedHanime(
             sortedBy: HanimeDownloadEntity.SortedBy,

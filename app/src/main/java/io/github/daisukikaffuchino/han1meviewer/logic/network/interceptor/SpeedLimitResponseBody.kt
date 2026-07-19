@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.network.interceptor
 
-import com.yenaly.yenaly_libs.utils.unsafeLazy
+import io.github.daisukikaffuchino.utils.unsafeLazy
 import okhttp3.ResponseBody
 import okio.Throttler
 import okio.buffer

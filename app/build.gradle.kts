@@ -109,10 +109,10 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.androidx.window)
     implementation(libs.androidx.window.java)
-    implementation(project(":yenaly_libs"))
     implementation(libs.aboutlibraries.core)
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.startup.runtime)
     implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.androidx.material.icons.extended)
 
@@ -125,6 +125,7 @@ dependencies {
     implementation(libs.compose.ui.graphics)
     implementation(libs.compose.material3)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.compose.ui.ui.tooling.preview)
     implementation(libs.androidx.ui)
     androidTestImplementation(platform(libs.compose.compose.bom))
@@ -137,6 +138,7 @@ dependencies {
     implementation(libs.coil.network.okhttp)
     implementation(libs.aboutlibraries.compose.m3)
     implementation(libs.compose.avatar.cropper)
+    implementation(libs.kyant.m3color)
 
     implementation(libs.datetime)
     implementation(libs.serialization.json)
@@ -159,7 +161,6 @@ dependencies {
     implementation(libs.expandable.textview)
     implementation(libs.spannable.x)
     implementation(libs.about)
-    implementation(libs.circular.reveal.switch)
     implementation(libs.drawerlayout)
 
     ksp(libs.room.compiler)

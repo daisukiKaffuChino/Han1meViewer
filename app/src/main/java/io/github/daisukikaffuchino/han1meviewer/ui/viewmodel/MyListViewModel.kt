@@ -4,14 +4,14 @@ import android.app.Application
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.mylist.FavSubViewModel
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.mylist.PlaylistSubViewModel
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.mylist.WatchLaterSubViewModel
-import com.yenaly.yenaly_libs.base.YenalyViewModel
+import io.github.daisukikaffuchino.utils.ApplicationViewModel
 
 /**
  * @project Han1meViewer
  * @author Yenaly Liew
  * @time 2022/07/04 004 22:46
  */
-class MyListViewModel(application: Application) : YenalyViewModel(application) {
+class MyListViewModel(application: Application) : ApplicationViewModel(application) {
 
     val playlist by sub<PlaylistSubViewModel>()
     val watchLater by sub<WatchLaterSubViewModel>()

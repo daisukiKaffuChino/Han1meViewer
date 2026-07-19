@@ -17,6 +17,7 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -33,22 +34,18 @@ import io.github.daisukikaffuchino.han1meviewer.login
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.login.LoginDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.login.LoginScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeTheme
-import com.yenaly.yenaly_libs.base.frame.FrameActivity
-import com.yenaly.yenaly_libs.utils.showShortToast
+import io.github.daisukikaffuchino.utils.showShortToast
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-class LoginActivity : FrameActivity() {
+class LoginActivity : AppCompatActivity() {
     private lateinit var scannerLauncher: ActivityResultLauncher<Intent>
     private var isRefreshing by mutableStateOf(true)
     private var showLoginDialog by mutableStateOf(false)
     private var isLoggingIn by mutableStateOf(false)
 
-    override fun setUiStyle() {
-        enableEdgeToEdge()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()

@@ -6,8 +6,8 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.getHanimeShareText
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.myplaylist.PlaylistScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.MyPlayListViewModelV2
-import com.yenaly.yenaly_libs.utils.copyTextToClipboard
-import com.yenaly.yenaly_libs.utils.showShortToast
+import io.github.daisukikaffuchino.utils.copyTextToClipboard
+import io.github.daisukikaffuchino.utils.showShortToast
 
 @Composable
 fun MyPlaylistRouteScreen(

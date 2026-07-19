@@ -47,7 +47,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.VideoWithC
 import io.github.daisukikaffuchino.han1meviewer.logic.model.DownloadHeaderNode
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeDownloadedNodes
-import com.yenaly.yenaly_libs.utils.formatFileSizeV2
+import io.github.daisukikaffuchino.utils.formatFileSizeV2
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
@@ -55,11 +55,11 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 /**
- * 已下载视频分组头部卡片。
+ * 已下载视频分组头部卡片�?
  *
  * @param header 分组节点
  * @param onToggle 展开/折叠回调
- * @param onRename 重命名回调
+ * @param onRename 重命名回�?
  */
 @Composable
 fun DownloadGroupHeader(
@@ -115,17 +115,17 @@ fun DownloadGroupHeader(
 }
 
 /**
- * 已下载视频卡片。
+ * 已下载视频卡片�?
  *
- * @param item 视频及分组信息
+ * @param item 视频及分组信�?
  * @param onOpenVideo 打开视频详情
  * @param onLocalPlayback 本地播放
- * @param onExternalPlayback 外部播放器
+ * @param onExternalPlayback 外部播放�?
  * @param onDeleteVideo 删除视频
- * @param onMoveGroup 移动到其他分组
- * @param isMultiSelect 是否多选模式
+ * @param onMoveGroup 移动到其他分�?
+ * @param isMultiSelect 是否多选模�?
  * @param isSelected 是否已选中
- * @param onToggleSelect 切换选中状态
+ * @param onToggleSelect 切换选中状�?
  */
 @OptIn(ExperimentalFoundationApi::class, ExperimentalTime::class)
 @Composable

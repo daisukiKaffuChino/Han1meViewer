@@ -76,8 +76,8 @@ import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberRandomLoadingHint
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.UserAccountViewModel
 import io.github.daisukikaffuchino.han1meviewer.util.pickVisualMedia
-import com.yenaly.yenaly_libs.utils.browse
-import com.yenaly.yenaly_libs.utils.showShortToast
+import io.github.daisukikaffuchino.utils.browse
+import io.github.daisukikaffuchino.utils.showShortToast
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -497,7 +497,7 @@ private fun AccountScreenPreview() {
                 username = "你的名字",
                 email = "username@gmail.com",
                 userId = "987654",
-                joinedLabel = "加入於 1年前",
+                joinedLabel = "加入�?1年前",
                 subscriberCount = 0,
                 videoCount = 9,
             ),

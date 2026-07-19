@@ -59,10 +59,10 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.saveHome
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.ThemeColorPreset
 import io.github.daisukikaffuchino.han1meviewer.util.ThemeUtils
 import io.github.daisukikaffuchino.han1meviewer.util.showToast
-import com.yenaly.yenaly_libs.ActivityManager
-import com.yenaly.yenaly_libs.utils.browse
-import com.yenaly.yenaly_libs.utils.folderSize
-import com.yenaly.yenaly_libs.utils.showShortToast
+import io.github.daisukikaffuchino.utils.ActivityManager
+import io.github.daisukikaffuchino.utils.browse
+import io.github.daisukikaffuchino.utils.folderSize
+import io.github.daisukikaffuchino.utils.showShortToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

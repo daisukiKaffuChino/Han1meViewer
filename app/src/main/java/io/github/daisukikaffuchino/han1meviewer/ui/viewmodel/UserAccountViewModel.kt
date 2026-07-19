@@ -9,7 +9,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccountAction
 import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccountActionEvent
 import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccountSubmittingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
-import com.yenaly.yenaly_libs.base.YenalyViewModel
+import io.github.daisukikaffuchino.utils.ApplicationViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
 
-class UserAccountViewModel(application: Application) : YenalyViewModel(application) {
+class UserAccountViewModel(application: Application) : ApplicationViewModel(application) {
 
     private val _accountState = MutableStateFlow<WebsiteState<UserAccount>>(WebsiteState.Loading)
     val accountState = _accountState.asStateFlow()

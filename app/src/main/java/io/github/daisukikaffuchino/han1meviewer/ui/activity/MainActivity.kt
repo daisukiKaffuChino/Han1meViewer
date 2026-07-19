@@ -18,6 +18,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.runtime.getValue
@@ -44,19 +45,13 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.main.MainActivityConte
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomePageViewModel
 import io.github.daisukikaffuchino.han1meviewer.util.showAlertDialog
 import io.github.daisukikaffuchino.han1meviewer.videoUrlRegex
-import com.yenaly.yenaly_libs.ActivityManager
-import com.yenaly.yenaly_libs.base.frame.FrameActivity
-import com.yenaly.yenaly_libs.utils.showSnackBar
-import com.yenaly.yenaly_libs.utils.textFromClipboard
+import io.github.daisukikaffuchino.utils.ActivityManager
+import io.github.daisukikaffuchino.utils.showSnackBar
+import io.github.daisukikaffuchino.utils.textFromClipboard
 import kotlinx.coroutines.flow.MutableSharedFlow
 import java.util.Locale
 
-/**
- * @project Hanime1
- * @author Yenaly Liew
- * @time 2022/06/08 008 17:35
- */
-class MainActivity : FrameActivity() {
+class MainActivity : AppCompatActivity() {
 
     val viewModel by viewModels<HomePageViewModel>()
 
@@ -79,7 +74,7 @@ class MainActivity : FrameActivity() {
     private var hasAuthenticated = false
     private val pipActionReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.i("pipmode", "✅ onReceive called with action: ${intent?.action}")
+            Log.i("pipmode", "�?onReceive called with action: ${intent?.action}")
             when (intent?.action) {
                 ACTION_TOGGLE_PLAY -> {
                     Log.i("pipmode", "🎬 ACTION_TOGGLE_PLAY triggered")
@@ -118,25 +113,17 @@ class MainActivity : FrameActivity() {
         val useLock = prefs.getBoolean("use_lock_screen", false)
 
         if (useLock && isDeviceSecureCompat(this)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                authenticate(
-                    this,
-                    onSuccess = {
-                        hasAuthenticated = true
-                        showAuthGuard = false
-                        initData()
-                    },
-                    onFailed = {
-                        finish()
-                    }
-                )
-            } else {
-                // Android 7~8，不支持 BiometricPrompt
-                Toast.makeText(this, R.string.not_compact_lock_screen, Toast.LENGTH_SHORT).show()
-                hasAuthenticated = true
-                showAuthGuard = false
-                initData()
-            }
+            authenticate(
+                this,
+                onSuccess = {
+                    hasAuthenticated = true
+                    showAuthGuard = false
+                    initData()
+                },
+                onFailed = {
+                    finish()
+                }
+            )
         } else {
             hasAuthenticated = true
             showAuthGuard = false
@@ -175,7 +162,7 @@ class MainActivity : FrameActivity() {
                 }
 
                 override fun onAuthenticationFailed() {
-                    // 指纹被识别但不匹配（单次）
+                    // 指纹被识别但不匹配（单次�?
                 }
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
@@ -217,11 +204,11 @@ class MainActivity : FrameActivity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(pipActionReceiver, filter, RECEIVER_NOT_EXPORTED)
-            Log.i("pipmode", "✅ registerReceiver with RECEIVER_NOT_EXPORTED")
+            Log.i("pipmode", "�?registerReceiver with RECEIVER_NOT_EXPORTED")
         } else {
             @SuppressLint("UnspecifiedRegisterReceiverFlag")
             registerReceiver(pipActionReceiver, filter)
-            Log.i("pipmode", "✅ registerReceiver (legacy)")
+            Log.i("pipmode", "�?registerReceiver (legacy)")
         }
     }
 

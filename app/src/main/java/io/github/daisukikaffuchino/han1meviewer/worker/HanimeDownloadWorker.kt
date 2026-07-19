@@ -32,9 +32,9 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.DownloadState
 import io.github.daisukikaffuchino.han1meviewer.util.HImageMeower
 import io.github.daisukikaffuchino.han1meviewer.util.SafFileManager
 import io.github.daisukikaffuchino.han1meviewer.util.await
-import com.yenaly.yenaly_libs.utils.createFileIfNotExists
-import com.yenaly.yenaly_libs.utils.saveTo
-import com.yenaly.yenaly_libs.utils.showShortToast
+import io.github.daisukikaffuchino.utils.createFileIfNotExists
+import io.github.daisukikaffuchino.utils.saveTo
+import io.github.daisukikaffuchino.utils.showShortToast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -123,7 +123,7 @@ class HanimeDownloadWorker(
         private val CONTENT_RANGE_LENGTH_REGEX = Regex("/([0-9]+)$")
 
         /**
-         * 方便统一管理下载 Worker 的创建
+         * 方便统一管理下载 Worker 的创�?
          */
         inline fun build(
             constraintsRequired: Boolean = true,
@@ -199,7 +199,7 @@ class HanimeDownloadWorker(
 
                 val len = fetchContentLength() ?: return@withContext null
                 if (len > 0) {
-                    // 创建数据库记录
+                    // 创建数据库记�?
                     val entity = HanimeDownloadEntity(
                         coverUrl = coverUrl,
                         coverUri = null,
@@ -214,7 +214,7 @@ class HanimeDownloadWorker(
                         state = DownloadState.Queued
                     )
                     DatabaseRepo.HanimeDownload.insert(entity)
-                    // 预写入长度（只有 File 支持）
+                    // 预写入长度（只有 File 支持�?
                     raf?.setLength(len)
                     return@withContext entity
                 }
@@ -586,7 +586,7 @@ class HanimeDownloadWorker(
         val notification = createDownloadNotification(progress)
         return ForegroundInfo(
             downloadId, notification,
-            // #issue-34: 這裡的參數是為了讓 Android 14 以上的系統可以正常顯示前景通知
+            // #issue-34: 這裡的參數是為了�?Android 14 以上的系統可以正常顯示前景通知
             ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
         )
     }

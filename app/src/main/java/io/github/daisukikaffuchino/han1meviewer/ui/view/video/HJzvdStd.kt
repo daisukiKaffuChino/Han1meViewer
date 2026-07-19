@@ -93,13 +93,13 @@ import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HomeRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeTheme
 import io.github.daisukikaffuchino.han1meviewer.util.showAlertDialog
-import com.yenaly.yenaly_libs.utils.OrientationManager
-import com.yenaly.yenaly_libs.utils.appScreenWidth
-import com.yenaly.yenaly_libs.utils.findActivityOrNull
-import com.yenaly.yenaly_libs.utils.navBarHeight
-import com.yenaly.yenaly_libs.utils.statusBarHeight
-import com.yenaly.yenaly_libs.utils.showShortToast
-import com.yenaly.yenaly_libs.utils.view.removeItself
+import io.github.daisukikaffuchino.utils.OrientationManager
+import io.github.daisukikaffuchino.utils.appScreenWidth
+import io.github.daisukikaffuchino.utils.findActivityOrNull
+import io.github.daisukikaffuchino.utils.navBarHeight
+import io.github.daisukikaffuchino.utils.statusBarHeight
+import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.removeItself
 import java.util.Timer
 import kotlin.math.absoluteValue
 

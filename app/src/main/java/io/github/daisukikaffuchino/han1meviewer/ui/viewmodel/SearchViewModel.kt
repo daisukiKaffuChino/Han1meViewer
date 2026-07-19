@@ -17,8 +17,8 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.util.loadAssetAs
-import com.yenaly.yenaly_libs.base.YenalyViewModel
-import com.yenaly.yenaly_libs.utils.unsafeLazy
+import io.github.daisukikaffuchino.utils.ApplicationViewModel
+import io.github.daisukikaffuchino.utils.unsafeLazy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,7 +38,7 @@ import kotlinx.coroutines.withContext
 class SearchViewModel(
     application: Application,
     private val state: SavedStateHandle
-) : YenalyViewModel(application) {
+) : ApplicationViewModel(application) {
 
     var page: Int = 1
     var query: String?

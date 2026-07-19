@@ -12,7 +12,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.DownloadGr
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeCategoryCrossRef
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeDownloadEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.state.DownloadState
-import com.yenaly.yenaly_libs.utils.applicationContext
+import io.github.daisukikaffuchino.utils.applicationContext
 
 /**
  * @project Han1meViewer

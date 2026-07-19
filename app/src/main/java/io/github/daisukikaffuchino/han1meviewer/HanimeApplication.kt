@@ -3,22 +3,26 @@ package io.github.daisukikaffuchino.han1meviewer
 import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.util.Log
+import android.app.Activity
+import android.app.Application
+import android.os.Bundle
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.android.material.color.DynamicColors
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HProxySelector
 import io.github.daisukikaffuchino.han1meviewer.util.AnimeShaders
 import io.github.daisukikaffuchino.han1meviewer.util.ThemeUtils
-import com.yenaly.yenaly_libs.base.YenalyApplication
+import io.github.daisukikaffuchino.utils.ActivityManager
 import `is`.xyz.mpv.MPVLib
 import java.net.ProxySelector
+import java.lang.ref.WeakReference
 
 /**
  * @project Hanime1
  * @author Yenaly Liew
  * @time 2022/06/08 008 17:32
  */
-class HanimeApplication : YenalyApplication() {
+class HanimeApplication : Application(), Application.ActivityLifecycleCallbacks {
 
     companion object {
         const val TAG = "HanimeApplication"
@@ -27,10 +31,10 @@ class HanimeApplication : YenalyApplication() {
     /**
      * 已经在 [HInitializer] 中处理了
      */
-    override val isDefaultCrashHandlerEnabled: Boolean = false
-
     override fun onCreate() {
         super.onCreate()
+        //applicationContext = this
+        registerActivityLifecycleCallbacks(this)
         ThemeUtils.applyDarkModeFromPreferences(this)
         if (Preferences.useDynamicColor){
             DynamicColors.applyToActivitiesIfAvailable(this)
@@ -89,4 +93,20 @@ class HanimeApplication : YenalyApplication() {
             )
         }
     }
+
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
+
+    override fun onActivityStarted(activity: Activity) = Unit
+
+    override fun onActivityResumed(activity: Activity) {
+        ActivityManager.currentActivity = WeakReference(activity)
+    }
+
+    override fun onActivityPaused(activity: Activity) = Unit
+
+    override fun onActivityStopped(activity: Activity) = Unit
+
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
+
+    override fun onActivityDestroyed(activity: Activity) = Unit
 }

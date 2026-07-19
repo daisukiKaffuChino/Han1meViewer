@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.worker
 
 import androidx.work.ListenableWorker
-import com.yenaly.yenaly_libs.utils.unsafeLazy
+import io.github.daisukikaffuchino.utils.unsafeLazy
 
 /**
  * @project Han1meViewer
