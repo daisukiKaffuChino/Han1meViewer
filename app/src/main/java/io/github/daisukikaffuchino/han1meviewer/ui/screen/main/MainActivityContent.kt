@@ -38,7 +38,6 @@ import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainDestinati
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.MainNavHost
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.handleMainIntent
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.navigateDrawerDestination
-import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeTheme
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomePageViewModel
 import io.github.daisukikaffuchino.han1meviewer.videoUrlRegex
 import io.github.daisukikaffuchino.utils.showShortToast
@@ -64,7 +63,6 @@ fun MainActivityContent(
     onOpenClipboardVideo: (String) -> Unit,
     onNavigateControllerReady: (NavHostController) -> Unit,
 ) {
-    HanimeTheme {
         val composeNavController = rememberNavController()
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
@@ -217,5 +215,4 @@ fun MainActivityContent(
             onConfirm = onConfirmLogout,
             onDismiss = onDismissLogout,
         )
-    }
 }

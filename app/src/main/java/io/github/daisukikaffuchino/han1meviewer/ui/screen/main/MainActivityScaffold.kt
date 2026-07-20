@@ -91,7 +91,6 @@ fun MainActivityScaffold(
                             MainDrawerDestination.FavVideo,
                             MainDrawerDestination.Playlist,
                             MainDrawerDestination.Subscription,
-                            MainDrawerDestination.CreatorCenter,
                         ),
                         selectedDestination = selectedDestination,
                         onItemClick = { destination ->

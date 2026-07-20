@@ -8,19 +8,15 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.platform.ComposeView
 import io.github.daisukikaffuchino.han1meviewer.Preferences.cloudFlareCookie
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.USER_AGENT
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.web.CloudflareScreen
-import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeTheme
 import io.github.daisukikaffuchino.han1meviewer.util.CookieString
 
-class CloudflareActivity : AppCompatActivity() {
+class CloudflareActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_URL = "request_url"
@@ -30,10 +26,7 @@ class CloudflareActivity : AppCompatActivity() {
     private val progressState = mutableIntStateOf(0)
     private val tipTextState = mutableStateOf("")
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
-        super.onCreate(savedInstanceState)
-
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
         val url = intent.getStringExtra(EXTRA_URL) ?: run {
             finish()
             return
@@ -41,17 +34,13 @@ class CloudflareActivity : AppCompatActivity() {
 
         tipTextState.value = getString(R.string.complete_cloudflare_verification_with_warning)
 
-        val composeView = ComposeView(this)
-        setContentView(composeView)
-        composeView.setContent {
-            HanimeTheme {
-                CloudflareScreen(
-                    progress = progressState.intValue,
-                    tipText = tipTextState.value,
-                    onClose = { finish() },
-                    webViewFactory = { createWebView(url) },
-                )
-            }
+        setHanimeContent {
+            CloudflareScreen(
+                progress = progressState.intValue,
+                tipText = tipTextState.value,
+                onClose = { finish() },
+                webViewFactory = { createWebView(url) },
+            )
         }
     }
 
@@ -132,10 +121,6 @@ class CloudflareActivity : AppCompatActivity() {
             }
             loadUrl(url)
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
     }
 
 }

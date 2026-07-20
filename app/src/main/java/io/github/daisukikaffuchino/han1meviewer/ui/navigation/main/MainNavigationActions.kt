@@ -30,7 +30,6 @@ fun NavHostController.navigateDrawerDestination(
         MainDrawerDestination.FavVideo -> navigateSafely(MyFavVideoRoute)
         MainDrawerDestination.Playlist -> navigateSafely(MyPlaylistRoute)
         MainDrawerDestination.Subscription -> navigateSafely(SubscriptionRoute)
-        MainDrawerDestination.CreatorCenter -> navigateSafely(CreatorCenterRoute)
         MainDrawerDestination.WatchHistory -> navigateSafely(WatchHistoryRoute)
         MainDrawerDestination.Download -> navigateSafely(DownloadRoute)
     }

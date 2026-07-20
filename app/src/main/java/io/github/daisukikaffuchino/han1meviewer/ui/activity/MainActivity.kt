@@ -12,11 +12,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.runtime.getValue
@@ -43,7 +40,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomePage
 import io.github.daisukikaffuchino.utils.ActivityManager
 import kotlinx.coroutines.flow.MutableSharedFlow
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     val viewModel by viewModels<HomePageViewModel>()
 
@@ -79,7 +76,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initData() {
-        setContent {
+        setHanimeContent {
             MainActivityContent(
                 activity = this,
                 viewModel = viewModel,
@@ -101,15 +98,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun beforeSuperOnCreate(savedInstanceState: Bundle?) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             installSplashScreen().apply {
                 setKeepOnScreenCondition { !hasAuthenticated }
             }
         }
-        enableEdgeToEdge()
-        super.onCreate(savedInstanceState)
+    }
 
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val useLock = prefs.getBoolean("use_lock_screen", false)
 

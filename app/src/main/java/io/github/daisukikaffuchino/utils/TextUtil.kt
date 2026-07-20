@@ -1,7 +1,12 @@
 package io.github.daisukikaffuchino.utils
 
+import android.util.Base64
 import androidx.annotation.IntRange
 import java.util.Locale
+
+fun String.decodeFromStringByBase64(flag: Int = Base64.DEFAULT): String {
+    return String(Base64.decode(toByteArray(), flag))
+}
 
 private val SI_UNITS = arrayOf("B", "kB", "MB", "GB", "TB")
 private val IEC_UNITS = arrayOf("B", "KiB", "MiB", "GiB", "TiB")

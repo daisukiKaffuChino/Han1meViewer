@@ -11,14 +11,11 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.lifecycleScope
 import io.github.daisukikaffuchino.han1meviewer.HANIME_LOGIN_URL
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
@@ -29,19 +26,16 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.login
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.login.LoginDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.login.LoginScreen
-import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeTheme
 import io.github.daisukikaffuchino.utils.showShortToast
 import kotlinx.coroutines.launch
 
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : BaseActivity() {
     private lateinit var scannerLauncher: ActivityResultLauncher<Intent>
     private var isRefreshing by mutableStateOf(true)
     private var showLoginDialog by mutableStateOf(false)
     private var isLoggingIn by mutableStateOf(false)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
-        super.onCreate(savedInstanceState)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
         registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) { isGranted ->
@@ -64,26 +58,22 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        val composeView = ComposeView(this)
-        setContentView(composeView)
-        composeView.setContent {
-            HanimeTheme {
-                if (showLoginDialog) {
-                    LoginDialog(
-                        isLoggingIn = isLoggingIn,
-                        onDismiss = { showLoginDialog = false },
-                        onLogin = { username, password -> handleLogin(username, password) },
-                    )
-                }
-                LoginScreen(
-                    isRefreshing = isRefreshing,
-                    onBack = { onBackPressedDispatcher.onBackPressed() },
-                    onRefresh = { webView?.loadUrl(HANIME_LOGIN_URL) },
-                    onShowLoginDialog = { showLoginDialog = true },
-                    onOpenQrScanner = { openQrScanner() },
-                    webViewFactory = { createWebView() },
+        setHanimeContent {
+            if (showLoginDialog) {
+                LoginDialog(
+                    isLoggingIn = isLoggingIn,
+                    onDismiss = { showLoginDialog = false },
+                    onLogin = { username, password -> handleLogin(username, password) },
                 )
             }
+            LoginScreen(
+                isRefreshing = isRefreshing,
+                onBack = { onBackPressedDispatcher.onBackPressed() },
+                onRefresh = { webView?.loadUrl(HANIME_LOGIN_URL) },
+                onShowLoginDialog = { showLoginDialog = true },
+                onOpenQrScanner = { openQrScanner() },
+                webViewFactory = { createWebView() },
+            )
         }
     }
 

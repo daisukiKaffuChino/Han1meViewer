@@ -15,7 +15,6 @@ import androidx.navigation.toRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.navigateSafely
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.account.AvatarCropScreen
-import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.CreatorCenterScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DownloadSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DownloadSettingsRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframeSettingsRoute
@@ -37,7 +36,6 @@ import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SharedHKe
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.account.AccountScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.materialSharedAxisXIn
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.materialSharedAxisXOut
-import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.CreatorCenterViewModel
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.UserAccountViewModel
 import kotlinx.serialization.json.Json
 
@@ -121,15 +119,6 @@ fun MainNavHost(
                 onBack = onBack,
                 onNavigateToVideo = onNavigateToVideo,
                 onNavigateToLocalVideo = onNavigateToLocalVideo,
-            )
-        }
-        composable<CreatorCenterRoute> {
-            val creatorViewModel: CreatorCenterViewModel = viewModel()
-            CreatorCenterScreen(
-                viewModel = creatorViewModel,
-                onBack = onBack,
-                onOpenUploadedVideo = { item -> onNavigateToVideo(item.videoCode) },
-                onOpenUploadingVideo = { item -> onNavigateToLocalVideo("-1", item.remoteVideoUrl) },
             )
         }
         composable<AccountRoute> {

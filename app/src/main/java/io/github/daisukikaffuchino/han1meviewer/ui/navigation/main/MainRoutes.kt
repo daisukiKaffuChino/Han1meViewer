@@ -35,9 +35,6 @@ object SubscriptionRoute
 object DownloadRoute
 
 @Serializable
-object CreatorCenterRoute
-
-@Serializable
 object AccountRoute
 
 @Serializable
@@ -112,11 +109,6 @@ enum class MainDestinationSpec(
     Download(
         drawerDestination = MainDrawerDestination.Download,
         routeClass = DownloadRoute::class,
-        drawerEnabled = false,
-    ),
-    CreatorCenter(
-        drawerDestination = MainDrawerDestination.CreatorCenter,
-        routeClass = CreatorCenterRoute::class,
         drawerEnabled = false,
     ),
     Account(
