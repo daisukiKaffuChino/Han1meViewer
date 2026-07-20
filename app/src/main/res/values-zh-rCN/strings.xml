@@ -696,4 +696,10 @@
     <string name="replay">重播</string>
     <string name="video_loading_failed">视频加载失败</string>
 
+    <string name="update_available_title">发现新版本 %1$s</string>
+    <string name="force_update_notice">本次为强制更新</string>
+    <string name="update_now">立即更新</string>
+    <string name="ignore_this_update">忽略此版本</string>
+    <string name="checking_for_updates">正在检查更新...</string>
+    <string name="update_link_open_failed">无法打开更新链接</string>
 </resources>

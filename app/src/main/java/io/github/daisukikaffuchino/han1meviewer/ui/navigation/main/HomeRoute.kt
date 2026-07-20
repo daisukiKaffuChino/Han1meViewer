@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.getHanimeShareText
@@ -33,6 +34,7 @@ fun HomeRouteScreen(
 ) {
     val viewModel = activity.viewModel
     val copyTextToClipboard = rememberCopyTextToClipboard()
+    val uriHandler = LocalUriHandler.current
     val confirmToExit = stringResource(R.string.confirm_to_exit)
     val confirmExitMessage = stringResource(R.string.confirm_exit_message)
     val cancel = stringResource(R.string.cancel)
@@ -60,6 +62,11 @@ fun HomeRouteScreen(
                     }
                     is HomeUiEvent.ShowAnnouncementDialog -> { announcement = event.announcement }
                     is HomeUiEvent.ShowExitDialog -> { showExitDialog = true }
+                    is HomeUiEvent.OpenUpdatePage -> {
+                        runCatching { uriHandler.openUri(event.downloadUrl) }
+                            .onFailure { showShortToast(R.string.update_link_open_failed) }
+                    }
+                    is HomeUiEvent.IgnoreUpdate -> viewModel.ignoreUpdate(event.versionCode)
                 }
             }
         )

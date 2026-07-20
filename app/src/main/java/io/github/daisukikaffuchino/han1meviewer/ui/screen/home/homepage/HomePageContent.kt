@@ -10,11 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.github.daisukikaffuchino.han1meviewer.logic.AppUpdateInfo
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeAnnouncements
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeHomePage
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.component.AnnouncementCard
+import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.component.AppUpdateCard
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.component.BannerCarousel
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.component.CategoryRow
 
@@ -29,6 +31,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.componen
 @Composable
 fun HomePageContent(
     data: HomeData,
+    updateInfo: AppUpdateInfo?,
     onEvent: (HomeUiEvent) -> Unit,
     onCloseAnnouncement: () -> Unit,
     modifier: Modifier = Modifier
@@ -44,6 +47,20 @@ fun HomePageContent(
         buildCategoryList(data.page)
     }
     LazyColumn(modifier = modifier.fillMaxSize()) {
+        if (updateInfo != null) {
+            item(key = "app_update_${updateInfo.versionCode}") {
+                AppUpdateCard(
+                    updateInfo = updateInfo,
+                    onUpdateClick = {
+                        onEvent(HomeUiEvent.OpenUpdatePage(updateInfo.downloadUrl))
+                    },
+                    onIgnoreClick = {
+                        onEvent(HomeUiEvent.IgnoreUpdate(updateInfo.versionCode))
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                )
+            }
+        }
         item(key = "banner") {
             BannerCarousel(
                 banners = banners,
@@ -100,6 +117,13 @@ private fun HomePageContentPreview() {
                 data = HomeData(
                     page = fakeHomePage,
                     announcements = fakeAnnouncements,
+                ),
+                updateInfo = AppUpdateInfo(
+                    versionName = "26.1.0",
+                    versionCode = 260720,
+                    downloadUrl = "https://example.com",
+                    updateDescription = "A new version is ready.",
+                    forceUpdate = false,
                 ),
                 onEvent = {},
                 onCloseAnnouncement = {},

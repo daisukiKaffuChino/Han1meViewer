@@ -3,12 +3,13 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.core.content.edit
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.SAVED_USER_ID
+import io.github.daisukikaffuchino.han1meviewer.logic.AppUpdateChecker
+import io.github.daisukikaffuchino.han1meviewer.logic.AppUpdateState
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
@@ -23,7 +24,6 @@ import io.github.daisukikaffuchino.utils.getSpValue
 import io.github.daisukikaffuchino.utils.putSpValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,7 +43,11 @@ class HomePageViewModel: ViewModel() {
     private val _sessionExpiredMessage = MutableSharedFlow<SessionExpiredMessage>()
     val sessionExpiredMessage = _sessionExpiredMessage
 
+    private val _appUpdateState = MutableStateFlow<AppUpdateState>(AppUpdateState.Checking)
+    val appUpdateState = _appUpdateState.asStateFlow()
+
     private var homePageJob: Job? = null
+    private var initializationJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -52,7 +56,35 @@ class HomePageViewModel: ViewModel() {
         }
     }
 
+    fun initializeHomePage() {
+        if (initializationJob != null || _appUpdateState.value !is AppUpdateState.Checking) return
+        initializationJob = viewModelScope.launch {
+            val updateInfo = AppUpdateChecker.checkForUpdate()
+            _appUpdateState.value = updateInfo
+                ?.let { AppUpdateState.Available(it) }
+                ?: AppUpdateState.NoUpdate
+            if (updateInfo?.forceUpdate != true) {
+                getHomePage()
+            }
+        }
+    }
+
+    fun ignoreUpdate(versionCode: Int) {
+        val available = _appUpdateState.value as? AppUpdateState.Available ?: return
+        if (available.info.forceUpdate || available.info.versionCode != versionCode) return
+        AppUpdateChecker.ignoreUpdate(versionCode)
+        _appUpdateState.value = AppUpdateState.NoUpdate
+    }
+
     fun getHomePage(isRefresh: Boolean = false){
+        when (val updateState = _appUpdateState.value) {
+            AppUpdateState.Checking -> {
+                initializeHomePage()
+                return
+            }
+            is AppUpdateState.Available -> if (updateState.info.forceUpdate) return
+            AppUpdateState.NoUpdate -> Unit
+        }
         homePageJob?.cancel()
         homePageJob = viewModelScope.launch {
             val current = _homePageFlow.value

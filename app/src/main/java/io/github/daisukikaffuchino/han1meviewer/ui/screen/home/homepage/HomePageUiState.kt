@@ -16,4 +16,6 @@ sealed interface HomeUiEvent {
     data class LongPressVideoCopy(val videoCode: String, val videoTitle: String) : HomeUiEvent
     data object ShowExitDialog : HomeUiEvent
     data class ShowAnnouncementDialog(val announcement: Announcement) : HomeUiEvent
+    data class OpenUpdatePage(val downloadUrl: String) : HomeUiEvent
+    data class IgnoreUpdate(val versionCode: Int) : HomeUiEvent
 }

@@ -711,4 +711,10 @@ Recommendations are as follows:\n
     <string name="click_to_restart">Click to restart</string>
     <string name="replay">Replay</string>
     <string name="video_loading_failed">Video loading failed</string>
+    <string name="update_available_title">New version %1$s available</string>
+    <string name="force_update_notice">This is a required update.</string>
+    <string name="update_now">Update now</string>
+    <string name="ignore_this_update">Ignore this version</string>
+    <string name="checking_for_updates">Checking for updates...</string>
+    <string name="update_link_open_failed">Unable to open the update link</string>
 </resources>

@@ -11,6 +11,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
@@ -24,11 +27,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
+import io.github.daisukikaffuchino.han1meviewer.logic.AppUpdateState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.dataOrNull
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PullRefreshOverlay
@@ -36,6 +40,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageEmpty
 import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageError
 import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageLoading
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.component.HomePageTopBar
+import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.component.AppUpdateCard
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberRandomLoadingHint
 import io.github.daisukikaffuchino.han1meviewer.util.toNetworkErrorMessageRes
 
@@ -56,13 +61,12 @@ fun HomePageScreen(
 ) {
     val context = LocalContext.current
     val pageState by viewModel.homePageFlow.collectAsStateWithLifecycle()
+    val updateState by viewModel.appUpdateState.collectAsStateWithLifecycle()
     val refreshState = rememberPullToRefreshState()
     var wasRefreshing by remember { mutableStateOf(false) }
     val loadingHint = rememberRandomLoadingHint()
     LaunchedEffect(Unit) {
-        if (pageState !is PageState.Success) {
-            viewModel.getHomePage(isRefresh = false)
-        }
+        viewModel.initializeHomePage()
     }
 
     BackHandler(enabled = !isDrawerOpen) {
@@ -70,6 +74,8 @@ fun HomePageScreen(
     }
 
     val isCurrentlyRefreshing = (pageState as? PageState.Success)?.isRefreshing == true
+    val availableUpdate = (updateState as? AppUpdateState.Available)?.info
+    val forcedUpdate = availableUpdate?.takeIf { it.forceUpdate }
 
     LaunchedEffect(pageState) {
         val errorState = pageState as? PageState.Error
@@ -94,49 +100,76 @@ fun HomePageScreen(
                 onSearchClick = { onEvent(HomeUiEvent.OpenSearchPage()) },
                 onNavigateToPreview = { onEvent(HomeUiEvent.NavigateToPreview) }
             )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pullToRefresh(
-                        state = refreshState,
-                        isRefreshing = isCurrentlyRefreshing,
-                        onRefresh = {
-                            viewModel.getHomePage(isRefresh = true)
-                        }
-                    )
-            ) {
-                PageContent(
-                    isLoading = pageState.isFirstPageLoading,
-                    isError = pageState.isFirstPageError,
-                    isEmpty = pageState.isFirstPageError || pageState.isFirstPageEmpty,
-                    errorMessage = (pageState as? PageState.Error)?.throwable?.toNetworkErrorMessageRes()?.let {
-                        stringResource(it)
-                    } ?: "",
-                    onRetry = { viewModel.getHomePage(isRefresh = false) },
-                    loadingMessage = loadingHint,
+            if (forcedUpdate != null) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(12.dp),
+                    verticalArrangement = Arrangement.Center,
                 ) {
-                    val homeData = pageState.dataOrNull
-
-                    if (homeData != null) {
-                        AnimatedContent(
-                            targetState = homeData,
-                            transitionSpec = { fadeIn(tween(300)) togetherWith fadeOut(tween(200)) },
-                            label = "HomeContentAnimation"
-                        ) { data ->
-                            HomePageContent(
-                                data = data,
-                                onEvent = onEvent,
-                                onCloseAnnouncement = viewModel::dismissAnnouncements,
-                            )
-                        }
+                    item(key = "forced_update_${forcedUpdate.versionCode}") {
+                        AppUpdateCard(
+                            updateInfo = forcedUpdate,
+                            onUpdateClick = {
+                                onEvent(HomeUiEvent.OpenUpdatePage(forcedUpdate.downloadUrl))
+                            },
+                            onIgnoreClick = {},
+                        )
                     }
                 }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .pullToRefresh(
+                            state = refreshState,
+                            isRefreshing = isCurrentlyRefreshing,
+                            enabled = updateState !is AppUpdateState.Checking,
+                            onRefresh = {
+                                viewModel.getHomePage(isRefresh = true)
+                            }
+                        )
+                ) {
+                    PageContent(
+                        isLoading = updateState is AppUpdateState.Checking || pageState.isFirstPageLoading,
+                        isError = pageState.isFirstPageError,
+                        isEmpty = pageState.isFirstPageError || pageState.isFirstPageEmpty,
+                        errorMessage = (pageState as? PageState.Error)?.throwable
+                            ?.toNetworkErrorMessageRes()
+                            ?.let { stringResource(it) }
+                            ?: "",
+                        onRetry = { viewModel.getHomePage(isRefresh = false) },
+                        loadingMessage = if (updateState is AppUpdateState.Checking) {
+                            stringResource(R.string.checking_for_updates)
+                        } else {
+                            loadingHint
+                        },
+                    ) {
+                        val homeData = pageState.dataOrNull
 
-                PullRefreshOverlay(
-                    state = refreshState,
-                    isRefreshing = isCurrentlyRefreshing,
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                )
+                        if (homeData != null) {
+                            AnimatedContent(
+                                targetState = homeData,
+                                transitionSpec = {
+                                    fadeIn(tween(300)) togetherWith fadeOut(tween(200))
+                                },
+                                label = "HomeContentAnimation",
+                            ) { data ->
+                                HomePageContent(
+                                    data = data,
+                                    updateInfo = availableUpdate,
+                                    onEvent = onEvent,
+                                    onCloseAnnouncement = viewModel::dismissAnnouncements,
+                                )
+                            }
+                        }
+                    }
+
+                    PullRefreshOverlay(
+                        state = refreshState,
+                        isRefreshing = isCurrentlyRefreshing,
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    )
+                }
             }
         }
     }
