@@ -2,6 +2,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.component
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +35,7 @@ import coil3.compose.AsyncImage
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoComments
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.util.DisplayTextLocalizer
 
 /**
@@ -48,7 +52,7 @@ import io.github.daisukikaffuchino.han1meviewer.util.DisplayTextLocalizer
  * @param onReport 举报回调
  * @param onViewMoreReplies 查看更多回复回调，为 null 时不显示入口
  */
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun VideoCommentCard(
     modifier: Modifier = Modifier,
@@ -62,7 +66,12 @@ fun VideoCommentCard(
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
+            .animateContentSize()
             .combinedClickable(onClick = {}, onLongClick = {}),
+        shape = MaterialTheme.shapes.largeIncreased,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = HanimeDefaults.Colors.Container,
+        ),
     ) {
         Column(
             modifier = Modifier.padding(12.dp),

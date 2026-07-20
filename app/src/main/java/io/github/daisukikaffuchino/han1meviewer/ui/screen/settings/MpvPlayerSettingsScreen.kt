@@ -241,9 +241,9 @@ private fun CustomParamsDialog(
 private fun MpvGroupTitle(title: String) {
     Text(
         text = title,
-        style = MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
     )
 }
 

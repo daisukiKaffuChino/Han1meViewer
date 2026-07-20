@@ -17,6 +17,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.ChoiceDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingNavigationItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingSliderItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingSwitchItem
+import io.github.daisukikaffuchino.han1meviewer.ui.component.segmentedGroup
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 
@@ -96,16 +97,13 @@ fun PlayerSettingsScreen(
         contentPadding = PaddingValues(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        item {
+        segmentedGroup {
             SettingNavigationItem(
                 title = stringResource(R.string.switch_player_kernel),
                 valueText = state.kernelDisplay,
                 iconRes = R.drawable.baseline_atomic_24,
                 onClick = { activeDialog = PlayerChoiceDialog.Kernel },
             )
-        }
-
-        item {
             SettingNavigationItem(
                 title = stringResource(R.string.mpv_advanced_settings),
                 summary = state.mpvSettingsSummary,
@@ -114,36 +112,24 @@ fun PlayerSettingsScreen(
                 enabled = state.mpvSettingsEnabled,
                 valueText = null,
             )
-        }
-
-        item {
             SettingSwitchItem(
                 title = stringResource(R.string.show_bottom_progress),
                 checked = state.showBottomProgress,
                 iconRes = R.drawable.baseline_seek_24,
                 onCheckedChange = onShowBottomProgressChange,
             )
-        }
-
-        item {
             SettingNavigationItem(
                 title = stringResource(R.string.default_playback_speed),
                 valueText = state.playerSpeedLabel,
                 iconRes = R.drawable.baseline_speed2_24,
                 onClick = { activeDialog = PlayerChoiceDialog.Speed },
             )
-        }
-
-        item {
             SettingNavigationItem(
                 title = stringResource(R.string.long_press_speed_multiplier),
                 valueText = state.longPressSpeedTimesLabel,
                 iconRes = R.drawable.baseline_touch_24,
                 onClick = { activeDialog = PlayerChoiceDialog.LongPressSpeed },
             )
-        }
-
-        item {
             SettingSliderItem(
                 title = stringResource(R.string.slide_sensitivity),
                 summary = state.slideSensitivitySummary,

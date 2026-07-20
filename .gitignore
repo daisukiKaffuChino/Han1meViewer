@@ -20,6 +20,7 @@ local.properties
 /.gradle/
 /build/
 /captures/
+.agent
 
 # Gradle 缓存
 .gradle/
@@ -69,3 +70,6 @@ Thumbs.db
 
 # 忽略 debug 测试构建
 /app/build/outputs/apk/debug/
+
+# 忽略参考代码
+参考/

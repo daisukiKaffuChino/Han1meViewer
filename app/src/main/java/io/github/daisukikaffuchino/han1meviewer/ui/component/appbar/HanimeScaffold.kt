@@ -1,11 +1,13 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.component.appbar
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -15,7 +17,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
+import io.github.daisukikaffuchino.han1meviewer.ui.component.verticalBounce
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,8 +47,18 @@ fun HanimeScaffold(
         },
         floatingActionButton = floatingActionButton,
         snackbarHost = snackbarHost,
-        content = content,
-    )
+        containerColor = HanimeDefaults.Colors.Background,
+    ) { innerPadding ->
+        Surface(
+            modifier = Modifier
+                .verticalBounce()
+                .fillMaxSize(),
+            color = HanimeDefaults.Colors.Background,
+            shape = HanimeDefaults.screenContainerShape,
+        ) {
+            content(innerPadding)
+        }
+    }
 }
 
 @Preview

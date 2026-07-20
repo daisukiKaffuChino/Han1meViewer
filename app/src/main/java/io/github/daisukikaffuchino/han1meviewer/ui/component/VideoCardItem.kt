@@ -2,6 +2,9 @@ package io.github.daisukikaffuchino.han1meviewer.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,11 +17,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -37,6 +45,8 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoItemType
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeVideosItem
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.RetryableImage
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.shapeByInteraction
 import io.github.daisukikaffuchino.han1meviewer.util.DisplayTextLocalizer
 
 
@@ -51,6 +61,7 @@ import io.github.daisukikaffuchino.han1meviewer.util.DisplayTextLocalizer
  * @param onClickVideosItem 点击回调，参数为视频 ID
  * @param onLongClickVideosItem 长按回调，参数为视频 ID 和视频标题
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun VideoCardItem(
     modifier: Modifier = Modifier,
@@ -64,18 +75,34 @@ fun VideoCardItem(
     val textFontSize = dimensionResource(id = R.dimen.video_view_and_time_and_duration).value.sp
     val iconSize = dimensionResource(id = R.dimen.view_view_and_time_icon_size)
     val imageAspectRatio = if (isHorizontalCard) 16f / 9f else 3f / 4f
+    val interactionSource = remember { MutableInteractionSource() }
+    val indication = LocalIndication.current
+    val pressed by interactionSource.collectIsPressedAsState()
+    val cardShape = shapeByInteraction(
+        shapes = HanimeDefaults.largerShapes(),
+        pressed = pressed,
+        animationSpec = HanimeDefaults.shapesDefaultAnimationSpec,
+    )
+    val tonalElevation by animateDpAsState(
+        targetValue = if (pressed) 0.dp else 1.dp,
+        animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
+        label = "video-card-elevation",
+    )
     Surface(
         modifier = modifier
             .fillMaxWidth()
+            .animateContentSize()
             .combinedClickable(
                 enabled = !isPlaying,
+                interactionSource = interactionSource,
+                indication = indication,
                 onClick = { onClickVideosItem(videoItem.videoCode) },
                 onLongClick = { onLongClickVideosItem(videoItem.videoCode, videoItem.title) },
             ),
-        shape = RoundedCornerShape(12.dp),
-        tonalElevation = 2.dp,
-        shadowElevation = 1.dp,
-        color = MaterialTheme.colorScheme.surface,
+        shape = cardShape,
+        tonalElevation = tonalElevation,
+        shadowElevation = tonalElevation,
+        color = HanimeDefaults.Colors.Container,
         contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
         Column(

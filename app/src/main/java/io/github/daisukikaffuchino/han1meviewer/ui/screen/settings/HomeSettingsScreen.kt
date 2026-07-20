@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -474,11 +473,10 @@ private fun SettingsGroupTitle(title: String) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
         )
-        HorizontalDivider()
     }
 }
 

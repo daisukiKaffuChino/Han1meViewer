@@ -9,10 +9,13 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -22,6 +25,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
+import io.github.daisukikaffuchino.han1meviewer.ui.component.verticalBounce
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.utils.findActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,7 +56,13 @@ fun SettingsScaffold(
                 TopAppBar(
                     title = { Text(stringResource(currentDestination.titleRes)) },
                     navigationIcon = {
-                        FilledIconButton(onClick = ::navigateBack) {
+                        FilledIconButton(
+                            onClick = ::navigateBack,
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            ),
+                            shapes = IconButtonDefaults.shapes(),
+                        ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = stringResource(R.string.back),
@@ -60,17 +71,28 @@ fun SettingsScaffold(
                     },
                     actions = { actions() },
                     modifier = Modifier.statusBarsPadding(),
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = HanimeDefaults.Colors.Background,
+                    ),
                 )
             }
         },
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = HanimeDefaults.Colors.Background,
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .verticalBounce(),
         ) {
-            content()
+            Surface(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = HanimeDefaults.screenHorizontalPadding),
+                color = HanimeDefaults.Colors.Background,
+                shape = HanimeDefaults.screenContainerShape,
+                content = content,
+            )
         }
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingNavigationItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingSliderItem
+import io.github.daisukikaffuchino.han1meviewer.ui.component.segmentedGroup
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 
@@ -35,25 +36,19 @@ fun DownloadSettingsScreen(
         contentPadding = PaddingValues(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        item {
+        segmentedGroup {
             SettingNavigationItem(
                 title = stringResource(R.string.download_path),
                 summary = state.downloadPathSummary,
                 iconRes = R.drawable.baseline_path_24,
                 onClick = onOpenDownloadPath,
             )
-        }
-
-        item {
             SettingNavigationItem(
                 title = stringResource(R.string.pref_export_downloads_title),
                 summary = stringResource(R.string.pref_export_downloads_summary),
                 iconRes = R.drawable.baseline_export_24,
                 onClick = onImportDownloadedFiles,
             )
-        }
-
-        item {
             SettingSliderItem(
                 title = stringResource(R.string.download_count_limit),
                 summary = state.downloadCountLimitSummary,
@@ -62,9 +57,6 @@ fun DownloadSettingsScreen(
                 iconRes = R.drawable.baseline_count_24,
                 onValueChange = onDownloadCountLimitChange,
             )
-        }
-
-        item {
             SettingSliderItem(
                 title = stringResource(R.string.download_speed_limit),
                 summary = state.downloadSpeedLimitSummary,
