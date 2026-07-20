@@ -36,6 +36,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 
 private enum class HKeyframeDialog {
     EditEntity,
@@ -151,6 +152,7 @@ fun HKeyframesScreen(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
+        enableItemAnimation = false,
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -195,6 +197,7 @@ private fun HKeyframeEntityCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = HanimeDefaults.screenContainerShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ),

@@ -34,6 +34,7 @@ import io.github.daisukikaffuchino.utils.findActivity
 fun SettingsScaffold(
     navController: NavController,
     fallbackDestination: Any,
+    onNavigateBack: (() -> Boolean)? = null,
     actions: @Composable () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
@@ -44,6 +45,7 @@ fun SettingsScaffold(
         ?: SettingsDestinationSpec.Home
 
     fun navigateBack() {
+        if (onNavigateBack?.invoke() == true) return
         if (!navController.popBackStack()) {
             navController.navigate(fallbackDestination)
         }

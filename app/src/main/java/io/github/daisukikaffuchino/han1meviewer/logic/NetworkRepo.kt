@@ -74,7 +74,7 @@ object NetworkRepo {
         action = Parser::hanimePreview
     )
 
-    //获取订阅或者可以说是关注列表及它们的更�
+    //获取订阅或者可以说是关注列表及它们的更新
     fun getMySubscriptions(page: Int) = websiteIOFlow(
         request = { HanimeNetwork.hanimeService.getMySubscriptions(page) },
         action = Parser::getMySubscriptions
@@ -421,12 +421,12 @@ object NetworkRepo {
         csrfToken: String?,
         commentPlace: CommentPlace,
         foreignId: String?,
-        isPositive: Boolean, // 你選擇的是讚還是踩，1是讚�是踩
+        isPositive: Boolean, // 你選擇的是讚還是踩，1是讚，0是踩
         likeUserId: String?,
         commentLikesCount: Int,
         commentLikesSum: Int,
-        likeCommentStatus: Boolean, // 你之前有沒有點過讚，1��
-        unlikeCommentStatus: Boolean, // 你之前有沒有點過踩，1��
+        likeCommentStatus: Boolean, // 你之前有沒有點過讚，1是0否
+        unlikeCommentStatus: Boolean, // 你之前有沒有點過踩，1是0否
         commentPosition: Int, comment: VideoComments.VideoComment,
     ) = websiteIOFlow(
         request = {
@@ -476,7 +476,7 @@ object NetworkRepo {
         csrfToken: String?,
         userId: String,
         artistId: String,
-        // 这里表示目标状�
+        // 这里表示目标状态
         status: Boolean,
     ) = websiteIOFlow(
         request = {
@@ -502,11 +502,11 @@ object NetworkRepo {
         val req = HanimeNetwork.hanimeService.login(token, email, password)
         if (req.isSuccessful) {
             // 再次获取登录页面，如果失败则返回 cookie
-            // 因为登录成功再次访问 login �404，这是判断是否登录成功的方法
+            // 因为登录成功再次访问 login 返回 404，这是判断是否登录成功的方法
             val loginPageAgain = HanimeNetwork.hanimeService.getLoginPage()
             if (loginPageAgain.code() == 404) {
-                // Cookie 會返�XSRF-TOKEN �hanime1_session，我們只需要後�
-                // 错误的，还需�remember_web 字段！但我没找到�
+                // Cookie 會返回 XSRF-TOKEN 和 hanime1_session，我們只需要後者
+                // 错误的，还需要 remember_web 字段！但我没找到！
                 Log.d("login_headers", req.headers().toMultimap().toString())
                 emit(WebsiteState.Success(req.headers().values("Set-Cookie")))
             } else {
@@ -523,7 +523,7 @@ object NetworkRepo {
     /**
      * 用于单网页的情况
      *
-     * @param permittedSuccessCode 用于处理特殊情况，比如[NetworkRepo.modifyPlaylist]需�02成功
+     * @param permittedSuccessCode 用于处理特殊情况，比如[NetworkRepo.modifyPlaylist]需要302成功
      */
     private fun <T> websiteIOFlow(
         request: suspend () -> Response<ResponseBody>,
@@ -543,7 +543,7 @@ object NetworkRepo {
     }.flowOn(Dispatchers.IO)
 
     /**
-     * 用于有page分页的情�
+     * 用于有page分页的情况
      */
     private fun <T> pageIOFlow(
         request: suspend () -> Response<ResponseBody>,

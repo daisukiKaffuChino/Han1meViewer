@@ -3,13 +3,20 @@ package io.github.daisukikaffuchino.han1meviewer.ui.navigation.main
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DownloadSettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.AboutSettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.AppearanceSettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DataSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframeSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframesRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HomeSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.MpvPlayerSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.NetworkSettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.NetworkDownloadSettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.OpenSourceLicensesRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.PlayerSettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.PrivacySettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SharedHKeyframesRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.VideoPlaybackSettingsRoute
 import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
 
@@ -124,6 +131,41 @@ enum class MainDestinationSpec(
     SettingsHome(
         drawerDestination = MainDrawerDestination.Settings,
         routeClass = HomeSettingsRoute::class,
+        drawerEnabled = false,
+    ),
+    SettingsVideoPlayback(
+        drawerDestination = MainDrawerDestination.Settings,
+        routeClass = VideoPlaybackSettingsRoute::class,
+        drawerEnabled = false,
+    ),
+    SettingsNetworkDownload(
+        drawerDestination = MainDrawerDestination.Settings,
+        routeClass = NetworkDownloadSettingsRoute::class,
+        drawerEnabled = false,
+    ),
+    SettingsAppearance(
+        drawerDestination = MainDrawerDestination.Settings,
+        routeClass = AppearanceSettingsRoute::class,
+        drawerEnabled = false,
+    ),
+    SettingsPrivacy(
+        drawerDestination = MainDrawerDestination.Settings,
+        routeClass = PrivacySettingsRoute::class,
+        drawerEnabled = false,
+    ),
+    SettingsData(
+        drawerDestination = MainDrawerDestination.Settings,
+        routeClass = DataSettingsRoute::class,
+        drawerEnabled = false,
+    ),
+    SettingsAbout(
+        drawerDestination = MainDrawerDestination.Settings,
+        routeClass = AboutSettingsRoute::class,
+        drawerEnabled = false,
+    ),
+    SettingsOpenSourceLicenses(
+        drawerDestination = MainDrawerDestination.Settings,
+        routeClass = OpenSourceLicensesRoute::class,
         drawerEnabled = false,
     ),
     SettingsPlayer(

@@ -29,6 +29,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
+import io.github.daisukikaffuchino.han1meviewer.HCacheManager
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.CloudFlareBlockedException
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
@@ -74,6 +75,7 @@ fun MainActivityContent(
             drawerState.currentValue == DrawerValue.Open || drawerState.targetValue == DrawerValue.Open
 
         val homeState by viewModel.homePageFlow.collectAsStateWithLifecycle()
+        val showStorageSwitchNotice by HCacheManager.storageSwitchNotice.collectAsStateWithLifecycle()
         val isLoggedIn by Preferences.loginStateFlow.collectAsStateWithLifecycle()
         val headerAvatarUrl = if (isLoggedIn) {
             (homeState as? PageState.Success)?.info?.page?.avatarUrl
@@ -214,5 +216,14 @@ fun MainActivityContent(
             dismissText = stringResource(R.string.no),
             onConfirm = onConfirmLogout,
             onDismiss = onDismissLogout,
+        )
+        ConfirmDialog(
+            visible = showStorageSwitchNotice,
+            title = stringResource(R.string.save_failed_title),
+            message = stringResource(R.string.save_failed_message),
+            confirmText = stringResource(R.string.understood),
+            dismissText = null,
+            onConfirm = HCacheManager::dismissStorageSwitchNotice,
+            onDismiss = HCacheManager::dismissStorageSwitchNotice,
         )
 }

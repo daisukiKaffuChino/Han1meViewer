@@ -3,6 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.theme
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.SharedPreferences
 import android.os.Build
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.AnimationSpec
@@ -13,9 +14,13 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
@@ -24,32 +29,44 @@ import androidx.core.view.WindowCompat
 import com.kyant.m3color.dynamiccolor.ColorSpec
 import com.kyant.m3color.dynamiccolor.DynamicScheme
 import com.kyant.m3color.hct.Hct
+import com.kyant.m3color.scheme.SchemeContent
+import com.kyant.m3color.scheme.SchemeExpressive
+import com.kyant.m3color.scheme.SchemeFidelity
+import com.kyant.m3color.scheme.SchemeFruitSalad
+import com.kyant.m3color.scheme.SchemeNeutral
+import com.kyant.m3color.scheme.SchemeRainbow
 import com.kyant.m3color.scheme.SchemeTonalSpot
+import com.kyant.m3color.scheme.SchemeVibrant
 import io.github.daisukikaffuchino.han1meviewer.Preferences
-
-private val MomoPink = Color(0xFFF596AA)
-private val MomoGreen = Color(0xFF8BC34A)
-private val MomoYellow = Color(0xFFFFF59D)
-private val MomoBlue = Color(0xFF03A9F4)
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SettingsPreferenceKeys
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HanimeTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean? = null,
     content: @Composable () -> Unit,
 ) {
-    val preset = ThemeColorPreset.fromKey(Preferences.themeColor)
+    val systemDarkTheme = isSystemInDarkTheme()
+    val themePreferences = rememberThemePreferences()
+    val resolvedDarkTheme = darkTheme ?: when (themePreferences.darkMode) {
+        "always_on" -> true
+        "always_off" -> false
+        else -> systemDarkTheme
+    }
+    val accentColor = ThemeAccentColor.fromId(themePreferences.accentColorId)
+    val paletteStyle = AppPaletteStyle.fromId(themePreferences.paletteStyleId)
     val keyColor = if (
-        preset == ThemeColorPreset.SYSTEM && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        themePreferences.useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
     ) {
         colorResource(android.R.color.system_accent1_500)
     } else {
-        preset.expressiveSeedColor()
+        accentColor.colors.first()
     }
     val colorScheme = expressiveColorScheme(
         keyColor = keyColor,
-        isDark = darkTheme,
-        contrastLevel = if (preset == ThemeColorPreset.HIGH_CONTRAST) 1.0 else 0.0,
+        isDark = resolvedDarkTheme,
+        style = paletteStyle,
+        contrastLevel = 0.0,
     )
     val view = LocalView.current
 
@@ -57,8 +74,8 @@ fun HanimeTheme(
         SideEffect {
             view.context.findActivity()?.window?.let { window ->
                 WindowCompat.getInsetsController(window, view).apply {
-                    isAppearanceLightStatusBars = !darkTheme
-                    isAppearanceLightNavigationBars = !darkTheme
+                    isAppearanceLightStatusBars = !resolvedDarkTheme
+                    isAppearanceLightNavigationBars = !resolvedDarkTheme
                 }
             }
         }
@@ -71,33 +88,66 @@ fun HanimeTheme(
     )
 }
 
-private fun ThemeColorPreset.expressiveSeedColor(): Color = when (this) {
-    ThemeColorPreset.SYSTEM, ThemeColorPreset.DEFAULT, ThemeColorPreset.PINK,
-    ThemeColorPreset.HIGH_CONTRAST -> MomoPink
-    ThemeColorPreset.BLUE -> MomoBlue
-    ThemeColorPreset.LIGHT_GREEN -> MomoGreen
-    ThemeColorPreset.PURPLE -> Color(0xFF9C6ADE)
-    ThemeColorPreset.ORANGE -> Color(0xFFE76F3C)
-    ThemeColorPreset.TEAL -> Color(0xFF009688)
-    ThemeColorPreset.YELLOW -> MomoYellow
+@Composable
+private fun rememberThemePreferences(): ThemePreferences {
+    val preferences = Preferences.preferenceSp
+    var snapshot by remember(preferences) { mutableStateOf(preferences.readThemePreferences()) }
+    DisposableEffect(preferences) {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+            if (key != null && key in THEME_PREFERENCE_KEYS) {
+                snapshot = sharedPreferences.readThemePreferences()
+            }
+        }
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+        onDispose { preferences.unregisterOnSharedPreferenceChangeListener(listener) }
+    }
+    return snapshot
 }
+
+private fun SharedPreferences.readThemePreferences() = ThemePreferences(
+    darkMode = getString(SettingsPreferenceKeys.USE_DARK_MODE, "always_off") ?: "always_off",
+    useDynamicColor = getBoolean(SettingsPreferenceKeys.USE_DYNAMIC_COLOR, false),
+    accentColorId = getInt(SettingsPreferenceKeys.THEME_ACCENT_COLOR, 0),
+    paletteStyleId = getInt(SettingsPreferenceKeys.APP_PALETTE_STYLE, 1),
+)
+
+private data class ThemePreferences(
+    val darkMode: String,
+    val useDynamicColor: Boolean,
+    val accentColorId: Int,
+    val paletteStyleId: Int,
+)
+
+private val THEME_PREFERENCE_KEYS = setOf(
+    SettingsPreferenceKeys.USE_DARK_MODE,
+    SettingsPreferenceKeys.USE_DYNAMIC_COLOR,
+    SettingsPreferenceKeys.THEME_ACCENT_COLOR,
+    SettingsPreferenceKeys.APP_PALETTE_STYLE,
+)
 
 @Composable
 @Stable
-private fun expressiveColorScheme(
+internal fun expressiveColorScheme(
     keyColor: Color,
     isDark: Boolean,
-    contrastLevel: Double,
+    style: AppPaletteStyle = AppPaletteStyle.TonalSpot,
+    contrastLevel: Double = 0.0,
     animationSpec: AnimationSpec<Color> = spring(),
 ): ColorScheme {
-    val scheme = remember(keyColor, isDark, contrastLevel) {
-        SchemeTonalSpot(
-            Hct.fromInt(keyColor.toArgb()),
-            isDark,
-            contrastLevel,
-            ColorSpec.SpecVersion.SPEC_2021,
-            DynamicScheme.Platform.PHONE,
-        )
+    val scheme = remember(keyColor, isDark, style, contrastLevel) {
+        val hct = Hct.fromInt(keyColor.toArgb())
+        val specVersion = ColorSpec.SpecVersion.SPEC_2021
+        val platform = DynamicScheme.Platform.PHONE
+        when (style) {
+            AppPaletteStyle.TonalSpot -> SchemeTonalSpot(hct, isDark, contrastLevel, specVersion, platform)
+            AppPaletteStyle.Neutral -> SchemeNeutral(hct, isDark, contrastLevel, specVersion, platform)
+            AppPaletteStyle.Vibrant -> SchemeVibrant(hct, isDark, contrastLevel, specVersion, platform)
+            AppPaletteStyle.Expressive -> SchemeExpressive(hct, isDark, contrastLevel, specVersion, platform)
+            AppPaletteStyle.Rainbow -> SchemeRainbow(hct, isDark, contrastLevel, specVersion, platform)
+            AppPaletteStyle.FruitSalad -> SchemeFruitSalad(hct, isDark, contrastLevel, specVersion, platform)
+            AppPaletteStyle.Fidelity -> SchemeFidelity(hct, isDark, contrastLevel, specVersion, platform)
+            AppPaletteStyle.Content -> SchemeContent(hct, isDark, contrastLevel, specVersion, platform)
+        }
     }
 
     return ColorScheme(

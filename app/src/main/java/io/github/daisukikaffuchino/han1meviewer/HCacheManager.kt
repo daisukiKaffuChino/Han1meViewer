@@ -1,18 +1,17 @@
 package io.github.daisukikaffuchino.han1meviewer
 
 import android.content.Context
-import android.os.Looper
 import android.util.Log
 import androidx.annotation.WorkerThread
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.edit
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SettingsPreferenceKeys
 import io.github.daisukikaffuchino.han1meviewer.util.SafFileManager
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
@@ -32,6 +31,8 @@ import java.io.OutputStream
 object HCacheManager {
 
     private const val CACHE_INFO_FILE = "info.json"
+    private val _storageSwitchNotice = MutableStateFlow(false)
+    val storageSwitchNotice = _storageSwitchNotice.asStateFlow()
 
     /**
      * 保存 HanimeVideo 信息，用于下载后直接在 APP 内观看
@@ -70,7 +71,7 @@ object HCacheManager {
             val shouldSwitch = isPathRelatedError && !Preferences.isUsePrivateStorage
 
             if (shouldSwitch) {
-                notify(context)
+                notifyStorageSwitch()
                 Log.w("FileSave", "⛔ 写入失败 (${e.message})，切换为私有路径")
                 Preferences.preferenceSp.edit {
                     putBoolean(SettingsPreferenceKeys.USE_PRIVATE_STORAGE, true)
@@ -85,21 +86,12 @@ object HCacheManager {
             throw e
         }
     }
-    fun notify(context: Context) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            showSwitchDialog(context)
-        } else {
-            MainScope().launch {
-                showSwitchDialog(context)
-            }
-        }
+    private fun notifyStorageSwitch() {
+        _storageSwitchNotice.value = true
     }
-    private fun showSwitchDialog(context: Context) {
-        AlertDialog.Builder(context)
-            .setTitle(context.getString(R.string.save_failed_title))
-            .setMessage(context.getString(R.string.save_failed_message))
-            .setPositiveButton(context.getString(R.string.understood), null)
-            .show()
+
+    fun dismissStorageSwitchNotice() {
+        _storageSwitchNotice.value = false
     }
 
     // 缓解写入冲突 (仅 File 模式下用)

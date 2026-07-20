@@ -27,7 +27,7 @@ fun ConfirmDialog(
     title: String,
     message: String,
     confirmText: String,
-    dismissText: String,
+    dismissText: String?,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
     cancelable: Boolean = true,
@@ -44,8 +44,10 @@ fun ConfirmDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(dismissText)
+            dismissText?.let {
+                TextButton(onClick = onDismiss) {
+                    Text(it)
+                }
             }
         },
     )

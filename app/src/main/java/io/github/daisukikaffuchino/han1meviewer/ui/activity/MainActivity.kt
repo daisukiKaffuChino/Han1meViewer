@@ -65,7 +65,7 @@ class MainActivity : BaseActivity() {
     private var hasAuthenticated = false
     private val pipActionReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.i("pipmode", "�?onReceive called with action: ${intent?.action}")
+            Log.i("pipmode", "✅ onReceive called with action: ${intent?.action}")
             when (intent?.action) {
                 ACTION_TOGGLE_PLAY -> {
                     Log.i("pipmode", "🎬 ACTION_TOGGLE_PLAY triggered")
@@ -156,7 +156,7 @@ class MainActivity : BaseActivity() {
                 }
 
                 override fun onAuthenticationFailed() {
-                    // 指纹被识别但不匹配（单次�?
+                    // 指纹被识别但不匹配（单次）
                 }
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
@@ -191,11 +191,11 @@ class MainActivity : BaseActivity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(pipActionReceiver, filter, RECEIVER_NOT_EXPORTED)
-            Log.i("pipmode", "�?registerReceiver with RECEIVER_NOT_EXPORTED")
+            Log.i("pipmode", "✅ registerReceiver with RECEIVER_NOT_EXPORTED")
         } else {
             @SuppressLint("UnspecifiedRegisterReceiverFlag")
             registerReceiver(pipActionReceiver, filter)
-            Log.i("pipmode", "�?registerReceiver (legacy)")
+            Log.i("pipmode", "✅ registerReceiver (legacy)")
         }
     }
 

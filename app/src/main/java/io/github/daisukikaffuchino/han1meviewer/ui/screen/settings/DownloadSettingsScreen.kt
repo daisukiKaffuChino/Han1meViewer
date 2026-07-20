@@ -33,6 +33,7 @@ fun DownloadSettingsScreen(
     onDownloadSpeedLimitChange: (Int) -> Unit,
 ) {
     LazyColumn(
+        enableItemAnimation = false,
         contentPadding = PaddingValues(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {

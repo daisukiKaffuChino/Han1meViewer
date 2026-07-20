@@ -11,7 +11,6 @@ import androidx.core.app.NotificationManagerCompat
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HProxySelector
 import io.github.daisukikaffuchino.han1meviewer.util.AnimeShaders
 import io.github.daisukikaffuchino.han1meviewer.util.AppLanguageManager
-import io.github.daisukikaffuchino.han1meviewer.util.ThemeUtils
 import io.github.daisukikaffuchino.utils.ActivityManager
 import `is`.xyz.mpv.MPVLib
 import java.net.ProxySelector
@@ -36,7 +35,6 @@ class HanimeApplication : Application(), Application.ActivityLifecycleCallbacks 
         AppLanguageManager.applyStoredLanguage(this)
         //applicationContext = this
         registerActivityLifecycleCallbacks(this)
-        ThemeUtils.applyDarkModeFromPreferences(this)
         ProxySelector.setDefault(HProxySelector())
         HProxySelector.rebuildNetwork()
         initNotificationChannel()

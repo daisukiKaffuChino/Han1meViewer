@@ -7,6 +7,9 @@ object SettingsPreferenceKeys {
     const val FAKE_LAUNCHER_ICON = "pref_fake_launcher_icon"
     const val USE_DARK_MODE = "use_dark_mode"
     const val USE_DYNAMIC_COLOR = "use_dynamic_color"
+    const val THEME_ACCENT_COLOR = "theme_accent_color"
+    const val APP_PALETTE_STYLE = "app_palette_style"
+    @Deprecated("Replaced by THEME_ACCENT_COLOR")
     const val THEME_COLOR = "theme_color"
     const val ALLOW_RESUME_PLAYBACK = "allow_resume_playback"
     const val SEARCH_ARTIST_IGNORE_VIDEO_TYPE = "search_artist_ignore_video_type"

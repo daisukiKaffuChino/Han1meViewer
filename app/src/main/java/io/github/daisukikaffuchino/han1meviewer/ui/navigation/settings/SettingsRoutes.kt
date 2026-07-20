@@ -10,6 +10,27 @@ import kotlin.reflect.KClass
 object HomeSettingsRoute
 
 @Serializable
+object VideoPlaybackSettingsRoute
+
+@Serializable
+object NetworkDownloadSettingsRoute
+
+@Serializable
+object AppearanceSettingsRoute
+
+@Serializable
+object PrivacySettingsRoute
+
+@Serializable
+object DataSettingsRoute
+
+@Serializable
+object AboutSettingsRoute
+
+@Serializable
+object OpenSourceLicensesRoute
+
+@Serializable
 object PlayerSettingsRoute
 
 @Serializable
@@ -42,6 +63,48 @@ enum class SettingsDestinationSpec(
         titleRes = R.string.settings,
         screenClassName = "HomeSettingsScreen",
         routeClass = HomeSettingsRoute::class,
+    ),
+    VideoPlayback(
+        routeKey = "video_playback",
+        titleRes = R.string.settings_video_playback,
+        screenClassName = "HomeSettingsScreen.VideoPlayback",
+        routeClass = VideoPlaybackSettingsRoute::class,
+    ),
+    NetworkDownload(
+        routeKey = "network_download",
+        titleRes = R.string.settings_network_download,
+        screenClassName = "HomeSettingsScreen.NetworkDownload",
+        routeClass = NetworkDownloadSettingsRoute::class,
+    ),
+    Appearance(
+        routeKey = "appearance",
+        titleRes = R.string.settings_appearance,
+        screenClassName = "HomeSettingsScreen.Appearance",
+        routeClass = AppearanceSettingsRoute::class,
+    ),
+    Privacy(
+        routeKey = "privacy",
+        titleRes = R.string.privacy,
+        screenClassName = "HomeSettingsScreen.Privacy",
+        routeClass = PrivacySettingsRoute::class,
+    ),
+    Data(
+        routeKey = "data",
+        titleRes = R.string.settings_data,
+        screenClassName = "HomeSettingsScreen.Data",
+        routeClass = DataSettingsRoute::class,
+    ),
+    About(
+        routeKey = "about",
+        titleRes = R.string.about,
+        screenClassName = "HomeSettingsScreen.About",
+        routeClass = AboutSettingsRoute::class,
+    ),
+    OpenSourceLicenses(
+        routeKey = "open_source_licenses",
+        titleRes = R.string.open_source_license,
+        screenClassName = "OpenSourceLicensesScreen",
+        routeClass = OpenSourceLicensesRoute::class,
     ),
     Player(
         routeKey = "player",
@@ -89,6 +152,13 @@ enum class SettingsDestinationSpec(
     val route: Any
         get() = when (this) {
             Home -> HomeSettingsRoute
+            VideoPlayback -> VideoPlaybackSettingsRoute
+            NetworkDownload -> NetworkDownloadSettingsRoute
+            Appearance -> AppearanceSettingsRoute
+            Privacy -> PrivacySettingsRoute
+            Data -> DataSettingsRoute
+            About -> AboutSettingsRoute
+            OpenSourceLicenses -> OpenSourceLicensesRoute
             Player -> PlayerSettingsRoute
             Network -> NetworkSettingsRoute
             Download -> DownloadSettingsRoute

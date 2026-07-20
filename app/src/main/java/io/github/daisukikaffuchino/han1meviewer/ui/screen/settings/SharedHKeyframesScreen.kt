@@ -23,6 +23,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeType
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 
 @Composable
 fun SharedHKeyframesScreen(
@@ -35,6 +36,7 @@ fun SharedHKeyframesScreen(
     }
 
     LazyColumn(
+        enableItemAnimation = false,
         contentPadding = PaddingValues(12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -64,6 +66,7 @@ private fun SharedEntityCard(
     onOpenVideo: () -> Unit,
 ) {
     Card(
+        shape = HanimeDefaults.screenContainerShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         Column(

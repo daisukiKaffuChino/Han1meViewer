@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package io.github.daisukikaffuchino.han1meviewer.ui.component
 
 import android.view.HapticFeedbackConstants
@@ -11,11 +13,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.ButtonShapes
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -27,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
@@ -45,6 +48,7 @@ private fun SettingSurface(
     modifier: Modifier,
     enabled: Boolean = true,
     selected: Boolean = false,
+    shapes: ButtonShapes = HanimeDefaults.shapes(),
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
@@ -59,7 +63,7 @@ private fun SettingSurface(
         animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
         label = "setting-container-color",
     ).value
-    val shape = animatedShape(HanimeDefaults.shapes(), interactionSource)
+    val shape = animatedShape(shapes, interactionSource)
 
     if (onClick == null) {
         Surface(
@@ -70,15 +74,19 @@ private fun SettingSurface(
         )
     } else {
         Surface(
-            onClick = {
-                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                onClick()
-            },
-            modifier = modifier.fillMaxWidth(),
-            enabled = enabled,
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .immediateClickable(
+                    enabled = enabled,
+                    interactionSource = interactionSource,
+                    onClick = {
+                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                        onClick()
+                    },
+                ),
             shape = shape,
             color = containerColor,
-            interactionSource = interactionSource,
             content = content,
         )
     }
@@ -185,15 +193,15 @@ fun SettingNavigationItem(
     valueText: String? = null,
     iconRes: Int? = null,
     enabled: Boolean = true,
+    shapes: ButtonShapes = HanimeDefaults.shapes(),
 ) {
-    SettingSurface(modifier, enabled, onClick = onClick) {
+    SettingSurface(modifier, enabled, shapes = shapes, onClick = onClick) {
         SettingRow(title, summary, iconRes, enabled) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(start = 12.dp),
-            ) {
-                if (!valueText.isNullOrBlank()) {
+            if (!valueText.isNullOrBlank()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(start = 12.dp),
+                ) {
                     Text(
                         text = valueText,
                         style = MaterialTheme.typography.bodyMedium,
@@ -202,7 +210,6 @@ fun SettingNavigationItem(
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null)
             }
         }
     }

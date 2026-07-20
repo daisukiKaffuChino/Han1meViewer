@@ -37,6 +37,8 @@ import io.github.daisukikaffuchino.han1meviewer.logic.network.HProxySelector
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ChoiceDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingNavigationItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingSwitchItem
+import io.github.daisukikaffuchino.han1meviewer.ui.component.segmentedGroup
+import io.github.daisukikaffuchino.han1meviewer.ui.component.segmentedSection
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 
@@ -199,28 +201,23 @@ fun NetworkSettingsScreen(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
+        enableItemAnimation = false,
         contentPadding = PaddingValues(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        item {
+        segmentedGroup {
             SettingNavigationItem(
                 title = stringResource(R.string.domain_name),
                 valueText = state.domainDisplay,
                 iconRes = R.drawable.baseline_domain_24,
                 onClick = { showDomainDialog = true },
             )
-        }
-
-        item {
             SettingNavigationItem(
                 title = stringResource(R.string.custom_mirror_site),
                 summary = if (useCustomMirrorSite && customMirrorSite.isNotBlank()) customMirrorSite else stringResource(R.string.custom_mirror_site_hint),
                 iconRes = R.drawable.baseline_domain_24,
                 onClick = { showCustomMirrorSiteDialog = true },
             )
-        }
-
-        item {
             SettingNavigationItem(
                 title = stringResource(R.string.proxy),
                 summary = state.proxySummary,
@@ -229,54 +226,45 @@ fun NetworkSettingsScreen(
             )
         }
 
-        item { NetworkGroupTitle(stringResource(R.string.builtin_dns)) }
-
-        item {
-            SettingSwitchItem(
-                title = stringResource(R.string.use_built_in_hosts),
-                summary = stringResource(R.string.use_built_in_hosts_summary),
-                checked = state.useBuiltInHosts,
-                iconRes = R.drawable.baseline_hosts_24,
-                onCheckedChange = onUseBuiltInHostsChange,
-            )
+        segmentedSection(titleRes = R.string.builtin_dns) {
+            segmentedGroup {
+                SettingSwitchItem(
+                    title = stringResource(R.string.use_built_in_hosts),
+                    summary = stringResource(R.string.use_built_in_hosts_summary),
+                    checked = state.useBuiltInHosts,
+                    iconRes = R.drawable.baseline_hosts_24,
+                    onCheckedChange = onUseBuiltInHostsChange,
+                )
+                SettingNavigationItem(
+                    title = stringResource(R.string.custom_hosts),
+                    summary = if (customHostsData.isBlank()) stringResource(R.string.custom_hosts_empty_summary) else customHostsData.take(60),
+                    iconRes = R.drawable.baseline_edit_24,
+                    onClick = { showCustomHostsDialog = true },
+                )
+                SettingNavigationItem(
+                    title = stringResource(R.string.use_doh),
+                    summary = state.dohSummary,
+                    iconRes = R.drawable.baseline_doh_24,
+                    onClick = { showDohDialog = true },
+                )
+            }
         }
 
-        item {
-            SettingNavigationItem(
-                title = stringResource(R.string.custom_hosts),
-                summary = if (customHostsData.isBlank()) stringResource(R.string.custom_hosts_empty_summary) else customHostsData.take(60),
-                iconRes = R.drawable.baseline_edit_24,
-                onClick = { showCustomHostsDialog = true },
-            )
-        }
-
-        item {
-            SettingNavigationItem(
-                title = stringResource(R.string.use_doh),
-                summary = state.dohSummary,
-                iconRes = R.drawable.baseline_doh_24,
-                onClick = { showDohDialog = true },
-            )
-        }
-
-        item { NetworkGroupTitle(stringResource(R.string.debug)) }
-
-        item {
-            SettingNavigationItem(
-                title = stringResource(R.string.view_node_latency),
-                summary = state.delaySummary,
-                iconRes = R.drawable.baseline_delay_24,
-                onClick = onOpenDelayTest,
-            )
-        }
-
-        item {
-            SettingNavigationItem(
-                title = stringResource(R.string.test_doh),
-                summary = stringResource(R.string.test_doh_summary),
-                iconRes = R.drawable.baseline_doh_24,
-                onClick = onOpenDohTest,
-            )
+        segmentedSection(titleRes = R.string.debug) {
+            segmentedGroup {
+                SettingNavigationItem(
+                    title = stringResource(R.string.view_node_latency),
+                    summary = state.delaySummary,
+                    iconRes = R.drawable.baseline_delay_24,
+                    onClick = onOpenDelayTest,
+                )
+                SettingNavigationItem(
+                    title = stringResource(R.string.test_doh),
+                    summary = stringResource(R.string.test_doh_summary),
+                    iconRes = R.drawable.baseline_doh_24,
+                    onClick = onOpenDohTest,
+                )
+            }
         }
     }
 }
@@ -400,6 +388,7 @@ private fun DelayTestDialog(
                 )
                 LazyColumn(
                     modifier = Modifier.heightIn(max = 320.dp),
+                    enableItemAnimation = false,
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items(results, key = { it.ip }) { item ->
@@ -450,6 +439,7 @@ private fun DohTestDialog(
                 )
                 LazyColumn(
                     modifier = Modifier.heightIn(max = 320.dp),
+                    enableItemAnimation = false,
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     items(results, key = { it.host }) { item ->
@@ -755,18 +745,6 @@ private fun CustomMirrorPathModeOption(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-    }
-}
-
-@Composable
-private fun NetworkGroupTitle(title: String) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-        )
     }
 }
 

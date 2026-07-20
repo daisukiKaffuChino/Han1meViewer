@@ -94,6 +94,7 @@ fun PlayerSettingsScreen(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
+        enableItemAnimation = false,
         contentPadding = PaddingValues(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {

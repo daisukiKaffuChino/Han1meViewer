@@ -480,7 +480,6 @@
     <string name="sort_most_likes">最多按讚</string>
     <string name="sort_most_dislikes">最多倒讚</string>
     <string name="sort_comment">評論排序</string>
-    <string name="theme">主題與外觀</string>
     <string name="dark_theme">深色主題</string>
     <string name="dynamic_color_title">動態配色</string>
     <string name="dynamic_color_summary">開啟後跟隨系統主題色，僅支援 Android 12 以上版本</string>
@@ -627,7 +626,6 @@
     <string name="remove">移除</string>
     <string name="add">新增</string>
     <string name="paused">已暫停</string>
-    <string name="theme_color">主題色彩</string>
     <string name="played">已觀看</string>
     <string name="local">本機</string>
     <string name="current_bucket">目前套用級距</string>
@@ -677,4 +675,31 @@
     <string name="ignore_this_update">忽略此版本</string>
     <string name="checking_for_updates">正在檢查更新...</string>
     <string name="update_link_open_failed">無法開啟更新連結</string>
+    <string name="settings_video_playback">影片和播放</string>
+    <string name="settings_video_playback_summary">影片顯示、播放行為與播放器選項</string>
+    <string name="settings_network_download">網路和下載</string>
+    <string name="settings_network_download_summary">連線、網域、下載儲存與限制</string>
+    <string name="settings_appearance">主題與外觀</string>
+    <string name="settings_appearance_summary">顏色、深色模式、版面與語言</string>
+    <string name="settings_privacy_summary">應用程式鎖、桌面偽裝與內容顯示</string>
+    <string name="settings_data">資料</string>
+    <string name="settings_data_summary">備份、還原與快取資料</string>
+    <string name="settings_about_summary">版本、開源授權與專案連結</string>
+    <string name="accent_color">強調色</string>
+    <string name="display">顯示</string>
+    <string name="preset_color_scheme">預設配色</string>
+    <string name="preset_color_scheme_summary">選擇一套強調色</string>
+    <string name="dark_mode_picker_summary">選擇應用程式如何跟隨淺色與深色外觀</string>
+    <string name="palette_style">調色盤樣式</string>
+    <string name="palette_style_summary">選擇 Material 顏色如何根據強調色產生</string>
+    <string name="temporarily_unavailable">暫時無法使用</string>
+    <string name="information">資訊</string>
+    <string name="version">版本號</string>
+    <string name="developer">開發者</string>
+    <string name="user_terms">使用者條款</string>
+    <string name="user_terms_summary">查看首次啟動時同意的使用須知</string>
+    <string name="project_repository">專案儲存庫</string>
+    <string name="open_source_license_summary">本應用程式使用的依賴庫及其授權條款</string>
+    <string name="search_licenses">搜尋授權條款</string>
+    <string name="no_licenses_found">沒有符合的授權條款</string>
 </resources>

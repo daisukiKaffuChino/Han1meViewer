@@ -1,5 +1,11 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.navigation.main
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,6 +23,9 @@ import io.github.daisukikaffuchino.han1meviewer.ui.navigation.navigateSafely
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.account.AvatarCropScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DownloadSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DownloadSettingsRouteScreen
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.AboutSettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.AppearanceSettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DataSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframeSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframeSettingsRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframesRoute
@@ -28,11 +37,18 @@ import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.MpvPlayer
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.MpvPlayerSettingsRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.NetworkSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.NetworkSettingsRouteScreen
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.NetworkDownloadSettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.OpenSourceLicensesRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.PlayerSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.PlayerSettingsRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SettingsScaffold
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.PrivacySettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SharedHKeyframesRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.SharedHKeyframesRouteScreen
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.VideoPlaybackSettingsRoute
+import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.HomeSettingsPage
+import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.OpenSourceLicensesScreen
+import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.SettingsMainScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.account.AccountScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.materialSharedAxisXIn
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.materialSharedAxisXOut
@@ -151,8 +167,21 @@ fun MainNavHost(
                 navController = navController,
                 fallbackDestination = HomeRoute,
             ) {
+                SettingsMainScreen(
+                    onOpenVideoPlayback = { navController.navigateSafely(VideoPlaybackSettingsRoute) },
+                    onOpenNetworkDownload = { navController.navigateSafely(NetworkDownloadSettingsRoute) },
+                    onOpenAppearance = { navController.navigateSafely(AppearanceSettingsRoute) },
+                    onOpenPrivacy = { navController.navigateSafely(PrivacySettingsRoute) },
+                    onOpenData = { navController.navigateSafely(DataSettingsRoute) },
+                    onOpenAbout = { navController.navigateSafely(AboutSettingsRoute) },
+                )
+            }
+        }
+        composable<VideoPlaybackSettingsRoute> {
+            SettingsScaffold(navController, HomeSettingsRoute) {
                 HomeSettingsRouteScreen(
                     activity = activity,
+                    page = HomeSettingsPage.VideoPlayback,
                     onNavigateToPlayerSettings = { navController.navigateSafely(PlayerSettingsRoute) },
                     onNavigateToHKeyframeSettings = { navController.navigateSafely(HKeyframeSettingsRoute) },
                     onNavigateToDownloadSettings = { navController.navigateSafely(DownloadSettingsRoute) },
@@ -160,10 +189,101 @@ fun MainNavHost(
                 )
             }
         }
+        composable<NetworkDownloadSettingsRoute> {
+            SettingsScaffold(navController, HomeSettingsRoute) {
+                HomeSettingsRouteScreen(
+                    activity = activity,
+                    page = HomeSettingsPage.NetworkDownload,
+                    onNavigateToPlayerSettings = { navController.navigateSafely(PlayerSettingsRoute) },
+                    onNavigateToHKeyframeSettings = { navController.navigateSafely(HKeyframeSettingsRoute) },
+                    onNavigateToDownloadSettings = { navController.navigateSafely(DownloadSettingsRoute) },
+                    onNavigateToNetworkSettings = { navController.navigateSafely(NetworkSettingsRoute) },
+                )
+            }
+        }
+        composable<AppearanceSettingsRoute> {
+            SettingsScaffold(navController, HomeSettingsRoute) {
+                HomeSettingsRouteScreen(
+                    activity = activity,
+                    page = HomeSettingsPage.Appearance,
+                    onNavigateToPlayerSettings = { navController.navigateSafely(PlayerSettingsRoute) },
+                    onNavigateToHKeyframeSettings = { navController.navigateSafely(HKeyframeSettingsRoute) },
+                    onNavigateToDownloadSettings = { navController.navigateSafely(DownloadSettingsRoute) },
+                    onNavigateToNetworkSettings = { navController.navigateSafely(NetworkSettingsRoute) },
+                )
+            }
+        }
+        composable<PrivacySettingsRoute> {
+            SettingsScaffold(navController, HomeSettingsRoute) {
+                HomeSettingsRouteScreen(
+                    activity = activity,
+                    page = HomeSettingsPage.Privacy,
+                    onNavigateToPlayerSettings = { navController.navigateSafely(PlayerSettingsRoute) },
+                    onNavigateToHKeyframeSettings = { navController.navigateSafely(HKeyframeSettingsRoute) },
+                    onNavigateToDownloadSettings = { navController.navigateSafely(DownloadSettingsRoute) },
+                    onNavigateToNetworkSettings = { navController.navigateSafely(NetworkSettingsRoute) },
+                )
+            }
+        }
+        composable<DataSettingsRoute> {
+            SettingsScaffold(navController, HomeSettingsRoute) {
+                HomeSettingsRouteScreen(
+                    activity = activity,
+                    page = HomeSettingsPage.Data,
+                    onNavigateToPlayerSettings = { navController.navigateSafely(PlayerSettingsRoute) },
+                    onNavigateToHKeyframeSettings = { navController.navigateSafely(HKeyframeSettingsRoute) },
+                    onNavigateToDownloadSettings = { navController.navigateSafely(DownloadSettingsRoute) },
+                    onNavigateToNetworkSettings = { navController.navigateSafely(NetworkSettingsRoute) },
+                )
+            }
+        }
+        composable<AboutSettingsRoute> {
+            SettingsScaffold(navController, HomeSettingsRoute) {
+                HomeSettingsRouteScreen(
+                    activity = activity,
+                    page = HomeSettingsPage.About,
+                    onNavigateToPlayerSettings = { navController.navigateSafely(PlayerSettingsRoute) },
+                    onNavigateToHKeyframeSettings = { navController.navigateSafely(HKeyframeSettingsRoute) },
+                    onNavigateToDownloadSettings = { navController.navigateSafely(DownloadSettingsRoute) },
+                    onNavigateToNetworkSettings = { navController.navigateSafely(NetworkSettingsRoute) },
+                    onNavigateToOpenSourceLicenses = {
+                        navController.navigateSafely(OpenSourceLicensesRoute)
+                    },
+                )
+            }
+        }
+        composable<OpenSourceLicensesRoute> {
+            var searchMode by remember { mutableStateOf(false) }
+            BackHandler(enabled = searchMode) {
+                searchMode = false
+            }
+            SettingsScaffold(
+                navController = navController,
+                fallbackDestination = AboutSettingsRoute,
+                onNavigateBack = {
+                    if (searchMode) {
+                        searchMode = false
+                        true
+                    } else {
+                        false
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { searchMode = !searchMode }) {
+                        Icon(
+                            imageVector = if (searchMode) Icons.Outlined.Close else Icons.Outlined.Search,
+                            contentDescription = null,
+                        )
+                    }
+                },
+            ) {
+                OpenSourceLicensesScreen(searchMode = searchMode)
+            }
+        }
         composable<PlayerSettingsRoute> {
             SettingsScaffold(
                 navController = navController,
-                fallbackDestination = HomeSettingsRoute,
+                fallbackDestination = VideoPlaybackSettingsRoute,
             ) {
                 PlayerSettingsRouteScreen(
                     onNavigateToMpvSettings = { navController.navigateSafely(MpvPlayerSettingsRoute) },
@@ -173,7 +293,7 @@ fun MainNavHost(
         composable<NetworkSettingsRoute> {
             SettingsScaffold(
                 navController = navController,
-                fallbackDestination = HomeSettingsRoute,
+                fallbackDestination = NetworkDownloadSettingsRoute,
             ) {
                 NetworkSettingsRouteScreen()
             }
@@ -181,7 +301,7 @@ fun MainNavHost(
         composable<DownloadSettingsRoute> {
             SettingsScaffold(
                 navController = navController,
-                fallbackDestination = HomeSettingsRoute,
+                fallbackDestination = NetworkDownloadSettingsRoute,
             ) {
                 DownloadSettingsRouteScreen()
             }
@@ -223,7 +343,7 @@ fun MainNavHost(
         composable<HKeyframeSettingsRoute> {
             SettingsScaffold(
                 navController = navController,
-                fallbackDestination = HomeSettingsRoute,
+                fallbackDestination = VideoPlaybackSettingsRoute,
             ) {
                 HKeyframeSettingsRouteScreen(
                     onNavigateToHKeyframes = { navController.navigateSafely(HKeyframesRoute) },

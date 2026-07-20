@@ -52,14 +52,12 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.AppLanguage
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.HomeSettingsScreen
-import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.dialog.LicenseDialog
+import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.HomeSettingsPage
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.model.HomeSettingsUiState
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.defaultHomeCategoryPreferenceItems
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.hiddenHomeCategoryKeys
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.homeCategoryOrder
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.saveHomeCategoryPreferences
-import io.github.daisukikaffuchino.han1meviewer.ui.theme.ThemeColorPreset
-import io.github.daisukikaffuchino.han1meviewer.util.ThemeUtils
 import io.github.daisukikaffuchino.han1meviewer.util.AppLanguageManager
 import io.github.daisukikaffuchino.han1meviewer.util.showToast
 import io.github.daisukikaffuchino.utils.ActivityManager
@@ -75,6 +73,9 @@ private const val HOME_SHOW_PLAYED_INDICATOR = "show_played_indicator"
 private const val HOME_ALLOW_PIP_MODE = "allow_pip_mode"
 private const val HOME_FAKE_LAUNCHER_ICON = "pref_fake_launcher_icon"
 private const val HOME_USE_DARK_MODE = "use_dark_mode"
+private const val HOME_USE_DYNAMIC_COLOR = "use_dynamic_color"
+private const val HOME_THEME_ACCENT_COLOR = "theme_accent_color"
+private const val HOME_APP_PALETTE_STYLE = "app_palette_style"
 private const val HOME_ALLOW_RESUME_PLAYBACK = "allow_resume_playback"
 private const val HOME_SEARCH_ARTIST_IGNORE_VIDEO_TYPE = "search_artist_ignore_video_type"
 private const val HOME_DISABLE_MOBILE_DATA_WARNING = "disable_mobile_data_warning"
@@ -83,7 +84,6 @@ private const val HOME_DISABLE_PREDICTIVE_BACK = "disable_predictive_back"
 private const val HOME_TABLET_MODE = "tablet_mode"
 private const val HOME_DISABLE_COMMENTS = "disable_comments"
 private const val HOME_USE_LOCK_SCREEN = "use_lock_screen"
-private const val HOME_THEME_COLOR = "theme_color"
 private const val HOME_SEARCH_GRID_COLUMNS_COMPACT = "search_grid_columns_compact"
 private const val HOME_SEARCH_GRID_COLUMNS_MEDIUM = "search_grid_columns_medium"
 private const val HOME_SEARCH_GRID_COLUMNS_EXPANDED = "search_grid_columns_expanded"
@@ -97,10 +97,12 @@ private const val HOME_HORIZONTAL_CARD_COUNT_EXPANDED = "horizontal_card_count_e
 @Composable
 fun HomeSettingsRouteScreen(
     activity: MainActivity,
+    page: HomeSettingsPage,
     onNavigateToPlayerSettings: () -> Unit,
     onNavigateToHKeyframeSettings: () -> Unit,
     onNavigateToDownloadSettings: () -> Unit,
     onNavigateToNetworkSettings: () -> Unit,
+    onNavigateToOpenSourceLicenses: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -108,7 +110,6 @@ fun HomeSettingsRouteScreen(
     var refreshKey by remember { mutableIntStateOf(0) }
     var cacheKey by remember { mutableIntStateOf(0) }
     var showClearCacheConfirm by remember { mutableStateOf(false) }
-    var showLicenseScreen by remember { mutableStateOf(false) }
     var showRestartConfirmDialog by remember { mutableStateOf(false) }
     var showLauncherPicker by remember { mutableStateOf(false) }
     var showApplyDeepLinksDialog by remember { mutableStateOf(false) }
@@ -176,6 +177,7 @@ fun HomeSettingsRouteScreen(
     }
 
     HomeSettingsScreen(
+        page = page,
         state = uiState,
         onVideoLanguageChange = { value ->
             if (value != Preferences.videoLanguage) {
@@ -191,9 +193,20 @@ fun HomeSettingsRouteScreen(
         onDarkModeChange = { value ->
             if (value != Preferences.useDarkMode) {
                 saveString(HOME_USE_DARK_MODE, value)
-                ThemeUtils.applyDarkModeFromPreferences(context)
-                activity.recreate()
+                refreshKey++
             }
+        },
+        onUseDynamicColorChange = { enabled ->
+            saveBoolean(HOME_USE_DYNAMIC_COLOR, enabled)
+            refreshKey++
+        },
+        onThemeAccentColorChange = { id ->
+            saveInt(HOME_THEME_ACCENT_COLOR, id)
+            refreshKey++
+        },
+        onAppPaletteStyleChange = { id ->
+            saveInt(HOME_APP_PALETTE_STYLE, id)
+            refreshKey++
         },
         onAllowPipModeChange = { enabled ->
             if (enabled && !isPipPermissionGranted(context)) {
@@ -252,11 +265,6 @@ fun HomeSettingsRouteScreen(
             saveString(HOME_HORIZONTAL_CARD_COUNT_EXPANDED, config.expandedCount.toString())
             refreshKey++
         },
-        onThemeColorChange = { key ->
-            saveString(HOME_THEME_COLOR, key)
-            refreshKey++
-            activity.recreate()
-        },
         onHomeCategoryPreferencesChange = { order, hiddenKeys ->
             saveHomeCategoryPreferences(order, hiddenKeys)
             refreshKey++
@@ -296,8 +304,7 @@ fun HomeSettingsRouteScreen(
             }
         },
         onOpenFakeLauncherIcon = { showLauncherPicker = true },
-        onOpenOpenSourceLicense = { showLicenseScreen = true },
-        onOpenAbout = {},
+        onOpenOpenSourceLicense = onNavigateToOpenSourceLicenses,
         onClearCache = {
             val cacheDir = context.cacheDir
             val folderSize = cacheDir?.folderSize ?: 0L
@@ -365,12 +372,6 @@ fun HomeSettingsRouteScreen(
         },
         onDismiss = { showClearCacheConfirm = false },
     )
-
-    if (showLicenseScreen) {
-        LicenseDialog(
-            onDismiss = { showLicenseScreen = false }
-        )
-    }
 
     if (showApplyDeepLinksDialog) {
         AlertDialog(
@@ -493,12 +494,6 @@ private fun buildHomeSettingsUiState(
         "zhs" -> context.getString(R.string.simplified_chinese)
         else -> Preferences.videoLanguage
     }
-    val darkModeLabel = when (Preferences.useDarkMode) {
-        "follow_system" -> context.getString(R.string.follow_system)
-        "always_off" -> context.getString(R.string.always_off)
-        "always_on" -> context.getString(R.string.always_on)
-        else -> Preferences.useDarkMode
-    }
     val appLanguage = AppLanguageManager.current(context)
     val appLanguageLabel = when (appLanguage) {
         AppLanguage.SYSTEM -> context.getString(R.string.follow_system)
@@ -513,7 +508,6 @@ private fun buildHomeSettingsUiState(
         videoLanguageLabel = videoLanguageLabel,
         defaultVideoQuality = Preferences.videoQuality,
         darkMode = Preferences.useDarkMode,
-        darkModeLabel = darkModeLabel,
         appLanguage = appLanguage.preferenceValue,
         appLanguageLabel = appLanguageLabel,
         allowPipMode = Preferences.preferenceSp.getBoolean(HOME_ALLOW_PIP_MODE, false),
@@ -534,8 +528,8 @@ private fun buildHomeSettingsUiState(
             "v${BuildConfig.VERSION_NAME}"
         ),
         dynamicColorEnabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S,
-        themeColorKey = Preferences.themeColor ?: ThemeColorPreset.DEFAULT.key,
-        themeColorName = context.getString(ThemeColorPreset.fromKey(Preferences.themeColor).displayNameRes),
+        themeAccentColorId = Preferences.preferenceSp.getInt(HOME_THEME_ACCENT_COLOR, 0),
+        appPaletteStyleId = Preferences.preferenceSp.getInt(HOME_APP_PALETTE_STYLE, 1),
         searchGridColumnsSummary = listOf(
             searchGridColumnsConfig.compactColumns,
             searchGridColumnsConfig.mediumColumns,
