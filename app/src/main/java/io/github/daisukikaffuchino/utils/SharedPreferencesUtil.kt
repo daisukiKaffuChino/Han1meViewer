@@ -64,6 +64,7 @@ private fun <T> serialize(obj: T): String {
     return serialized
 }
 
+@Suppress("UNCHECKED_CAST")
 private fun <T> deSerialization(value: String?): T {
     val decoded = URLDecoder.decode(value, "UTF-8")
     val byteArrayInputStream = ByteArrayInputStream(decoded.toByteArray(charset("ISO-8859-1")))

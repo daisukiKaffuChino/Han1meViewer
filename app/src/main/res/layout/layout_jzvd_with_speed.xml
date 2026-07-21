@@ -131,7 +131,7 @@
             android:layout_height="match_parent"
             android:paddingStart="12dp"
             android:scaleType="centerInside"
-            android:src="@drawable/jz_click_back_selector" />
+            android:src="@drawable/arrow_back_ios_new_24px" />
 
         <ImageView
             android:id="@+id/go_home"
@@ -139,7 +139,7 @@
             android:layout_height="match_parent"
             android:layout_marginStart="12dp"
             android:scaleType="centerInside"
-            android:src="@drawable/outline_home_24"
+            android:src="@drawable/ic_baseline_home_24"
             android:tint="@color/white"/>
 
         <TextView

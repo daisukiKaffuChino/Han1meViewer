@@ -1,5 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -93,6 +94,7 @@ private const val HOME_HORIZONTAL_CARD_COUNT_COMPACT = "horizontal_card_count_co
 private const val HOME_HORIZONTAL_CARD_COUNT_MEDIUM = "horizontal_card_count_medium"
 private const val HOME_HORIZONTAL_CARD_COUNT_EXPANDED = "horizontal_card_count_expanded"
 
+@SuppressLint("ResourceType")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeSettingsRouteScreen(
@@ -276,11 +278,6 @@ fun HomeSettingsRouteScreen(
                     refreshKey++
                     return@HomeSettingsScreen
                 }
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-                    context.showToast(R.string.not_compact_lock_screen)
-                    refreshKey++
-                    return@HomeSettingsScreen
-                }
             }
             saveBoolean(HOME_USE_LOCK_SCREEN, value)
             refreshKey++
@@ -385,7 +382,7 @@ fun HomeSettingsRouteScreen(
                     Text(stringResource(R.string.apply_deep_links_summary))
                     Text(stringResource(R.string.apply_deep_links_tips))
                     Image(
-                        painter = painterResource(R.drawable.apply_deep_links),
+                        painter = painterResource(R.raw.apply_deep_links),
                         contentDescription = null,
                         modifier = Modifier.fillMaxWidth(),
                     )

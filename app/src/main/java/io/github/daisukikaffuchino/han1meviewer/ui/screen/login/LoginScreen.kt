@@ -54,7 +54,7 @@ fun LoginScreen(
                 text = { Text(stringResource(R.string.scan_for_cookies)) },
                 icon = {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_scan_24),
+                        painter = painterResource(R.drawable.baseline_export_24),
                         contentDescription = null,
                         modifier = Modifier.size(24.dp),
                     )

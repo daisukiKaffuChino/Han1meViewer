@@ -60,7 +60,7 @@ fun HKeyframeSettingsScreen(
         ) {
             SettingNavigationItem(
                 title = stringResource(R.string.h_keyframe_manage),
-                iconRes = R.drawable.baseline_manage_24,
+                iconRes = R.drawable.baseline_format_list_bulleted_24,
                 onClick = onOpenHKeyframeManage,
             )
         }

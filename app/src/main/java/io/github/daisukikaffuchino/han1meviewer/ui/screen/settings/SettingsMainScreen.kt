@@ -45,7 +45,7 @@ fun SettingsMainScreen(
             SettingNavigationItem(
                 title = stringResource(R.string.settings_network_download),
                 summary = stringResource(R.string.settings_network_download_summary),
-                iconRes = R.drawable.baseline_data_usage_24,
+                iconRes = R.drawable.ic_captive_portal,
                 shapes = HanimeDefaults.largerShapes(),
                 onClick = onOpenNetworkDownload,
             )
@@ -63,7 +63,7 @@ fun SettingsMainScreen(
             SettingNavigationItem(
                 title = stringResource(R.string.privacy),
                 summary = stringResource(R.string.settings_privacy_summary),
-                iconRes = R.drawable.ic_setting_applock,
+                iconRes = R.drawable.admin_panel_settings_24px,
                 shapes = HanimeDefaults.largerShapes(),
                 onClick = onOpenPrivacy,
             )
@@ -72,7 +72,7 @@ fun SettingsMainScreen(
             SettingNavigationItem(
                 title = stringResource(R.string.settings_data),
                 summary = stringResource(R.string.settings_data_summary),
-                iconRes = R.drawable.baseline_backup_24,
+                iconRes = R.drawable.data_table_24px,
                 shapes = HanimeDefaults.largerShapes(),
                 onClick = onOpenData,
             )

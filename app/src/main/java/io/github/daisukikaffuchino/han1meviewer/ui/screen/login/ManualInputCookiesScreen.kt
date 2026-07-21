@@ -1,5 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.login
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -89,6 +90,7 @@ private fun ScanCookieContent(
     }
 }
 
+@SuppressLint("ResourceType")
 @Composable
 private fun CookieGuideDialog(onDismiss: () -> Unit) {
     AlertDialog(
@@ -106,7 +108,7 @@ private fun CookieGuideDialog(onDismiss: () -> Unit) {
                 Text(stringResource(R.string.import_cookies_intro))
                 Spacer(modifier = Modifier.height(8.dp))
                 Image(
-                    painter = painterResource(R.drawable.cookies_intro1),
+                    painter = painterResource(R.raw.cookies_intro),
                     contentDescription = stringResource(R.string.cookies_import_desc),
                     modifier = Modifier
                         .fillMaxWidth()

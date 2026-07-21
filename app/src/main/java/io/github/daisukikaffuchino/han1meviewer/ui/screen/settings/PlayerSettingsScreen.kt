@@ -102,7 +102,7 @@ fun PlayerSettingsScreen(
             SettingNavigationItem(
                 title = stringResource(R.string.switch_player_kernel),
                 valueText = state.kernelDisplay,
-                iconRes = R.drawable.baseline_atomic_24,
+                iconRes = R.drawable.ic_settings_slow_motion,
                 onClick = { activeDialog = PlayerChoiceDialog.Kernel },
             )
             SettingNavigationItem(

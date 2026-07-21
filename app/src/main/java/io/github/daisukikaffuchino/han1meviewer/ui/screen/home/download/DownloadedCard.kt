@@ -80,7 +80,7 @@ fun DownloadGroupHeader(
                 Icon(
                     painter = painterResource(
                         if (header.isExpanded) R.drawable.ic_baseline_fold_24
-                        else R.drawable.ic_baseline_list_24
+                        else R.drawable.baseline_format_list_bulleted_24
                     ),
                     contentDescription = null,
                 )

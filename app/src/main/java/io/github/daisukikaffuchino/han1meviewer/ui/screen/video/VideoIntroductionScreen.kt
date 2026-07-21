@@ -1000,7 +1000,7 @@ private fun ActionSection(
             onClick = onToggleFavorite,
         )
         VideoActionButton(
-            iconRes = R.drawable.baseline_format_list_bulleted_24,
+            iconRes = R.drawable.ic_format_list_bulleted_add,
             label = stringResource(R.string.add_to_playlist),
             onClick = onManageMyList,
         )
@@ -1010,7 +1010,7 @@ private fun ActionSection(
             onClick = onDownload,
         )
         VideoActionButton(
-            iconRes = R.drawable.ic_baseline_share_24,
+            iconRes = R.drawable.baseline_share_24,
             label = stringResource(R.string.share),
             onClick = onShare,
             onLongClick = onCopyShareText,

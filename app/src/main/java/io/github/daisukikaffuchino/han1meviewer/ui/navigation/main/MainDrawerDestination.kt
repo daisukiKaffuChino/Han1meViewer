@@ -18,17 +18,17 @@ enum class MainDrawerDestination(
         titleRes = R.string.settings,
     ),
     WatchLater(
-        iconRes = R.drawable.ic_baseline_watch_later_24,
+        iconRes = R.drawable.ic_baseline_access_time_24,
         titleRes = R.string.watch_later,
         requiresLogin = true,
     ),
     FavVideo(
-        iconRes = R.drawable.ic_baseline_favorite_24,
+        iconRes = R.drawable.ic_baseline_favorite_border_24,
         titleRes = R.string.fav_video,
         requiresLogin = true,
     ),
     Playlist(
-        iconRes = R.drawable.ic_baseline_list_24,
+        iconRes = R.drawable.baseline_format_list_bulleted_24,
         titleRes = R.string.play_list,
         requiresLogin = true,
     ),

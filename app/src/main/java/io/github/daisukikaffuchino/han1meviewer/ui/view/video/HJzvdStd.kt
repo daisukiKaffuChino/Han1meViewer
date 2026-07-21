@@ -789,7 +789,7 @@ class HJzvdStd @JvmOverloads constructor(
         }
         composeView.setContent {
             HanimeTheme {
-                content { popup?.dismiss() }
+                content { popup.dismiss() }
             }
         }
     }

@@ -182,9 +182,9 @@ fun VideoRouteHostScreen(
         if (!activity.isInPictureInPictureMode) return
         val isPlaying = (Jzvd.CURRENT_JZVD?.mediaInterface as? ExoMediaKernel)?.isPlaying == true
         val icon = if (isPlaying) {
-            Icon.createWithResource(activity, R.drawable.ic_pip_pause_24)
+            Icon.createWithResource(activity, R.drawable.ic_baseline_pause_24)
         } else {
-            Icon.createWithResource(activity, R.drawable.ic_pip_play_arrow_24)
+            Icon.createWithResource(activity, R.drawable.ic_baseline_play_arrow_24)
         }
         val title = if (isPlaying) "Pause Video" else "Play Video"
         val intent = PendingIntent.getBroadcast(
@@ -234,7 +234,7 @@ fun VideoRouteHostScreen(
                     PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
                 )
                 val icon =
-                    Icon.createWithResource(activity, R.drawable.ic_pip_pause_24)
+                    Icon.createWithResource(activity, R.drawable.ic_baseline_pause_24)
                 val action = RemoteAction(
                     icon,
                     activity.getString(R.string.play_pause),

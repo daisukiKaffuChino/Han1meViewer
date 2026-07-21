@@ -244,7 +244,7 @@ fun NetworkSettingsScreen(
                 SettingNavigationItem(
                     title = stringResource(R.string.use_doh),
                     summary = state.dohSummary,
-                    iconRes = R.drawable.baseline_doh_24,
+                    iconRes = R.drawable.ic_dns,
                     onClick = { showDohDialog = true },
                 )
             }
@@ -261,7 +261,7 @@ fun NetworkSettingsScreen(
                 SettingNavigationItem(
                     title = stringResource(R.string.test_doh),
                     summary = stringResource(R.string.test_doh_summary),
-                    iconRes = R.drawable.baseline_doh_24,
+                    iconRes = R.drawable.ic_router,
                     onClick = onOpenDohTest,
                 )
             }
