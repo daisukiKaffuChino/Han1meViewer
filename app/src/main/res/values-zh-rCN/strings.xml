@@ -620,12 +620,14 @@
     <string name="ignore_this_update">忽略此版本</string>
     <string name="checking_for_updates">正在检查更新…</string>
     <string name="update_link_open_failed">无法打开更新链接</string>
-    <string name="settings_video_playback">影片和播放</string>
-    <string name="settings_video_playback_summary">影片显示、播放行为与播放器选项</string>
+    <string name="settings_video_playback">影片播放偏好</string>
+    <string name="settings_video_playback_summary">影片显示与播放行为偏好</string>
+    <string name="settings_player_summary">播放内核、字幕与播放器高级选项</string>
     <string name="settings_network_download">网络和下载</string>
     <string name="settings_network_download_summary">连接、域名、下载存储与限制</string>
     <string name="settings_appearance">主题与外观</string>
     <string name="settings_appearance_summary">颜色、深色模式、布局与语言</string>
+    <string name="settings_layout_content">布局与内容</string>
     <string name="settings_privacy_summary">应用锁、桌面伪装与内容显示</string>
     <string name="settings_data">数据</string>
     <string name="settings_data_summary">备份、恢复与缓存数据</string>
@@ -645,6 +647,6 @@
     <string name="user_terms_summary">查看首次启动时同意的使用须知</string>
     <string name="project_repository">项目仓库</string>
     <string name="open_source_license_summary">本应用使用的依赖库及其许可证</string>
-    <string name="search_licenses">搜索许可证</string>
-    <string name="no_licenses_found">没有匹配的许可证</string>
+    <string name="no_license_items">没有可显示的项目</string>
+    <string name="no_licenses_found">未搜索到项目</string>
 </resources>

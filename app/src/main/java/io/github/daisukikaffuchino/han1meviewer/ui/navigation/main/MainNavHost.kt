@@ -1,23 +1,33 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.navigation.main
 
+import android.view.HapticFeedbackConstants
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.toRoute
+import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.navigateSafely
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.account.AvatarCropScreen
@@ -169,6 +179,7 @@ fun MainNavHost(
             ) {
                 SettingsMainScreen(
                     onOpenVideoPlayback = { navController.navigateSafely(VideoPlaybackSettingsRoute) },
+                    onOpenPlayerSettings = { navController.navigateSafely(PlayerSettingsRoute) },
                     onOpenNetworkDownload = { navController.navigateSafely(NetworkDownloadSettingsRoute) },
                     onOpenAppearance = { navController.navigateSafely(AppearanceSettingsRoute) },
                     onOpenPrivacy = { navController.navigateSafely(PrivacySettingsRoute) },
@@ -182,10 +193,8 @@ fun MainNavHost(
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.VideoPlayback,
-                    onNavigateToPlayerSettings = { navController.navigateSafely(PlayerSettingsRoute) },
-                    onNavigateToHKeyframeSettings = { navController.navigateSafely(HKeyframeSettingsRoute) },
-                    onNavigateToDownloadSettings = { navController.navigateSafely(DownloadSettingsRoute) },
-                    onNavigateToNetworkSettings = { navController.navigateSafely(NetworkSettingsRoute) },
+                    onNavigateToHKeyframes = { navController.navigateSafely(HKeyframesRoute) },
+                    onNavigateToSharedHKeyframes = { navController.navigateSafely(SharedHKeyframesRoute) },
                 )
             }
         }
@@ -194,10 +203,6 @@ fun MainNavHost(
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.NetworkDownload,
-                    onNavigateToPlayerSettings = { navController.navigateSafely(PlayerSettingsRoute) },
-                    onNavigateToHKeyframeSettings = { navController.navigateSafely(HKeyframeSettingsRoute) },
-                    onNavigateToDownloadSettings = { navController.navigateSafely(DownloadSettingsRoute) },
-                    onNavigateToNetworkSettings = { navController.navigateSafely(NetworkSettingsRoute) },
                 )
             }
         }
@@ -206,10 +211,6 @@ fun MainNavHost(
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.Appearance,
-                    onNavigateToPlayerSettings = { navController.navigateSafely(PlayerSettingsRoute) },
-                    onNavigateToHKeyframeSettings = { navController.navigateSafely(HKeyframeSettingsRoute) },
-                    onNavigateToDownloadSettings = { navController.navigateSafely(DownloadSettingsRoute) },
-                    onNavigateToNetworkSettings = { navController.navigateSafely(NetworkSettingsRoute) },
                 )
             }
         }
@@ -218,10 +219,6 @@ fun MainNavHost(
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.Privacy,
-                    onNavigateToPlayerSettings = { navController.navigateSafely(PlayerSettingsRoute) },
-                    onNavigateToHKeyframeSettings = { navController.navigateSafely(HKeyframeSettingsRoute) },
-                    onNavigateToDownloadSettings = { navController.navigateSafely(DownloadSettingsRoute) },
-                    onNavigateToNetworkSettings = { navController.navigateSafely(NetworkSettingsRoute) },
                 )
             }
         }
@@ -230,10 +227,6 @@ fun MainNavHost(
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.Data,
-                    onNavigateToPlayerSettings = { navController.navigateSafely(PlayerSettingsRoute) },
-                    onNavigateToHKeyframeSettings = { navController.navigateSafely(HKeyframeSettingsRoute) },
-                    onNavigateToDownloadSettings = { navController.navigateSafely(DownloadSettingsRoute) },
-                    onNavigateToNetworkSettings = { navController.navigateSafely(NetworkSettingsRoute) },
                 )
             }
         }
@@ -242,10 +235,6 @@ fun MainNavHost(
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.About,
-                    onNavigateToPlayerSettings = { navController.navigateSafely(PlayerSettingsRoute) },
-                    onNavigateToHKeyframeSettings = { navController.navigateSafely(HKeyframeSettingsRoute) },
-                    onNavigateToDownloadSettings = { navController.navigateSafely(DownloadSettingsRoute) },
-                    onNavigateToNetworkSettings = { navController.navigateSafely(NetworkSettingsRoute) },
                     onNavigateToOpenSourceLicenses = {
                         navController.navigateSafely(OpenSourceLicensesRoute)
                     },
@@ -253,6 +242,7 @@ fun MainNavHost(
             }
         }
         composable<OpenSourceLicensesRoute> {
+            val view = LocalView.current
             var searchMode by remember { mutableStateOf(false) }
             BackHandler(enabled = searchMode) {
                 searchMode = false
@@ -269,21 +259,38 @@ fun MainNavHost(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { searchMode = !searchMode }) {
-                        Icon(
-                            imageVector = if (searchMode) Icons.Outlined.Close else Icons.Outlined.Search,
-                            contentDescription = null,
-                        )
+                    AnimatedVisibility(
+                        visible = !searchMode,
+                        enter = fadeIn(MaterialTheme.motionScheme.fastEffectsSpec()) +
+                            scaleIn(MaterialTheme.motionScheme.fastSpatialSpec()),
+                        exit = fadeOut(MaterialTheme.motionScheme.fastEffectsSpec()) +
+                            scaleOut(MaterialTheme.motionScheme.fastSpatialSpec()),
+                    ) {
+                        IconButton(
+                            shapes = IconButtonDefaults.shapes(),
+                            onClick = {
+                                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                                searchMode = true
+                            },
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Search,
+                                contentDescription = stringResource(R.string.search),
+                            )
+                        }
                     }
                 },
             ) {
-                OpenSourceLicensesScreen(searchMode = searchMode)
+                OpenSourceLicensesScreen(
+                    searchMode = searchMode,
+                    onSearchModeChange = { searchMode = it },
+                )
             }
         }
         composable<PlayerSettingsRoute> {
             SettingsScaffold(
                 navController = navController,
-                fallbackDestination = VideoPlaybackSettingsRoute,
+                fallbackDestination = HomeSettingsRoute,
             ) {
                 PlayerSettingsRouteScreen(
                     onNavigateToMpvSettings = { navController.navigateSafely(MpvPlayerSettingsRoute) },
@@ -318,7 +325,7 @@ fun MainNavHost(
             var showImportDialog by remember { mutableStateOf(false) }
             SettingsScaffold(
                 navController = navController,
-                fallbackDestination = HKeyframeSettingsRoute,
+                fallbackDestination = VideoPlaybackSettingsRoute,
                 actions = {
                     HKeyframesTopBarActions(onImportClick = { showImportDialog = true })
                 },
@@ -333,7 +340,7 @@ fun MainNavHost(
         composable<SharedHKeyframesRoute> {
             SettingsScaffold(
                 navController = navController,
-                fallbackDestination = HKeyframeSettingsRoute,
+                fallbackDestination = VideoPlaybackSettingsRoute,
             ) {
                 SharedHKeyframesRouteScreen(
                     onOpenVideo = onNavigateToVideo,

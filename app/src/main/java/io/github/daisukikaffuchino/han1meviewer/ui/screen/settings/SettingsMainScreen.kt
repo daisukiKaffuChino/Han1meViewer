@@ -19,6 +19,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 @Composable
 fun SettingsMainScreen(
     onOpenVideoPlayback: () -> Unit,
+    onOpenPlayerSettings: () -> Unit,
     onOpenNetworkDownload: () -> Unit,
     onOpenAppearance: () -> Unit,
     onOpenPrivacy: () -> Unit,
@@ -36,9 +37,18 @@ fun SettingsMainScreen(
             SettingNavigationItem(
                 title = stringResource(R.string.settings_video_playback),
                 summary = stringResource(R.string.settings_video_playback_summary),
-                iconRes = R.drawable.ic_baseline_play_circle_outline_24,
+                iconRes = R.drawable.video_settings_24px,
                 shapes = HanimeDefaults.largerShapes(),
                 onClick = onOpenVideoPlayback,
+            )
+        }
+        item {
+            SettingNavigationItem(
+                title = stringResource(R.string.player_settings),
+                summary = stringResource(R.string.settings_player_summary),
+                iconRes = R.drawable.ic_baseline_play_circle_outline_24,
+                shapes = HanimeDefaults.largerShapes(),
+                onClick = onOpenPlayerSettings,
             )
         }
         item {
@@ -93,6 +103,6 @@ fun SettingsMainScreen(
 @Composable
 private fun SettingsMainScreenPreview() {
     ComponentPreview {
-        SettingsMainScreen({}, {}, {}, {}, {}, {})
+        SettingsMainScreen({}, {}, {}, {}, {}, {}, {})
     }
 }

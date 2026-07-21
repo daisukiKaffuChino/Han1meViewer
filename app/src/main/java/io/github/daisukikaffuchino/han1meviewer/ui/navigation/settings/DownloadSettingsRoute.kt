@@ -48,7 +48,7 @@ private const val DOWNLOAD_USE_PRIVATE_STORAGE = "use_private_storage"
 
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
-fun DownloadSettingsRouteScreen() {
+fun DownloadSettingsRouteScreen(embedded: Boolean = false) {
     val context = LocalContext.current
     var refreshKey by remember { mutableIntStateOf(0) }
     var showDownloadPathDialog by remember { mutableStateOf(false) }
@@ -97,6 +97,7 @@ fun DownloadSettingsRouteScreen() {
             Preferences.preferenceSp.edit { putInt(DOWNLOAD_SPEED_LIMIT, value) }
             refreshKey++
         },
+        embedded = embedded,
     )
 
     if (!Preferences.isUsePrivateStorage) {

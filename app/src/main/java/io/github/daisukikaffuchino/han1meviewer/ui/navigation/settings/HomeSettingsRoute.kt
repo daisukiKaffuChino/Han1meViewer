@@ -100,10 +100,8 @@ private const val HOME_HORIZONTAL_CARD_COUNT_EXPANDED = "horizontal_card_count_e
 fun HomeSettingsRouteScreen(
     activity: MainActivity,
     page: HomeSettingsPage,
-    onNavigateToPlayerSettings: () -> Unit,
-    onNavigateToHKeyframeSettings: () -> Unit,
-    onNavigateToDownloadSettings: () -> Unit,
-    onNavigateToNetworkSettings: () -> Unit,
+    onNavigateToHKeyframes: () -> Unit = {},
+    onNavigateToSharedHKeyframes: () -> Unit = {},
     onNavigateToOpenSourceLicenses: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -282,10 +280,15 @@ fun HomeSettingsRouteScreen(
             saveBoolean(HOME_USE_LOCK_SCREEN, value)
             refreshKey++
         },
-        onOpenPlayerSettings = onNavigateToPlayerSettings,
-        onOpenHKeyframeSettings = onNavigateToHKeyframeSettings,
-        onOpenDownloadSettings = onNavigateToDownloadSettings,
-        onOpenNetworkSettings = onNavigateToNetworkSettings,
+        hKeyframeSettingsContent = {
+            HKeyframeSettingsRouteScreen(
+                onNavigateToHKeyframes = onNavigateToHKeyframes,
+                onNavigateToSharedHKeyframes = onNavigateToSharedHKeyframes,
+                embedded = true,
+            )
+        },
+        networkSettingsContent = { NetworkSettingsRouteScreen(embedded = true) },
+        downloadSettingsContent = { DownloadSettingsRouteScreen(embedded = true) },
         onOpenAppLanguageSettings = { value ->
             val language = AppLanguage.fromPreference(value)
             if (AppLanguageManager.current(context) != language) {

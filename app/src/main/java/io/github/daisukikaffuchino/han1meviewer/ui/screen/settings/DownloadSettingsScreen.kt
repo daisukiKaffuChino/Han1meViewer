@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.settings
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
@@ -9,7 +9,8 @@ import androidx.compose.ui.unit.dp
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingNavigationItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingSliderItem
-import io.github.daisukikaffuchino.han1meviewer.ui.component.segmentedGroup
+import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingsSectionTitle
+import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingsSegmentedGroup
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 
@@ -31,41 +32,53 @@ fun DownloadSettingsScreen(
     onImportDownloadedFiles: () -> Unit,
     onDownloadCountLimitChange: (Int) -> Unit,
     onDownloadSpeedLimitChange: (Int) -> Unit,
+    embedded: Boolean = false,
 ) {
-    LazyColumn(
-        enableItemAnimation = false,
-        contentPadding = PaddingValues(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        segmentedGroup {
-            SettingNavigationItem(
-                title = stringResource(R.string.download_path),
-                summary = state.downloadPathSummary,
-                iconRes = R.drawable.baseline_path_24,
-                onClick = onOpenDownloadPath,
-            )
-            SettingNavigationItem(
-                title = stringResource(R.string.pref_export_downloads_title),
-                summary = stringResource(R.string.pref_export_downloads_summary),
-                iconRes = R.drawable.baseline_export_24,
-                onClick = onImportDownloadedFiles,
-            )
-            SettingSliderItem(
-                title = stringResource(R.string.download_count_limit),
-                summary = state.downloadCountLimitSummary,
-                value = state.downloadCountLimit,
-                valueRange = 0..maxDownloadCountLimit,
-                iconRes = R.drawable.baseline_count_24,
-                onValueChange = onDownloadCountLimitChange,
-            )
-            SettingSliderItem(
-                title = stringResource(R.string.download_speed_limit),
-                summary = state.downloadSpeedLimitSummary,
-                value = state.downloadSpeedLimitIndex,
-                valueRange = 0..maxDownloadSpeedLimitIndex,
-                iconRes = R.drawable.baseline_speed2_24,
-                onValueChange = onDownloadSpeedLimitChange,
-            )
+    val content: @Composable () -> Unit = {
+        Column {
+            if (embedded) {
+                SettingsSectionTitle(titleRes = R.string.download)
+            }
+            SettingsSegmentedGroup {
+                SettingNavigationItem(
+                    title = stringResource(R.string.download_path),
+                    summary = state.downloadPathSummary,
+                    iconRes = R.drawable.baseline_path_24,
+                    onClick = onOpenDownloadPath,
+                )
+                SettingNavigationItem(
+                    title = stringResource(R.string.pref_export_downloads_title),
+                    summary = stringResource(R.string.pref_export_downloads_summary),
+                    iconRes = R.drawable.baseline_export_24,
+                    onClick = onImportDownloadedFiles,
+                )
+                SettingSliderItem(
+                    title = stringResource(R.string.download_count_limit),
+                    summary = state.downloadCountLimitSummary,
+                    value = state.downloadCountLimit,
+                    valueRange = 0..maxDownloadCountLimit,
+                    iconRes = R.drawable.baseline_count_24,
+                    onValueChange = onDownloadCountLimitChange,
+                )
+                SettingSliderItem(
+                    title = stringResource(R.string.download_speed_limit),
+                    summary = state.downloadSpeedLimitSummary,
+                    value = state.downloadSpeedLimitIndex,
+                    valueRange = 0..maxDownloadSpeedLimitIndex,
+                    iconRes = R.drawable.baseline_speed2_24,
+                    onValueChange = onDownloadSpeedLimitChange,
+                )
+            }
+        }
+    }
+    if (embedded) {
+        content()
+    } else {
+        LazyColumn(
+            enableItemAnimation = false,
+            contentPadding = PaddingValues(vertical = 8.dp),
+        ) {
+            item { content() }
         }
     }
 }

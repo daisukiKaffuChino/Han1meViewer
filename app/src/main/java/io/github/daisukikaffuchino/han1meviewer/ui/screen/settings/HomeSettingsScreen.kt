@@ -77,10 +77,9 @@ fun HomeSettingsScreen(
     onHorizontalCardCountConfigChange: (HorizontalCardCountConfig) -> Unit,
     onUseLockScreenChange: (Boolean) -> Unit,
     onHomeCategoryPreferencesChange: (List<String>, Set<String>) -> Unit,
-    onOpenPlayerSettings: () -> Unit,
-    onOpenHKeyframeSettings: () -> Unit,
-    onOpenDownloadSettings: () -> Unit,
-    onOpenNetworkSettings: () -> Unit,
+    hKeyframeSettingsContent: @Composable () -> Unit,
+    networkSettingsContent: @Composable () -> Unit,
+    downloadSettingsContent: @Composable () -> Unit,
     onOpenAppLanguageSettings: (String) -> Unit,
     onOpenApplyDeepLinks: () -> Unit,
     onOpenFakeLauncherIcon: () -> Unit,
@@ -220,70 +219,19 @@ fun HomeSettingsScreen(
                             iconRes = R.drawable.ic_baseline_history_24,
                             onCheckedChange = onShowPlayedIndicatorChange,
                         )
-                        SettingNavigationItem(
-                            title = stringResource(R.string.horizontal_card_count_title),
-                            summary = stringResource(R.string.horizontal_card_count_summary),
-                            valueText = state.horizontalCardCountSummary,
-                            iconRes = R.drawable.baseline_row_24,
-                            onClick = { showHorizontalCardCountDialog = true },
-                        )
-                        SettingSwitchItem(
-                            title = stringResource(R.string.search_artist_ignore_video_type),
-                            summary = stringResource(R.string.search_artist_ignore_video_type_summary),
-                            checked = state.searchArtistIgnoreVideoType,
-                            iconRes = R.drawable.baseline_prohibit_24,
-                            onCheckedChange = onSearchArtistIgnoreVideoTypeChange,
-                        )
-                        SettingSwitchItem(
-                            title = stringResource(R.string.disable_predictive_back_title),
-                            summary = stringResource(R.string.temporarily_unavailable),
-                            checked = state.disablePredictiveBack,
-                            iconRes = R.drawable.ic_baseline_arrow_back_24,
-                            onCheckedChange = onDisablePredictiveBackChange,
-                            enabled = false,
-                        )
-                        SettingSwitchItem(
-                            title = stringResource(R.string.tablet_mode),
-                            summary = stringResource(R.string.tablet_mode_summary),
-                            checked = state.tabletMode,
-                            iconRes = R.drawable.ic_baseline_tablet_24,
-                            onCheckedChange = onTabletModeChange,
-                        )
-                        SettingsAnimatedVisibility(visible = state.tabletMode) {
-                            SettingNavigationItem(
-                                title = stringResource(R.string.search_grid_columns_title),
-                                summary = stringResource(R.string.search_grid_columns_summary),
-                                valueText = state.searchGridColumnsSummary,
-                                iconRes = R.drawable.baseline_grid_24,
-                                onClick = { showSearchGridColumnsDialog = true },
-                            )
-                        }
                     }
                 }
                 item {
-                    SettingsSection(stringResource(R.string.advanced)) {
-                        SettingNavigationItem(
-                            title = stringResource(R.string.player_settings),
-                            iconRes = R.drawable.ic_baseline_play_circle_outline_24,
-                            onClick = onOpenPlayerSettings,
-                        )
-                        SettingNavigationItem(
-                            title = stringResource(R.string.h_keyframe_settings),
-                            iconRes = R.drawable.baseline_h_24,
-                            onClick = onOpenHKeyframeSettings,
-                        )
-                    }
+                    hKeyframeSettingsContent()
                 }
             }
 
             HomeSettingsPage.NetworkDownload -> {
                 item {
-                    SettingsSection(stringResource(R.string.network)) {
-                        SettingNavigationItem(
-                            title = stringResource(R.string.network_settings),
-                            iconRes = R.drawable.ic_baseline_language_24,
-                            onClick = onOpenNetworkSettings,
-                        )
+                    networkSettingsContent()
+                }
+                item {
+                    SettingsSegmentedGroup {
                         SettingSwitchItem(
                             title = stringResource(R.string.disable_mobile_data_warning),
                             summary = stringResource(R.string.disable_mobile_data_warning_summary),
@@ -300,12 +248,10 @@ fun HomeSettingsScreen(
                     }
                 }
                 item {
-                    SettingsSection(stringResource(R.string.download)) {
-                        SettingNavigationItem(
-                            title = stringResource(R.string.download_settings),
-                            iconRes = R.drawable.ic_baseline_download_24,
-                            onClick = onOpenDownloadSettings,
-                        )
+                    downloadSettingsContent()
+                }
+                item {
+                    SettingsSegmentedGroup {
                         SettingSwitchItem(
                             title = stringResource(R.string.collapse_downloaded_groups),
                             summary = stringResource(R.string.collapse_downloaded_groups_summary),
@@ -351,6 +297,48 @@ fun HomeSettingsScreen(
                             darkMode = state.darkMode,
                             onSelect = onAppPaletteStyleChange,
                         )
+                    }
+                }
+                item {
+                    SettingsSection(stringResource(R.string.settings_layout_content)) {
+                        SettingNavigationItem(
+                            title = stringResource(R.string.horizontal_card_count_title),
+                            summary = stringResource(R.string.horizontal_card_count_summary),
+                            valueText = state.horizontalCardCountSummary,
+                            iconRes = R.drawable.baseline_row_24,
+                            onClick = { showHorizontalCardCountDialog = true },
+                        )
+                        SettingSwitchItem(
+                            title = stringResource(R.string.search_artist_ignore_video_type),
+                            summary = stringResource(R.string.search_artist_ignore_video_type_summary),
+                            checked = state.searchArtistIgnoreVideoType,
+                            iconRes = R.drawable.baseline_prohibit_24,
+                            onCheckedChange = onSearchArtistIgnoreVideoTypeChange,
+                        )
+                        SettingSwitchItem(
+                            title = stringResource(R.string.disable_predictive_back_title),
+                            summary = stringResource(R.string.temporarily_unavailable),
+                            checked = state.disablePredictiveBack,
+                            iconRes = R.drawable.ic_baseline_arrow_back_24,
+                            onCheckedChange = onDisablePredictiveBackChange,
+                            enabled = false,
+                        )
+                        SettingSwitchItem(
+                            title = stringResource(R.string.tablet_mode),
+                            summary = stringResource(R.string.tablet_mode_summary),
+                            checked = state.tabletMode,
+                            iconRes = R.drawable.ic_baseline_tablet_24,
+                            onCheckedChange = onTabletModeChange,
+                        )
+                        SettingsAnimatedVisibility(visible = state.tabletMode) {
+                            SettingNavigationItem(
+                                title = stringResource(R.string.search_grid_columns_title),
+                                summary = stringResource(R.string.search_grid_columns_summary),
+                                valueText = state.searchGridColumnsSummary,
+                                iconRes = R.drawable.baseline_grid_24,
+                                onClick = { showSearchGridColumnsDialog = true },
+                            )
+                        }
                         SettingNavigationItem(
                             title = stringResource(R.string.home_category_layout),
                             summary = stringResource(
@@ -439,14 +427,14 @@ fun HomeSettingsScreen(
                         )
                         SettingNavigationItem(
                             title = stringResource(R.string.developer),
-                            summary = "GitHub @daisukiKaffuChino",
-                            iconRes = R.drawable.ic_baseline_info_24,
+                            summary = "@daisukiKaffuChino",
+                            iconRes = R.drawable.person_24px,
                             onClick = { uriHandler.openUri("https://github.com/daisukiKaffuChino") },
                         )
                         SettingNavigationItem(
                             title = stringResource(R.string.user_terms),
                             summary = stringResource(R.string.user_terms_summary),
-                            iconRes = R.drawable.ic_oss,
+                            iconRes = R.drawable.inbox_text_24px,
                             onClick = { showUsageTerms = true },
                         )
                     }
@@ -530,10 +518,9 @@ private fun HomeSettingsScreenPreview() {
             onHorizontalCardCountConfigChange = {},
             onUseLockScreenChange = {},
             onHomeCategoryPreferencesChange = { _, _ -> },
-            onOpenPlayerSettings = {},
-            onOpenHKeyframeSettings = {},
-            onOpenDownloadSettings = {},
-            onOpenNetworkSettings = {},
+            hKeyframeSettingsContent = {},
+            networkSettingsContent = {},
+            downloadSettingsContent = {},
             onOpenAppLanguageSettings = {},
             onOpenApplyDeepLinks = {},
             onOpenFakeLauncherIcon = {},

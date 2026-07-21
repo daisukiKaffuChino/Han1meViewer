@@ -9,7 +9,6 @@ plugins {
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.com.google.devtools.ksp)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.navigation.safeargs)
     //noinspection NewerVersionAvailable
     id("com.mikepenz.aboutlibraries.plugin") version "14.2.0"
     id("com.github.ben-manes.versions") version "0.54.0"
@@ -22,7 +21,7 @@ android {
         applicationId = "io.github.daisukikaffuchino.han1meviewer"
         minSdk = 29
         targetSdk = 37
-        versionCode = 260719
+        versionCode = 260721
         versionName = "26.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -30,14 +29,6 @@ android {
         buildConfigField("String", "VERSION_NAME", "\"${versionName}\"")
         buildConfigField("int", "VERSION_CODE", "$versionCode")
         buildConfigField("int", "SEARCH_YEAR_RANGE_END", "${Config.thisYear}")
-    }
-    signingConfigs {
-        create("release") {
-            storeFile = file(System.getenv("HOME") + "/.android/keystore.jks")
-            storePassword = System.getenv("KEYSTORE_PASSWORD")
-            keyAlias = System.getenv("KEY_ALIAS")
-            keyPassword = System.getenv("KEYSTORE_PASSWORD")
-        }
     }
 
     splits {
@@ -57,7 +48,6 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("release")
             manifestPlaceholders["appIcon"] = "@mipmap/ic_launcher_new"
         }
 
@@ -106,19 +96,15 @@ androidComponents {
 }
 
 dependencies {
-    implementation(libs.appcompat)
-    implementation(libs.androidx.window)
-    implementation(libs.androidx.window.java)
     implementation(libs.aboutlibraries.core)
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.documentfile)
     implementation(libs.startup.runtime)
-    implementation(libs.androidx.swiperefreshlayout)
     implementation(libs.androidx.material.icons.extended)
 
     implementation(libs.bundles.android.base)
     implementation(libs.bundles.android.jetpack)
-    implementation(libs.palette)
 
     implementation(platform(libs.compose.compose.bom))
     implementation(libs.compose.ui.graphics)
@@ -127,12 +113,8 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.compose.ui.ui.tooling.preview)
     implementation(libs.androidx.ui)
-    androidTestImplementation(platform(libs.compose.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.compose.ui.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.material.icons.core)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
     implementation(libs.aboutlibraries.compose.m3)
@@ -155,17 +137,11 @@ dependencies {
     implementation(libs.media3.exoplayer.hls)
     implementation(libs.mpv.lib)
 
-    implementation(libs.multitype)
-    implementation(libs.base.recyclerview.adapter.helper4)
-    implementation(libs.expandable.textview)
     implementation(libs.spannable.x)
-    implementation(libs.drawerlayout)
 
     ksp(libs.room.compiler)
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
-    testImplementation(libs.junit)
     androidTestImplementation(libs.test.junit)
-    androidTestImplementation(libs.test.espresso.core)
 }

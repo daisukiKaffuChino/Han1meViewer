@@ -635,12 +635,14 @@ Recommendations are as follows:\n
     <string name="ignore_this_update">Ignore this version</string>
     <string name="checking_for_updates">Checking for updates…</string>
     <string name="update_link_open_failed">Unable to open the update link</string>
-    <string name="settings_video_playback">Video and playback</string>
-    <string name="settings_video_playback_summary">Video display, playback behavior and player options</string>
+    <string name="settings_video_playback">Video playback preferences</string>
+    <string name="settings_video_playback_summary">Video display and playback behavior preferences</string>
+    <string name="settings_player_summary">Playback engine, subtitles and advanced player options</string>
     <string name="settings_network_download">Network and downloads</string>
     <string name="settings_network_download_summary">Connections, domains, download storage and limits</string>
     <string name="settings_appearance">Theme and appearance</string>
     <string name="settings_appearance_summary">Colors, dark mode, layout and language</string>
+    <string name="settings_layout_content">Layout and content</string>
     <string name="settings_privacy_summary">App lock, launcher disguise and content visibility</string>
     <string name="settings_data">Data</string>
     <string name="settings_data_summary">Backup, restore and cached data</string>
@@ -660,6 +662,6 @@ Recommendations are as follows:\n
     <string name="user_terms_summary">View the usage notice accepted on first launch</string>
     <string name="project_repository">Project Repository</string>
     <string name="open_source_license_summary">Libraries and licenses used by this app</string>
-    <string name="search_licenses">Search licenses</string>
-    <string name="no_licenses_found">No matching licenses</string>
+    <string name="no_license_items">No items to display</string>
+    <string name="no_licenses_found">No items found</string>
 </resources>

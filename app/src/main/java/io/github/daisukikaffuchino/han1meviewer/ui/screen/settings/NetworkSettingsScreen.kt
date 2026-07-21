@@ -37,8 +37,8 @@ import io.github.daisukikaffuchino.han1meviewer.logic.network.HProxySelector
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ChoiceDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingNavigationItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingSwitchItem
-import io.github.daisukikaffuchino.han1meviewer.ui.component.segmentedGroup
-import io.github.daisukikaffuchino.han1meviewer.ui.component.segmentedSection
+import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingsSectionTitle
+import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingsSegmentedGroup
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 
@@ -108,6 +108,7 @@ fun NetworkSettingsScreen(
     onDismissDelayTest: () -> Unit,
     onDismissDohTest: () -> Unit,
     onApplyProxy: (Int, String, Int) -> Unit,
+    embedded: Boolean = false,
 ) {
     var showDomainDialog by rememberSaveable { mutableStateOf(false) }
     var showProxyDialog by rememberSaveable { mutableStateOf(false) }
@@ -199,35 +200,34 @@ fun NetworkSettingsScreen(
         )
     }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        enableItemAnimation = false,
-        contentPadding = PaddingValues(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        segmentedGroup {
-            SettingNavigationItem(
-                title = stringResource(R.string.domain_name),
-                valueText = state.domainDisplay,
-                iconRes = R.drawable.baseline_domain_24,
-                onClick = { showDomainDialog = true },
-            )
-            SettingNavigationItem(
-                title = stringResource(R.string.custom_mirror_site),
-                summary = if (useCustomMirrorSite && customMirrorSite.isNotBlank()) customMirrorSite else stringResource(R.string.custom_mirror_site_hint),
-                iconRes = R.drawable.baseline_domain_24,
-                onClick = { showCustomMirrorSiteDialog = true },
-            )
-            SettingNavigationItem(
-                title = stringResource(R.string.proxy),
-                summary = state.proxySummary,
-                iconRes = R.drawable.baseline_vpn_24,
-                onClick = { showProxyDialog = true },
-            )
-        }
+    val content: @Composable () -> Unit = {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            if (embedded) {
+                SettingsSectionTitle(titleRes = R.string.network)
+            }
+            SettingsSegmentedGroup {
+                SettingNavigationItem(
+                    title = stringResource(R.string.domain_name),
+                    valueText = state.domainDisplay,
+                    iconRes = R.drawable.baseline_domain_24,
+                    onClick = { showDomainDialog = true },
+                )
+                SettingNavigationItem(
+                    title = stringResource(R.string.custom_mirror_site),
+                    summary = if (useCustomMirrorSite && customMirrorSite.isNotBlank()) customMirrorSite else stringResource(R.string.custom_mirror_site_hint),
+                    iconRes = R.drawable.baseline_domain_24,
+                    onClick = { showCustomMirrorSiteDialog = true },
+                )
+                SettingNavigationItem(
+                    title = stringResource(R.string.proxy),
+                    summary = state.proxySummary,
+                    iconRes = R.drawable.baseline_vpn_24,
+                    onClick = { showProxyDialog = true },
+                )
+            }
 
-        segmentedSection(titleRes = R.string.builtin_dns) {
-            segmentedGroup {
+            SettingsSectionTitle(titleRes = R.string.builtin_dns)
+            SettingsSegmentedGroup {
                 SettingSwitchItem(
                     title = stringResource(R.string.use_built_in_hosts),
                     summary = stringResource(R.string.use_built_in_hosts_summary),
@@ -248,10 +248,9 @@ fun NetworkSettingsScreen(
                     onClick = { showDohDialog = true },
                 )
             }
-        }
 
-        segmentedSection(titleRes = R.string.debug) {
-            segmentedGroup {
+            SettingsSectionTitle(titleRes = R.string.debug)
+            SettingsSegmentedGroup {
                 SettingNavigationItem(
                     title = stringResource(R.string.view_node_latency),
                     summary = state.delaySummary,
@@ -265,6 +264,17 @@ fun NetworkSettingsScreen(
                     onClick = onOpenDohTest,
                 )
             }
+        }
+    }
+    if (embedded) {
+        content()
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            enableItemAnimation = false,
+            contentPadding = PaddingValues(vertical = 8.dp),
+        ) {
+            item { content() }
         }
     }
 }

@@ -180,6 +180,7 @@ fun SharedHKeyframesRouteScreen(
 fun HKeyframeSettingsRouteScreen(
     onNavigateToHKeyframes: () -> Unit,
     onNavigateToSharedHKeyframes: () -> Unit,
+    embedded: Boolean = false,
 ) {
     val context = LocalContext.current
     var refreshKey by remember { mutableIntStateOf(0) }
@@ -209,6 +210,7 @@ fun HKeyframeSettingsRouteScreen(
             Preferences.preferenceSp.edit { putInt(WHEN_COUNTDOWN_REMIND, it) }
             refreshKey++
         },
+        embedded = embedded,
     )
 }
 

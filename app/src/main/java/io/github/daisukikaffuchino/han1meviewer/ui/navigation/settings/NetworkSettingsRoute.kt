@@ -64,7 +64,7 @@ private enum class DohConflictTarget {
 }
 
 @Composable
-fun NetworkSettingsRouteScreen() {
+fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
     val context = LocalContext.current
     var refreshKey by remember { mutableIntStateOf(0) }
     var currentHost by remember { mutableStateOf(Preferences.baseUrl) }
@@ -341,6 +341,7 @@ fun NetworkSettingsRouteScreen() {
             HanimeNetwork.rebuildNetwork()
             refreshKey++
         },
+        embedded = embedded,
     )
 
     ConfirmDialog(

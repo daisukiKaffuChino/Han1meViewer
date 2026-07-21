@@ -606,12 +606,14 @@
     <string name="ignore_this_update">忽略此版本</string>
     <string name="checking_for_updates">正在檢查更新…</string>
     <string name="update_link_open_failed">無法開啟更新連結</string>
-    <string name="settings_video_playback">影片和播放</string>
-    <string name="settings_video_playback_summary">影片顯示、播放行為與播放器選項</string>
+    <string name="settings_video_playback">影片播放偏好</string>
+    <string name="settings_video_playback_summary">影片顯示與播放行為偏好</string>
+    <string name="settings_player_summary">播放核心、字幕與播放器進階選項</string>
     <string name="settings_network_download">網路和下載</string>
     <string name="settings_network_download_summary">連線、網域、下載儲存與限制</string>
     <string name="settings_appearance">主題與外觀</string>
     <string name="settings_appearance_summary">顏色、深色模式、版面與語言</string>
+    <string name="settings_layout_content">版面與內容</string>
     <string name="settings_privacy_summary">應用程式鎖、桌面偽裝與內容顯示</string>
     <string name="settings_data">資料</string>
     <string name="settings_data_summary">備份、還原與快取資料</string>
@@ -631,6 +633,6 @@
     <string name="user_terms_summary">查看首次啟動時同意的使用須知</string>
     <string name="project_repository">專案儲存庫</string>
     <string name="open_source_license_summary">本應用程式使用的依賴庫及其授權條款</string>
-    <string name="search_licenses">搜尋授權條款</string>
-    <string name="no_licenses_found">沒有符合的授權條款</string>
+    <string name="no_license_items">沒有可顯示的項目</string>
+    <string name="no_licenses_found">找不到項目</string>
 </resources>
