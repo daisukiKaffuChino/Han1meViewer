@@ -215,6 +215,44 @@ object Parser {
         return resultList
     }
 
+    private data class VideoCardMeta(
+        val artist: String = "",
+        val uploadTime: String = "",
+        val genre: String? = null,
+    )
+
+    private fun Element.extractVideoCardMeta(): VideoCardMeta {
+        val subtitleText = selectFirst("div.subtitle a, div.subtitle")
+            ?.text()
+            ?.trim()
+            .orEmpty()
+        if (subtitleText.isNotBlank()) {
+            val parts = subtitleText.split("•").map { it.trim() }.filter { it.isNotEmpty() }
+            return VideoCardMeta(
+                artist = parts.getOrNull(0).orEmpty(),
+                uploadTime = parts.getOrNull(1).orEmpty(),
+            )
+        }
+
+        val metaDataText = selectFirst("div.video-meta-data a, div.video-meta-data")
+            ?.text()
+            ?.trim()
+            .orEmpty()
+        if (metaDataText.isNotBlank()) {
+            val parts = metaDataText.split("•").map { it.trim() }.filter { it.isNotEmpty() }
+            return VideoCardMeta(
+                artist = parts.getOrNull(0).orEmpty(),
+                uploadTime = parts.getOrNull(1).orEmpty(),
+            )
+        }
+
+        return VideoCardMeta(
+            artist = selectFirst(".meta-author a, a.card-mobile-user")?.text()?.trim().orEmpty(),
+            uploadTime = selectFirst(".meta-stats span")?.text()?.trim().orEmpty(),
+            genre = selectFirst(".meta-stats a")?.text()?.trim(),
+        )
+    }
+
     fun hanimeSearch(body: String): PageLoadingState<MutableList<HanimeInfo>> {
         val parseBody = Jsoup.parse(body).body()
         val allContentsClass =
@@ -245,14 +283,7 @@ object Parser {
         val durationAndViews = hanimeSearchItem.select("div[class^=thumb-container]")
         val duration = durationAndViews.select("div[class^=duration]").text()
         val views = durationAndViews.select("div[class^=stat-item]").getOrNull(1)?.text()
-        val artistAndUploadTime = hanimeSearchItem.selectFirst("div.subtitle a, div.video-meta-data a")!!.text().trim()
-        var artist = ""
-        var uploadTime = ""
-        if (artistAndUploadTime.contains("•")) {
-            val parts = artistAndUploadTime.split("•").map { it.trim() }
-            artist = parts[0].trim()
-            uploadTime = parts[1].trim()
-        }
+        val meta = hanimeSearchItem.extractVideoCardMeta()
         val infoBoxes = hanimeSearchItem.selectFirst(".stats-container .stat-item")
         val reviews = infoBoxes?.ownText()?.trim() ?: ""
         return HanimeInfo(
@@ -260,10 +291,10 @@ object Parser {
             coverUrl = coverUrl,
             videoCode = videoCode,
             duration = duration.logIfParseNull(Parser::hanimeNormalItemVer2.name, "duration"),
-            currentArtist = artist,
+            currentArtist = meta.artist,
             views = views.logIfParseNull(Parser::hanimeNormalItemVer2.name, "views"),
-            uploadTime = uploadTime,
-            genre = null,
+            uploadTime = meta.uploadTime,
+            genre = meta.genre,
             itemType = HanimeInfo.NORMAL,
             reviews = reviews
         )
@@ -1060,14 +1091,7 @@ object Parser {
                     val durationAndViews = videoCard.select("div[class^=thumb-container]")
                     val duration = durationAndViews.select("div[class^=duration]").text()
                     val views = durationAndViews.select("div[class^=stat-item]").getOrNull(1)?.text()
-                    val artistAndUploadTime = videoCard.select("div.subtitle a").text().trim()
-                    var artist = ""
-                    var uploadTime = ""
-                    if (artistAndUploadTime.contains("•")) {
-                        val parts = artistAndUploadTime.split("•").map { it.trim() }
-                        artist = parts[0].trim()
-                        uploadTime = parts[1].trim()
-                    }
+                    val meta = videoCard.extractVideoCardMeta()
                     val infoBoxes = videoCard.selectFirst(".stats-container .stat-item")
                     val reviews = infoBoxes?.ownText()?.trim() ?: ""
 
@@ -1078,8 +1102,8 @@ object Parser {
                         duration = duration,
                         views = views,
                         reviews = reviews,
-                        currentArtist = artist,
-                        uploadTime = uploadTime
+                        currentArtist = meta.artist,
+                        uploadTime = meta.uploadTime
                     )
                 } catch (_: Exception) {
                     null
