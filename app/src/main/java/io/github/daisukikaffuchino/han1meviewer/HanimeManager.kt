@@ -1,6 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer
 
 import android.webkit.CookieManager
+import androidx.core.content.edit
 import androidx.core.text.parseAsHtml
 import io.github.daisukikaffuchino.han1meviewer.Preferences.isAlreadyLogin
 import io.github.daisukikaffuchino.han1meviewer.Preferences.loginCookie
@@ -71,6 +72,7 @@ fun String.toVideoCode() = videoUrlRegex.find(this)?.groupValues?.get(1)
 fun logout() {
     isAlreadyLogin = false
     loginCookie = CookieString(EMPTY_STRING)
+    Preferences.preferenceSp.edit { remove(SAVED_USER_ID) }
     HCookieJar.cookieMap.clear()
     CookieManager.getInstance().removeAllCookies(null)
 }

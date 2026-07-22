@@ -1,8 +1,10 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.main
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -29,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -113,6 +116,13 @@ fun MainDrawerHeader(
     onAvatarLongClick: () -> Unit,
     onSwitchSiteClick: () -> Unit,
 ) {
+val cardShape = RoundedCornerShape(28.dp)
+val cardInteractionSource = remember { MutableInteractionSource() }
+val isCardPressed = cardInteractionSource.collectIsPressedAsState().value
+val cardScale = animateFloatAsState(
+    targetValue = if (isCardPressed) 0.98f else 1f,
+    label = "drawerHeaderCardScale"
+).value
 Column(
     modifier = Modifier
         .fillMaxWidth()
@@ -125,8 +135,18 @@ Column(
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 12.dp, bottom = 8.dp),
-        shape = RoundedCornerShape(28.dp),
+            .padding(top = 12.dp, bottom = 8.dp)
+            .graphicsLayer {
+                scaleX = cardScale
+                scaleY = cardScale
+            }
+            .clip(cardShape)
+            .combinedClickable(
+                interactionSource = cardInteractionSource,
+                indication = ripple(),
+                onClick = onAvatarClick,
+            ),
+        shape = cardShape,
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),

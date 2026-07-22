@@ -537,12 +537,7 @@ private fun buildHomeSettingsUiState(
             searchGridColumnsConfig.largeColumns,
         ).joinToString(" / "),
         searchGridColumnsConfig = searchGridColumnsConfig,
-        horizontalCardCountSummary = listOf(
-            horizontalCardCountConfig.narrowCount,
-            horizontalCardCountConfig.compactCount,
-            horizontalCardCountConfig.mediumCount,
-            horizontalCardCountConfig.expandedCount,
-        ).joinToString(" / "),
+        horizontalCardCountSummary = "${horizontalCardCountConfig.narrowCount}~${horizontalCardCountConfig.expandedCount}",
         horizontalCardCountConfig = horizontalCardCountConfig,
         homeCategoryItems = defaultHomeCategoryPreferenceItems,
         homeCategoryOrder = homeCategoryOrder,

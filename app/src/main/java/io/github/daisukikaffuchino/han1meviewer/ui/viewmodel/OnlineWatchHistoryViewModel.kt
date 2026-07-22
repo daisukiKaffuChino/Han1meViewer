@@ -3,6 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 import android.app.Application
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.Preferences
+import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
@@ -11,10 +12,12 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel.csrfToken
 import io.github.daisukikaffuchino.utils.ApplicationViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -40,6 +43,17 @@ class OnlineWatchHistoryViewModel(application: Application) : ApplicationViewMod
 
     private var isRefreshing = true
     private var isManualRefreshing = false
+    private var loadJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            Preferences.loginStateFlow.drop(1).collect { isLoggedIn ->
+                if (!isLoggedIn) {
+                    clearLoggedOutState()
+                }
+            }
+        }
+    }
 
     fun refresh(sort: OnlineWatchHistorySort = _selectedSort.value) {
         val sortChanged = _selectedSort.value != sort
@@ -64,13 +78,13 @@ class OnlineWatchHistoryViewModel(application: Application) : ApplicationViewMod
 
     private fun loadPage(page: Int) {
         val userId = Preferences.savedUserId
-        if (userId.isBlank()) {
-            _state.value = PageLoadingState.Error(IllegalStateException(application.getString(io.github.daisukikaffuchino.han1meviewer.R.string.not_logged_in_currently)))
-            _isLoadingMore.value = false
+        if (!Preferences.isAlreadyLogin || userId.isBlank()) {
+            clearLoggedOutState()
             return
         }
         _isLoadingMore.value = !isRefreshing && _items.value.isNotEmpty()
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             NetworkRepo.getOnlineWatchHistories(userId, _selectedSort.value, page).collect { pageState ->
                 _state.value = pageState
                 _items.update { previousItems ->
@@ -104,7 +118,24 @@ class OnlineWatchHistoryViewModel(application: Application) : ApplicationViewMod
 
     fun isRefreshing(): Boolean = isManualRefreshing
 
+    private fun clearLoggedOutState() {
+        loadJob?.cancel()
+        loadJob = null
+        isRefreshing = false
+        isManualRefreshing = false
+        _items.value = emptyList()
+        _loadedPageCount.value = 0
+        _isLoadingMore.value = false
+        _state.value = PageLoadingState.Error(
+            IllegalStateException(application.getString(R.string.not_logged_in_currently))
+        )
+    }
+
     fun deleteItem(item: HanimeInfo) {
+        if (!Preferences.isAlreadyLogin || Preferences.savedUserId.isBlank()) {
+            clearLoggedOutState()
+            return
+        }
         val position = _items.value.indexOfFirst { it.videoCode == item.videoCode }
         if (position < 0) return
         viewModelScope.launch {
