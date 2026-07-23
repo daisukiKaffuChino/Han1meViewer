@@ -27,7 +27,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.SharedHKeyfra
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.SettingsViewModel
 import io.github.daisukikaffuchino.han1meviewer.ui.util.rememberCopyTextToClipboard
 import io.github.daisukikaffuchino.utils.decodeFromStringByBase64
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.serialization.json.Json
 
 private const val H_KEYFRAMES_ENABLE = "h_keyframes_enable"
@@ -57,7 +57,7 @@ fun HKeyframesRouteScreen(
                     sharedHKeyframeEntity = entity
                     onImportDialogDismiss()
                 } else {
-                    showShortToast(R.string.h_keyframes_shared_by_other_not_detected)
+                    SonnerToast.info(R.string.h_keyframes_shared_by_other_not_detected)
                 }
             },
         )
@@ -71,19 +71,19 @@ fun HKeyframesRouteScreen(
         },
         onUpdateEntityTitle = { entity, newTitle ->
             viewModel.updateHKeyframes(entity.copy(title = newTitle))
-            showShortToast(R.string.modify_success)
+            SonnerToast.success(R.string.modify_success)
         },
         onDeleteKeyframe = { videoCode, keyframe ->
             viewModel.removeHKeyframe(videoCode, keyframe)
-            showShortToast(R.string.delete_success)
+            SonnerToast.success(R.string.delete_success)
         },
         onUpdateKeyframe = { videoCode, oldKeyframe, newKeyframe ->
             viewModel.modifyHKeyframe(videoCode, oldKeyframe, newKeyframe)
-            showShortToast(R.string.modify_success)
+            SonnerToast.success(R.string.modify_success)
         },
         onCopyShareContent = {
             copyTextToClipboard(it)
-            showShortToast(R.string.copy_to_clipboard)
+            SonnerToast.success(R.string.copy_to_clipboard)
         },
     )
 

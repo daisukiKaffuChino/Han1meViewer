@@ -15,7 +15,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.video.CommentSortType
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel.csrfToken
 import io.github.daisukikaffuchino.han1meviewer.util.loadAssetAs
 import io.github.daisukikaffuchino.utils.ApplicationViewModel
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 import io.github.daisukikaffuchino.utils.unsafeLazy
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -254,15 +254,15 @@ class CommentViewModel(application: Application) : ApplicationViewModel(applicat
     fun handleCommentLike(args: VideoCommentArgs) {
         if (args.isPositive) {
             if (args.comment.post.likeCommentStatus) {
-                showShortToast(R.string.cancel_thumb_up_success)
+                SonnerToast.success(R.string.cancel_thumb_up_success)
             } else {
-                showShortToast(R.string.thumb_up_success)
+                SonnerToast.success(R.string.thumb_up_success)
             }
         } else {
             if (args.comment.post.unlikeCommentStatus) {
-                showShortToast(R.string.cancel_thumb_down_success)
+                SonnerToast.success(R.string.cancel_thumb_down_success)
             } else {
-                showShortToast(R.string.thumb_down_success)
+                SonnerToast.success(R.string.thumb_down_success)
             }
         }
     }

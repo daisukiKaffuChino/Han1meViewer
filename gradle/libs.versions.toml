@@ -24,6 +24,7 @@ lifecycleLiveDataKtx = "2.11.0"
 roomRuntime = "2.8.4"
 roomCompiler = "2.8.4"
 navigation = "2.9.8"
+sonner = "0.4.0"
 workRuntimeKtx = "2.11.2"
 startupRuntime = "1.2.0"
 spannableX = "1.0.4"
@@ -69,6 +70,7 @@ activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref
 fragment = { group = "androidx.fragment", name = "fragment", version.ref = "fragment" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomRuntime" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomCompiler" }
+sonner = { module = "io.github.dokar3:sonner", version.ref = "sonner" }
 work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 startup-runtime = { group = "androidx.startup", name = "startup-runtime", version.ref = "startupRuntime" }

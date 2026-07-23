@@ -11,7 +11,7 @@ import io.github.daisukikaffuchino.han1meviewer.FILE_PROVIDER_AUTHORITY
 import io.github.daisukikaffuchino.han1meviewer.HJson
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.utils.applicationContext
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -50,7 +50,7 @@ fun Context.openDownloadedHanimeVideoLocally(
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            showShortToast(R.string.action_not_support)
+            SonnerToast.warning(R.string.action_not_support)
             e.printStackTrace()
         }
     } else {
@@ -67,7 +67,7 @@ fun Context.openDownloadedHanimeVideoLocally(
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            showShortToast(R.string.action_not_support)
+            SonnerToast.warning(R.string.action_not_support)
             e.printStackTrace()
         }
     }

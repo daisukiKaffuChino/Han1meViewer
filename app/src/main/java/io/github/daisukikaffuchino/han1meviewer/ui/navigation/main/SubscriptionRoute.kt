@@ -8,7 +8,7 @@ import io.github.daisukikaffuchino.han1meviewer.getHanimeShareText
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.SubscriptionScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.MySubscriptionsViewModel
 import io.github.daisukikaffuchino.han1meviewer.ui.util.rememberCopyTextToClipboard
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 
 @Composable
 fun SubscriptionRouteScreen(
@@ -24,12 +24,12 @@ fun SubscriptionRouteScreen(
         onClickArtist = { onNavigateToSearch(it) },
         onLongClickArtist = { artistName ->
             copyTextToClipboard(getHanimeSearchShareText(artistName))
-            showShortToast(R.string.copy_to_clipboard)
+            SonnerToast.success(R.string.copy_to_clipboard)
         },
         onClickVideosItem = onNavigateToVideo,
         onLongClickVideosItem = { videoCode, title ->
             copyTextToClipboard(getHanimeShareText(title, videoCode))
-            showShortToast(R.string.copy_to_clipboard)
+            SonnerToast.success(R.string.copy_to_clipboard)
         },
     )
 }

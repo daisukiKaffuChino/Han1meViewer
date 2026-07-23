@@ -6,6 +6,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeTheme
+import io.github.daisukikaffuchino.utils.SonnerToast
 
 abstract class BaseActivity : AppCompatActivity() {
 
@@ -22,7 +23,10 @@ abstract class BaseActivity : AppCompatActivity() {
 
     protected fun setHanimeContent(content: @Composable () -> Unit) {
         setContent {
-            HanimeTheme(content = content)
+            HanimeTheme {
+                content()
+                SonnerToast.Host()
+            }
         }
     }
 }

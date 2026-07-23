@@ -22,7 +22,7 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.view.video.HJzvdStd
 import io.github.daisukikaffuchino.utils.formatBytesPerSecond
 import io.github.daisukikaffuchino.utils.formatFileSizeV2
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 
 internal fun saveBoolean(key: String, value: Boolean) {
     Preferences.preferenceSp.edit { putBoolean(key, value) }
@@ -121,7 +121,7 @@ internal fun openApplyDeepLinksSettings(context: Context, activity: Activity) {
         }
         activity.startActivity(intent)
     } catch (e: Exception) {
-        showShortToast(R.string.action_app_open_by_default_settings_not_support)
+        SonnerToast.warning(R.string.action_app_open_by_default_settings_not_support)
         e.printStackTrace()
     }
 }

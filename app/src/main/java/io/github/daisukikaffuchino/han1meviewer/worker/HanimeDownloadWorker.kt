@@ -34,7 +34,7 @@ import io.github.daisukikaffuchino.han1meviewer.util.SafFileManager
 import io.github.daisukikaffuchino.han1meviewer.util.await
 import io.github.daisukikaffuchino.utils.createFileIfNotExists
 import io.github.daisukikaffuchino.utils.saveTo
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -295,7 +295,7 @@ class HanimeDownloadWorker(
                             val reason = context.getString(R.string.download_error_file_info)
                             showFailureNotification(reason)
                             mainScope.launch {
-                                showShortToast(
+                                SonnerToast.error(
                                     context.getString(R.string.download_task_failed_s_reason_s, hanimeName, reason)
                                 )
                             }
@@ -377,7 +377,7 @@ class HanimeDownloadWorker(
                         val reason = response.toDownloadErrorMessage(requestNeedRange)
                         showFailureNotification(reason)
                         mainScope.launch {
-                            showShortToast(context.getString(R.string.download_task_failed_s_reason_s, hanimeName, reason))
+                            SonnerToast.error(context.getString(R.string.download_task_failed_s_reason_s, hanimeName, reason))
                         }
                         result = Result.failure(workDataOf(DownloadState.STATE to DownloadState.Failed.mask))
                         return@withContext result
@@ -439,7 +439,7 @@ class HanimeDownloadWorker(
             } catch (e: Exception) {
                 result = if (e is CancellationException || e.isStoppedCancellation()) {
                     cancelDownloadNotification()
-                    mainScope.launch { showShortToast(R.string.download_error_cancelled) }
+                    mainScope.launch { SonnerToast.info(R.string.download_error_cancelled) }
                     Result.success(
                         workDataOf(DownloadState.STATE to DownloadState.Paused.mask)
                     )
@@ -447,7 +447,7 @@ class HanimeDownloadWorker(
                     val reason = e.toDownloadErrorMessage()
                     showRetryNotification(reason)
                     mainScope.launch {
-                        showShortToast(context.getString(R.string.download_task_retrying_s_reason_s, hanimeName, reason))
+                        SonnerToast.warning(context.getString(R.string.download_task_retrying_s_reason_s, hanimeName, reason))
                     }
                     shouldRetry = true
                     Result.retry()
@@ -456,7 +456,7 @@ class HanimeDownloadWorker(
                     showFailureNotification(reason)
                     e.printStackTrace()
                     mainScope.launch {
-                        showShortToast(context.getString(R.string.download_task_failed_s_reason_s, hanimeName, reason))
+                        SonnerToast.error(context.getString(R.string.download_task_failed_s_reason_s, hanimeName, reason))
                     }
                     Result.failure(
                         workDataOf(DownloadState.STATE to DownloadState.Failed.mask)

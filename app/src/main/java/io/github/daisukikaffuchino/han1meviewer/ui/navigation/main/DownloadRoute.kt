@@ -24,7 +24,7 @@ import io.github.daisukikaffuchino.han1meviewer.util.SafFileManager.scanAndImpor
 import io.github.daisukikaffuchino.han1meviewer.util.openDownloadedHanimeVideoLocally
 import io.github.daisukikaffuchino.han1meviewer.worker.HanimeDownloadManager
 import io.github.daisukikaffuchino.utils.application
-import io.github.daisukikaffuchino.utils.showLongToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -62,7 +62,7 @@ fun DownloadRouteScreen(
                 ) {
                     showImportDownloadedConfirm = true
                 } else {
-                    showLongToast(application.getString(R.string.select_custom_directory))
+                    SonnerToast.warning(application.getString(R.string.select_custom_directory))
                 }
             }
 
@@ -85,21 +85,21 @@ fun DownloadRouteScreen(
 
             is DownloadEvent.OnRenameGroup -> {
                 viewModel.updateGroupName(event.groupId, event.newName)
-                showLongToast(application.getString(R.string.group_renamed, event.newName))
+                SonnerToast.success(application.getString(R.string.group_renamed, event.newName))
             }
 
             is DownloadEvent.OnCreateGroup -> {
                 if (event.name.isBlank()) {
-                    showLongToast(application.getString(R.string.group_name_empty))
+                SonnerToast.warning(application.getString(R.string.group_name_empty))
                 } else {
                     viewModel.createNewGroup(event.name)
-                    showLongToast(application.getString(R.string.create_group_success, event.name))
+                SonnerToast.success(application.getString(R.string.create_group_success, event.name))
                 }
             }
 
             is DownloadEvent.OnDeleteGroup -> {
                 viewModel.deleteGroup(event.group)
-                showLongToast(application.getString(R.string.delete_success))
+                SonnerToast.success(application.getString(R.string.delete_success))
             }
 
             is DownloadEvent.OnBatchDelete -> event.videos.forEach { video ->
@@ -163,9 +163,9 @@ fun DownloadRouteScreen(
                         sortedBy = HanimeDownloadEntity.SortedBy.ID,
                         ascending = false,
                     )
-                    showLongToast(application.getString(R.string.read_success))
+                    SonnerToast.success(application.getString(R.string.read_success))
                 } else {
-                    showLongToast(application.getString(R.string.permission_error))
+                    SonnerToast.error(application.getString(R.string.permission_error))
                 }
             }
         },

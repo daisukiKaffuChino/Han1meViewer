@@ -38,9 +38,8 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.DownloadSetti
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.DownloadSettingsUiState
 import io.github.daisukikaffuchino.han1meviewer.util.SafFileManager
 import io.github.daisukikaffuchino.han1meviewer.util.SafFileManager.KEY_TREE_URI
-import io.github.daisukikaffuchino.han1meviewer.util.showToast
 import io.github.daisukikaffuchino.han1meviewer.worker.HanimeDownloadManager
-import io.github.daisukikaffuchino.utils.showLongToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 
 private const val DOWNLOAD_COUNT_LIMIT = "download_count_limit"
 private const val DOWNLOAD_SPEED_LIMIT = "download_speed_limit"
@@ -65,10 +64,10 @@ fun DownloadSettingsRouteScreen(embedded: Boolean = false) {
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
             SafFileManager.persistUriPermission(context, result.data)
             Preferences.preferenceSp.edit { putBoolean(DOWNLOAD_USE_PRIVATE_STORAGE, false) }
-            context.showToast(R.string.directory_saved, result.data.toString())
+            SonnerToast.success(R.string.directory_saved, result.data.toString())
             refreshKey++
         } else {
-            context.showToast(R.string.no_directory_selected)
+            SonnerToast.warning(R.string.no_directory_selected)
         }
     }
 
@@ -147,7 +146,7 @@ fun DownloadSettingsRouteScreen(embedded: Boolean = false) {
             }
             refreshKey++
             showRestoreDefaultConfirm = false
-            context.showToast(R.string.default_path_restored)
+            SonnerToast.success(R.string.default_path_restored)
         },
         onDismiss = { showRestoreDefaultConfirm = false },
     )
@@ -165,19 +164,19 @@ fun DownloadSettingsRouteScreen(embedded: Boolean = false) {
                 when (total) {
                     0 -> {
                         importProgress = null
-                        showLongToast(context.getString(R.string.no_exportable_files))
+                        SonnerToast.info(context.getString(R.string.no_exportable_files))
                     }
 
                     -1 -> {
                         importProgress = null
-                        showLongToast(context.getString(R.string.permission_error))
+                        SonnerToast.error(context.getString(R.string.permission_error))
                     }
 
                     else -> {
                         importProgress = ImportProgress(migrated, total)
                         if (migrated == total) {
                             importProgress = null
-                            showLongToast(context.getString(R.string.import_complete, total))
+                            SonnerToast.success(context.getString(R.string.import_complete, total))
                             refreshKey++
                         }
                     }

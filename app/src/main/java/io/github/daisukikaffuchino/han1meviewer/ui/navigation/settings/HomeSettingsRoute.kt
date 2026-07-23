@@ -62,10 +62,9 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.homeCate
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.saveHomeCategoryPreferences
 import io.github.daisukikaffuchino.han1meviewer.ui.widget.CheckInWidget
 import io.github.daisukikaffuchino.han1meviewer.util.AppLanguageManager
-import io.github.daisukikaffuchino.han1meviewer.util.showToast
 import io.github.daisukikaffuchino.utils.ActivityManager
 import io.github.daisukikaffuchino.utils.folderSize
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -123,8 +122,8 @@ fun HomeSettingsRouteScreen(
         uri ?: return@rememberLauncherForActivityResult
         coroutineScope.launch(Dispatchers.IO) {
             runCatching { BackupManager.exportTo(context, uri) }
-                .onSuccess { withContext(Dispatchers.Main) { showShortToast(R.string.backup_export_success) } }
-                .onFailure { withContext(Dispatchers.Main) { showShortToast(R.string.backup_export_failed) } }
+                .onSuccess { withContext(Dispatchers.Main) { SonnerToast.success(R.string.backup_export_success) } }
+                .onFailure { withContext(Dispatchers.Main) { SonnerToast.error(R.string.backup_export_failed) } }
         }
     }
     val importLauncher = rememberLauncherForActivityResult(
@@ -190,7 +189,7 @@ fun HomeSettingsRouteScreen(
         onVideoQualityChange = { value ->
             saveString(HOME_DEFAULT_VIDEO_QUALITY, value)
             refreshKey++
-            context.showToast(R.string.success_value, value)
+            SonnerToast.success(R.string.success_value, value)
         },
         onDarkModeChange = { value ->
             if (value != Preferences.useDarkMode) {
@@ -212,7 +211,7 @@ fun HomeSettingsRouteScreen(
         },
         onAllowPipModeChange = { enabled ->
             if (enabled && !isPipPermissionGranted(context)) {
-                context.showToast(R.string.request_pip_alert)
+                SonnerToast.warning(R.string.request_pip_alert)
                 openPipPermissionSettings(context)
                 saveBoolean(HOME_ALLOW_PIP_MODE, false)
                 refreshKey++
@@ -279,7 +278,7 @@ fun HomeSettingsRouteScreen(
         onUseLockScreenChange = { value ->
             if (value) {
                 if (!isDeviceSecureCompat(context)) {
-                    context.showToast(R.string.not_set_sys_lock)
+                    SonnerToast.warning(R.string.not_set_sys_lock)
                     refreshKey++
                     return@HomeSettingsScreen
                 }
@@ -305,7 +304,7 @@ fun HomeSettingsRouteScreen(
         },
         onOpenApplyDeepLinks = {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                showShortToast(R.string.action_app_open_by_default_settings_not_support)
+                SonnerToast.warning(R.string.action_app_open_by_default_settings_not_support)
             } else {
                 showApplyDeepLinksDialog = true
             }
@@ -316,7 +315,7 @@ fun HomeSettingsRouteScreen(
             val cacheDir = context.cacheDir
             val folderSize = cacheDir?.folderSize ?: 0L
             if (folderSize == 0L) {
-                showShortToast(R.string.cache_empty)
+                SonnerToast.info(R.string.cache_empty)
                 return@HomeSettingsScreen
             }
             showClearCacheConfirm = true
@@ -344,14 +343,14 @@ fun HomeSettingsRouteScreen(
                 runCatching { BackupManager.importFrom(context, uri) }
                     .onSuccess {
                         withContext(Dispatchers.Main) {
-                            showShortToast(R.string.backup_import_success)
+                            SonnerToast.success(R.string.backup_import_success)
                             refreshKey++
                             activity.recreate()
                         }
                     }
                     .onFailure {
                         withContext(Dispatchers.Main) {
-                            showShortToast(R.string.backup_import_failed)
+                            SonnerToast.error(R.string.backup_import_failed)
                         }
                     }
             }
@@ -373,7 +372,7 @@ fun HomeSettingsRouteScreen(
                 withContext(Dispatchers.Main) {
                     cacheKey++
                     refreshKey++
-                    if (success) showShortToast(R.string.clear_success) else showShortToast(R.string.clear_failed)
+                    if (success) SonnerToast.success(R.string.clear_success) else SonnerToast.error(R.string.clear_failed)
                 }
             }
         },
@@ -456,7 +455,7 @@ fun HomeSettingsRouteScreen(
                                 (context.applicationContext as? HanimeApplication)?.switchLauncher(
                                     item.alias
                                 )
-                                context.showToast(R.string.fake_icon_hint)
+                                SonnerToast.info(R.string.fake_icon_hint)
                                 refreshKey++
                                 showLauncherPicker = false
                             },

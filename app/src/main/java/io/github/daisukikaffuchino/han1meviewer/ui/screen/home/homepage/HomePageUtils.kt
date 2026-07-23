@@ -5,12 +5,12 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Environment
 import android.provider.MediaStore
-import android.widget.Toast
 import coil3.SingletonImageLoader
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.toBitmap
 import io.github.daisukikaffuchino.han1meviewer.R
+import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -33,7 +33,7 @@ internal fun HomeCategory.toAdvancedSearchParams(): Map<String, String> = buildM
  * 通过 [MediaStore] 写入公共图片目录。
  * 保存成功后会在主线程显示完成提示。
  *
- * @param context 用于加载图片、访问 ContentResolver 和显示 Toast 的上下文
+ * @param context 用于加载图片和访问 ContentResolver 的上下文
  * @param imageUrl 需要保存的图片地址
  */
 internal suspend fun saveImageToGallery(context: Context, imageUrl: String) {
@@ -53,6 +53,6 @@ internal suspend fun saveImageToGallery(context: Context, imageUrl: String) {
     val fos = uri?.let { context.contentResolver.openOutputStream(it) }
     fos?.use { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it) }
     withContext(Dispatchers.Main) {
-        Toast.makeText(context, context.getString(R.string.saved), Toast.LENGTH_SHORT).show()
+        SonnerToast.success(R.string.saved)
     }
 }

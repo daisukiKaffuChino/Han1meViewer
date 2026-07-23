@@ -96,7 +96,7 @@ import io.github.daisukikaffuchino.utils.appScreenWidth
 import io.github.daisukikaffuchino.utils.findActivityOrNull
 import io.github.daisukikaffuchino.utils.navBarHeight
 import io.github.daisukikaffuchino.utils.statusBarHeight
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 import io.github.daisukikaffuchino.utils.removeItself
 import java.util.Timer
 import kotlin.math.absoluteValue
@@ -1498,14 +1498,14 @@ class HJzvdStd @JvmOverloads constructor(
                         oldKeyframe,
                         newKeyframe,
                     )
-                    showShortToast(R.string.modify_success)
+                    SonnerToast.success(R.string.modify_success)
                 },
                 onDelete = { keyframe ->
                     context.findActivityOrNull<MainActivity>()?.viewModel?.removeHKeyframe(
                         currentVideoCode,
                         keyframe,
                     )
-                    showShortToast(R.string.delete_success)
+                    SonnerToast.success(R.string.delete_success)
                 },
             )
         }

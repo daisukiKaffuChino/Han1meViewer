@@ -58,7 +58,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.shapeByInteraction
 import io.github.daisukikaffuchino.han1meviewer.ui.util.rememberCopyTextToClipboard
 import io.github.daisukikaffuchino.han1meviewer.util.DisplayTextLocalizer
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 
 
 /**
@@ -311,7 +311,7 @@ fun VideoCardItem(
                                 videoItem.videoCode
                             )
                         )
-                        showShortToast(R.string.copy_to_clipboard)
+                        SonnerToast.success(R.string.copy_to_clipboard)
                     },
                 )
                 if (currentArtist != null) {

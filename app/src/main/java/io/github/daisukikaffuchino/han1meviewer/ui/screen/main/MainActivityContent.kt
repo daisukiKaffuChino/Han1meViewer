@@ -41,7 +41,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.handleMainInt
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.navigateDrawerDestination
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomePageViewModel
 import io.github.daisukikaffuchino.han1meviewer.videoUrlRegex
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
@@ -119,7 +119,7 @@ fun MainActivityContent(
         }
         LaunchedEffect(viewModel) {
             viewModel.sessionExpiredMessage.collect { event ->
-                event.message?.let(::showShortToast) ?: showShortToast(event.fallbackResId)
+                event.message?.let(SonnerToast::error) ?: SonnerToast.error(event.fallbackResId)
             }
         }
         LaunchedEffect(homeState) {
@@ -156,7 +156,7 @@ fun MainActivityContent(
                 val handled = composeNavController.navigateDrawerDestination(
                     destination = destination,
                     isLoggedIn = isLoggedIn,
-                    onRequireLogin = { showShortToast(R.string.login_first) },
+                    onRequireLogin = { SonnerToast.warning(R.string.login_first) },
                 )
                 if (handled) {
                     scope.launch { drawerState.close() }

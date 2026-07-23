@@ -41,7 +41,7 @@ import io.github.daisukikaffuchino.han1meviewer.USER_AGENT
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HProxySelector
 import io.github.daisukikaffuchino.han1meviewer.util.AnimeShaders
 import io.github.daisukikaffuchino.han1meviewer.util.AnimeShaders.getCert
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 import `is`.xyz.mpv.MPVLib
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -623,7 +623,7 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd) {
                 MPVLib.setOptionString(key, value)
             }
         } catch (e: Exception){
-            showShortToast(e.message)
+            SonnerToast.error(e.message)
         }
 
         observedProperties.forEach { (name, type) ->

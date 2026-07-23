@@ -1,6 +1,5 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
@@ -44,6 +43,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.componen
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.component.AnnouncementCard
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberRandomLoadingHint
 import io.github.daisukikaffuchino.han1meviewer.util.toNetworkErrorMessageRes
+import io.github.daisukikaffuchino.utils.SonnerToast
 
 /**
  * 首页容器屏幕，负责连接 ViewModel 状态与导航回调。
@@ -82,11 +82,7 @@ fun HomePageScreen(
     LaunchedEffect(pageState) {
         val errorState = pageState as? PageState.Error
         if (wasRefreshing && errorState?.cachedInfo != null) {
-            Toast.makeText(
-                context,
-                errorState.throwable.toNetworkErrorMessageRes(),
-                Toast.LENGTH_SHORT
-            ).show()
+            SonnerToast.error(errorState.throwable.toNetworkErrorMessageRes())
         }
         wasRefreshing = isCurrentlyRefreshing
     }

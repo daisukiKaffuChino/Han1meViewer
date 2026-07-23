@@ -8,13 +8,13 @@ import android.os.Build
 import android.provider.CalendarContract
 import android.view.View
 import android.view.WindowInsetsController
-import android.widget.Toast
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import io.github.daisukikaffuchino.han1meviewer.R
+import io.github.daisukikaffuchino.utils.SonnerToast
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.CheckInType
 import java.time.LocalDate
 import java.time.YearMonth
@@ -186,7 +186,7 @@ fun createCalendarEvent(context: Context, date: LocalDate) {
     try {
         context.startActivity(intent)
     } catch (_: android.content.ActivityNotFoundException) {
-        Toast.makeText(context, R.string.no_calendar_app, Toast.LENGTH_SHORT).show()
+        SonnerToast.warning(R.string.no_calendar_app)
     }
 }
 

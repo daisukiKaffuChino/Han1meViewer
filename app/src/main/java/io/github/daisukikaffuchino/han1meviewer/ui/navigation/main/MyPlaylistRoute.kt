@@ -7,7 +7,7 @@ import io.github.daisukikaffuchino.han1meviewer.getHanimeShareText
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.myplaylist.PlaylistScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.MyPlayListViewModelV2
 import io.github.daisukikaffuchino.han1meviewer.ui.util.rememberCopyTextToClipboard
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 
 @Composable
 fun MyPlaylistRouteScreen(
@@ -22,7 +22,7 @@ fun MyPlaylistRouteScreen(
         onClickItem = onNavigateToVideo,
         onLongClickItem = { videoCode, title ->
             copyTextToClipboard(getHanimeShareText(title, videoCode))
-            showShortToast(R.string.copy_to_clipboard)
+            SonnerToast.success(R.string.copy_to_clipboard)
         },
     )
 }

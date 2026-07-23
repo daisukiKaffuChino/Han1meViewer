@@ -1,7 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.home
 
 import android.app.Activity
-import android.widget.Toast
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.daisukikaffuchino.han1meviewer.R
+import io.github.daisukikaffuchino.utils.SonnerToast
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.dailycheckin.CheckInDialog
@@ -250,11 +250,7 @@ fun DailyCheckInScreen(
         onConfirm = {
             suckBackDialogDate?.let {
                 viewModel.clearCheckIn(it)
-                Toast.makeText(
-                    context,
-                    R.string.suck_back_done,
-                    Toast.LENGTH_SHORT
-                ).show()
+                SonnerToast.success(R.string.suck_back_done)
             }
             suckBackDialogDate = null
         },

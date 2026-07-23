@@ -38,7 +38,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.PullRefreshOverlay
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.MyPlayListViewModelV2
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 
 /**
  * 播放列表页面 Screen 层。
@@ -90,10 +90,10 @@ fun PlaylistScreen(
     LaunchedEffect(Unit) {
         viewModel.createPlaylistFlow.collect { result ->
             when (result) {
-                is WebsiteState.Error -> showShortToast(R.string.add_failed)
+                is WebsiteState.Error -> SonnerToast.error(R.string.add_failed)
                 is WebsiteState.Loading -> Unit
                 is WebsiteState.Success -> {
-                    showShortToast(R.string.add_success)
+                    SonnerToast.success(R.string.add_success)
                     viewModel.loadMyPlayList()
                 }
             }

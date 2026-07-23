@@ -62,7 +62,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.RetryableImage
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.SpacingNormal
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.VideoNormalCardMinWidth
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.MyPlayListViewModelV2
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 
 /**
  * 播放列表详情底部弹窗。
@@ -115,7 +115,7 @@ fun PlaylistBottomSheet(
                 vm.getPlaylistItems(1, currentCode, true)
             }
         } else {
-            showShortToast(R.string.unknown_error)
+            SonnerToast.error(R.string.unknown_error)
         }
     }
 
@@ -164,17 +164,17 @@ fun PlaylistBottomSheet(
     LaunchedEffect(Unit) {
         vm.modifyPlaylistFlow.collect { result ->
             when (result) {
-                is WebsiteState.Error -> showShortToast(R.string.modify_failed)
+                is WebsiteState.Error -> SonnerToast.error(R.string.modify_failed)
                 WebsiteState.Loading -> {}
                 is WebsiteState.Success -> {
                     if (result.info.isDeleted) {
                         sheetState.hide()
                         onDismiss()
-                        showShortToast(R.string.delete_success)
+                        SonnerToast.success(R.string.delete_success)
                         vm.loadMyPlayList()
                         return@collect
                     }
-                    showShortToast(R.string.modify_success)
+                    SonnerToast.success(R.string.modify_success)
                     vm.getPlaylistItems(1, currentCode, true)
                     vm.loadMyPlayList()
                 }
@@ -185,10 +185,10 @@ fun PlaylistBottomSheet(
     LaunchedEffect(Unit) {
         vm.deleteFromPlaylistFlow.collect { result ->
             when (result) {
-                is WebsiteState.Error -> showShortToast(R.string.delete_failed)
+                is WebsiteState.Error -> SonnerToast.error(R.string.delete_failed)
                 is WebsiteState.Loading -> {}
                 is WebsiteState.Success -> {
-                    showShortToast(R.string.delete_success)
+                    SonnerToast.success(R.string.delete_success)
                     vm.loadMyPlayList()
                 }
             }

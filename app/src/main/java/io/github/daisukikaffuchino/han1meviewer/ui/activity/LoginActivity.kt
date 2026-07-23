@@ -10,7 +10,6 @@ import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
@@ -26,7 +25,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.login
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.login.LoginDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.login.LoginScreen
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.coroutines.launch
 
 class LoginActivity : BaseActivity() {
@@ -42,7 +41,7 @@ class LoginActivity : BaseActivity() {
             if (isGranted) {
                 scannerLauncher.launch(Intent(this, ManualInputCookiesActivity::class.java))
             } else {
-                Toast.makeText(this, getString(R.string.request_camera), Toast.LENGTH_SHORT).show()
+                SonnerToast.warning(R.string.request_camera)
             }
         }
 
@@ -155,9 +154,9 @@ class LoginActivity : BaseActivity() {
                         isLoggingIn = false
                         state.throwable.printStackTrace()
                         if (state.throwable is IllegalStateException) {
-                            showShortToast(R.string.account_or_password_wrong)
+                            SonnerToast.error(R.string.account_or_password_wrong)
                         } else {
-                            showShortToast(R.string.login_failed)
+                            SonnerToast.error(R.string.login_failed)
                         }
                     }
 
@@ -165,7 +164,7 @@ class LoginActivity : BaseActivity() {
                         login(state.info)
                         setResult(RESULT_OK)
                         showLoginDialog = false
-                        showShortToast(R.string.login_success)
+                        SonnerToast.success(R.string.login_success)
                         finish()
                     }
                 }

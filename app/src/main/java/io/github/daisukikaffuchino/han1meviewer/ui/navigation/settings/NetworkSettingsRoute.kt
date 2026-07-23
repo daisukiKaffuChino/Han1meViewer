@@ -37,7 +37,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.NetworkSettin
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.NetworkSettingsUiState
 import io.github.daisukikaffuchino.utils.ActivityManager
 import io.github.daisukikaffuchino.utils.applicationContext
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 import okhttp3.Request
 import java.net.InetAddress
 import java.util.concurrent.Executors
@@ -326,7 +326,7 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
                 else -> false
             }
             if (!valid) {
-                showShortToast(R.string.invalid_ip_or_port)
+                SonnerToast.warning(R.string.invalid_ip_or_port)
                 return@NetworkSettingsScreen
             }
             if (type == HProxySelector.TYPE_SOCKS) {

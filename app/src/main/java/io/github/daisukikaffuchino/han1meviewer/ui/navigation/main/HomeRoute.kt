@@ -25,7 +25,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomeUiEv
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.LocalSearchHistoryQuery
 import io.github.daisukikaffuchino.han1meviewer.ui.util.rememberCopyTextToClipboard
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.CheckInCalendarViewModel
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 import java.time.LocalTime
@@ -69,13 +69,13 @@ fun HomeRouteScreen(
                     is HomeUiEvent.OpenVideo -> onNavigateToVideo(event.videoCode)
                     is HomeUiEvent.LongPressVideoCopy -> {
                         copyTextToClipboard(getHanimeShareText(event.videoTitle, event.videoCode))
-                        showShortToast(R.string.copy_to_clipboard)
+                        SonnerToast.success(R.string.copy_to_clipboard)
                     }
                     is HomeUiEvent.ShowAnnouncementDialog -> { announcement = event.announcement }
                     is HomeUiEvent.ShowExitDialog -> { showExitDialog = true }
                     is HomeUiEvent.OpenUpdatePage -> {
                         runCatching { uriHandler.openUri(event.downloadUrl) }
-                            .onFailure { showShortToast(R.string.update_link_open_failed) }
+                            .onFailure { SonnerToast.error(R.string.update_link_open_failed) }
                     }
                     is HomeUiEvent.IgnoreUpdate -> viewModel.ignoreUpdate(event.versionCode)
                 }

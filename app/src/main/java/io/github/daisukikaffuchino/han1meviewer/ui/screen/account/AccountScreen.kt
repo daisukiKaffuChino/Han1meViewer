@@ -77,7 +77,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.content.ErrorConten
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberRandomLoadingHint
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.UserAccountViewModel
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -115,7 +115,7 @@ fun AccountScreen(
         viewModel.actionFlow.collect { event ->
             when (event.state) {
                 is WebsiteState.Error -> {
-                    showShortToast(event.state.throwable.message ?: modifyFailed)
+                    SonnerToast.error(event.state.throwable.message ?: modifyFailed)
                 }
 
                 is WebsiteState.Success -> {
@@ -129,7 +129,7 @@ fun AccountScreen(
                         UserAccountAction.PasswordUpdated -> modifySuccess
                         UserAccountAction.AvatarUpdated -> modifySuccess
                     }
-                    showShortToast(message)
+                    SonnerToast.error(message)
                 }
 
                 WebsiteState.Loading -> Unit
@@ -450,7 +450,7 @@ private fun AccountContent(
                 Button(
                     onClick = {
                         if (newPassword != newPasswordConfirm) {
-                            showShortToast(R.string.password_not_match)
+                            SonnerToast.warning(R.string.password_not_match)
                         } else {
                             onUpdatePassword(oldPassword, newPassword, newPasswordConfirm)
                             oldPassword = ""

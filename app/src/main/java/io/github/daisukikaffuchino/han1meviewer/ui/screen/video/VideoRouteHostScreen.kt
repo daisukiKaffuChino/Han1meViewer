@@ -86,7 +86,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.util.rememberShareText
 import io.github.daisukikaffuchino.han1meviewer.util.loadAssetAs
 import io.github.daisukikaffuchino.utils.OrientationManager
 import io.github.daisukikaffuchino.utils.dp
-import io.github.daisukikaffuchino.utils.showShortToast
+import io.github.daisukikaffuchino.utils.SonnerToast
 import io.github.daisukikaffuchino.utils.startActivity
 import io.github.daisukikaffuchino.utils.statusBarHeight
 import kotlinx.coroutines.launch
@@ -376,7 +376,7 @@ fun VideoRouteHostScreen(
                 onOpenShare = shareText,
                 onCopyText = {
                     copyTextToClipboard(it)
-                    showShortToast(R.string.copy_to_clipboard)
+                    SonnerToast.success(R.string.copy_to_clipboard)
                 },
                 onIntroductionLinkClick = actions::openIntroductionLink,
                 stringLongPressShare = stringLongPressShare,
@@ -451,7 +451,7 @@ fun VideoRouteHostScreen(
                 val currentPosition = player.currentPositionWhenPlaying
                 showAddHKeyframeDialog = Pair(currentPosition, videoTitle ?: "Untitled")
             } else {
-                showShortToast(R.string.pause_then_long_press)
+                SonnerToast.info(R.string.pause_then_long_press)
             }
         }
         player.onWifiWarningRequested = { showWifiWarning = true }
@@ -516,7 +516,7 @@ fun VideoRouteHostScreen(
             viewModel.hanimeVideoStateFlow.collect { state ->
                 when (state) {
                     is VideoLoadingState.Error -> {
-                        state.throwable.localizedMessage?.let { showShortToast(it) }
+                        state.throwable.localizedMessage?.let(SonnerToast::error)
                         if (state.throwable is ParseException) {
                             uriHandler.openUri(getHanimeVideoLink(route.videoCode))
                         }
@@ -528,7 +528,7 @@ fun VideoRouteHostScreen(
                         videoTitle = state.info.title
                         if (state.info.videoUrls.isEmpty()) {
                             player.startButton.setOnClickListener {
-                                showShortToast(R.string.fail_to_get_video_link)
+                                SonnerToast.error(R.string.fail_to_get_video_link)
                                 uriHandler.openUri(getHanimeVideoLink(route.videoCode))
                             }
                         } else {
@@ -557,7 +557,7 @@ fun VideoRouteHostScreen(
                     }
 
                     is VideoLoadingState.NoContent -> {
-                        showShortToast(R.string.video_might_not_exist)
+                        SonnerToast.error(R.string.video_might_not_exist)
                     }
                 }
             }
@@ -603,7 +603,7 @@ fun VideoRouteHostScreen(
                 ), Charsets.UTF_8
             )
         )
-            showShortToast(
+            SonnerToast.error(
                 String(
                     Base64.decode(
                         "562+5ZCN5qCh6aqM5bSp5rqD77yM5peg5rOV6aqM6K+B5piv5ZCm6KKr56+h5pS577yM6K+36IGU57O75byA5Y+R6ICF",
@@ -628,7 +628,7 @@ fun VideoRouteHostScreen(
     LaunchedEffect(viewModel) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
             viewModel.modifyHKeyframeFlow.collect { (_, reason) ->
-                showShortToast(reason)
+                SonnerToast.info(reason)
             }
         }
     }
@@ -713,7 +713,7 @@ fun VideoRouteHostScreen(
         },
         onDismiss = {
             showNotificationPermissionReason = false
-            showShortToast(R.string.msg_deny_download_notification)
+            SonnerToast.warning(R.string.msg_deny_download_notification)
         },
     )
 
