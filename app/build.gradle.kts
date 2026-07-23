@@ -21,8 +21,8 @@ android {
         applicationId = "io.github.daisukikaffuchino.han1meviewer"
         minSdk = 29
         targetSdk = 37
-        versionCode = 260722
-        versionName = "26.2.0"
+        versionCode = 260723
+        versionName = "26.2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

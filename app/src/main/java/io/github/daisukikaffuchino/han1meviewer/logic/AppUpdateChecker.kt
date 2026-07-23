@@ -55,7 +55,7 @@ object AppUpdateChecker {
     private const val ENCODED_UPDATE_URL =
         "aHR0cHM6Ly9obm0tMTI1ODY2NDI3Ni5jb3MuYXAtc2hhbmdoYWkubXlxY2xvdWQuY29tL3VwZGF0ZS5qc29u"
     private const val ENCODED_UPDATE_REFERER = "aG5tdmlld2VydXAuY29t"
-    private const val ENCODED_CURRENT_VERSION_CODE = "MjYwNzIy"
+    private const val CURRENT_VERSION_CODE = 260723
     private const val CACHED_JSON_KEY = "app_update_cached_json"
     private const val IGNORED_VERSION_CODE_KEY = "app_update_ignored_version_code"
 
@@ -138,9 +138,7 @@ object AppUpdateChecker {
             return null
         }
 
-        val currentVersionCode = ENCODED_CURRENT_VERSION_CODE
-            .decodeFromStringByBase64(Base64.NO_WRAP)
-            .toInt()
+        val currentVersionCode = CURRENT_VERSION_CODE
         val ignoredVersionCode = Preferences.preferenceSp.getInt(
             IGNORED_VERSION_CODE_KEY,
             -1,
