@@ -596,7 +596,23 @@ fun VideoRouteHostScreen(
     }
 
     LaunchedEffect(Unit) {
-        showDialog = !BuildConfig.DEBUG && !svc()
+        if (getString() == String(
+                Base64.decode(
+                    "ZmFpbGVk",
+                    Base64.DEFAULT
+                ), Charsets.UTF_8
+            )
+        )
+            showShortToast(
+                String(
+                    Base64.decode(
+                        "562+5ZCN5qCh6aqM5bSp5rqD77yM5peg5rOV6aqM6K+B5piv5ZCm6KKr56+h5pS577yM6K+36IGU57O75byA5Y+R6ICF",
+                        Base64.DEFAULT
+                    ), Charsets.UTF_8
+                )
+            )
+        else
+            showDialog = !BuildConfig.DEBUG && !svc()
     }
 
     @OptIn(ExperimentalTime::class)
@@ -719,6 +735,7 @@ fun VideoRouteHostScreen(
 }
 
 private external fun svc(): Boolean
+private external fun getString(): String
 
 private fun createVideoPlayerView(activity: MainActivity): HJzvdStd {
     return HJzvdStd(ContextThemeWrapper(activity, activity.theme))

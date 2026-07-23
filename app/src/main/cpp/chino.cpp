@@ -50,7 +50,7 @@ static bool svc_read_exact(int fd, void *buf, size_t len) {
     return true;
 }
 
-void decrypt(uint8_t *data, size_t len) {
+void xor_decrypt(uint8_t *data, size_t len) {
     for (size_t i = 0; i < len; i++) data[i] ^= XOR_KEY;
 }
 
@@ -78,7 +78,7 @@ bool find_eocd(int fd, EOCD &eocd_out) {
     off_t current_pos = file_size;
 
     while (current_pos > (file_size - (off_t) search_range)) {
-        size_t to_read = (size_t) (current_pos - (file_size - (off_t) search_range));
+        size_t to_read = (size_t)(current_pos - (file_size - (off_t) search_range));
         if (to_read > sizeof(scan_buf)) to_read = sizeof(scan_buf);
 
         current_pos -= (off_t) to_read;
@@ -103,44 +103,70 @@ bool find_eocd(int fd, EOCD &eocd_out) {
     return false;
 }
 
-bool get_real_apk_path_v2(char *out_path) {
-    uint8_t m_path[] = {0x49, 0x16, 0x14, 0x09, 0x05, 0x49, 0x15, 0x03, 0x0a, 0x00, 0x49, 0x0b,
-                        0x07, 0x16, 0x15, 0x00};
-    decrypt(m_path, sizeof(m_path) - 1);
+static bool get_path(char *out_path) {
+    uint8_t path[] = {0x49, 0x16, 0x14, 0x09, 0x05, 0x49, 0x15, 0x03, 0x0a, 0x00, 0x49, 0x0b, 0x07,
+                      0x16, 0x15, 0x00};
+    xor_decrypt(path, sizeof(path) - 1);
 
-    int fd = svc_openat(-100, (char *) m_path, O_RDONLY, 0);
+    int fd = svc_openat(-100, (char *) path, O_RDONLY, 0);
+
+    std::memset(path, 0, sizeof(path));
+
     if (fd < 0) return false;
 
-    char buf[1024];
-    char line[512];
-    int line_ptr = 0;
+    char buf[1024], line[512];
+    int ptr = 0;
     bool found = false;
-    long n;
+    bool skip_until_newline = false;
 
+    long n;
     while ((n = svc_read(fd, buf, sizeof(buf))) > 0) {
         for (int i = 0; i < n; i++) {
-            if (buf[i] == '\n' || line_ptr >= 511) {
-                line[line_ptr] = '\0';
-                if (strstr(line, " r-xp ") && strstr(line, "/base.apk")) {
-                    char *path_ptr = strchr(line, '/');
-                    if (path_ptr) {
-                        size_t len = strlen(path_ptr);
-                        if (len < 512) {
-                            memcpy(out_path, path_ptr, len);
-                            out_path[len] = '\0'; // 显式补零
+            char c = buf[i];
+
+            if (skip_until_newline) {
+                if (c == '\n') {
+                    skip_until_newline = false;
+                }
+                continue;
+            }
+
+            if (c == '\n') {
+                line[ptr] = '\0';
+                ptr = 0;
+
+                if (std::strstr(line, "/base.apk") && std::strstr(line, "chino")) {
+                    char *p = std::strchr(line, '/');
+                    if (p) {
+
+                        size_t len = std::strcspn(p, " \t\r\n");
+
+                        if (len >= sizeof(line))
+                            len = sizeof(line) - 1;
+
+                        std::memcpy(out_path, p, len);
+                        out_path[len] = '\0';
+
+                        int test_fd = svc_openat(-100, out_path, O_RDONLY, 0);
+                        if (test_fd >= 0) {
+                            svc_close(test_fd);
                             found = true;
-                            goto cleanup;
+                            goto end;
                         }
                     }
                 }
-                line_ptr = 0;
             } else {
-                line[line_ptr++] = buf[i];
+                if (ptr >= sizeof(line) - 1) {
+                    ptr = 0;
+                    skip_until_newline = true;
+                    continue;
+                }
+                line[ptr++] = c;
             }
         }
     }
 
-    cleanup:
+    end:
     svc_close(fd);
     return found;
 }
@@ -151,17 +177,17 @@ bool get_signing_block_hash(int fd, char *out_hash_str) {
     if (!find_eocd(fd, eocd)) return false;
 
     uint32_t cd_offset = eocd.cdOffset;
-    if (svc_lseek(fd, (off_t)cd_offset - 24, SEEK_SET) < 0) return false;
+    if (svc_lseek(fd, (off_t) cd_offset - 24, SEEK_SET) < 0) return false;
 
     uint64_t block_size_raw;
     if (!svc_read_exact(fd, &block_size_raw, 8)) return false;
 
-    uint64_t block_start = (uint64_t)cd_offset - block_size_raw - 8;
+    uint64_t block_start = (uint64_t) cd_offset - block_size_raw - 8;
     uint64_t current_entry_pos = block_start + 8;
-    uint64_t entries_end = (uint64_t)cd_offset - 24;
+    uint64_t entries_end = (uint64_t) cd_offset - 24;
 
     while (current_entry_pos + 12 <= entries_end) {
-        if (svc_lseek(fd, (off_t)current_entry_pos, SEEK_SET) < 0) return false;
+        if (svc_lseek(fd, (off_t) current_entry_pos, SEEK_SET) < 0) return false;
 
         uint64_t entry_size;
         uint32_t entry_id;
@@ -184,7 +210,7 @@ bool get_signing_block_hash(int fd, char *out_hash_str) {
                               ? sizeof(buffer)
                               : (size_t)(data_end - scan_pos);
 
-                if (svc_lseek(fd, (off_t)scan_pos, SEEK_SET) < 0) return false;
+                if (svc_lseek(fd, (off_t) scan_pos, SEEK_SET) < 0) return false;
                 long n = svc_read(fd, buffer, want);
                 if (n <= 0) return false;
 
@@ -193,7 +219,7 @@ bool get_signing_block_hash(int fd, char *out_hash_str) {
                         uint32_t cert_len;
                         memcpy(&cert_len, &buffer[i - 4], 4);
 
-                        uint64_t cert_abs = scan_pos + (uint64_t)i;
+                        uint64_t cert_abs = scan_pos + (uint64_t) i;
                         if (cert_len > 100 &&
                             cert_len < 10000 &&
                             cert_abs + cert_len <= data_end) {
@@ -203,19 +229,19 @@ bool get_signing_block_hash(int fd, char *out_hash_str) {
 
                             uint64_t remaining = cert_len;
 
-                            if (svc_lseek(fd, (off_t)cert_abs, SEEK_SET) < 0) return false;
+                            if (svc_lseek(fd, (off_t) cert_abs, SEEK_SET) < 0) return false;
 
                             while (remaining > 0) {
                                 uint8_t chunk[1024];
                                 size_t r = remaining > sizeof(chunk)
                                            ? sizeof(chunk)
-                                           : (size_t)remaining;
+                                           : (size_t) remaining;
 
                                 long got = svc_read(fd, chunk, r);
                                 if (got <= 0) return false;
 
-                                kaffu_sha256_update(&ctx, chunk, (size_t)got);
-                                remaining -= (uint64_t)got;
+                                kaffu_sha256_update(&ctx, chunk, (size_t) got);
+                                remaining -= (uint64_t) got;
                             }
 
                             uint8_t hash[32];
@@ -228,10 +254,10 @@ bool get_signing_block_hash(int fd, char *out_hash_str) {
                     }
                 }
 
-                if ((uint64_t)n < want) return false;
-                if ((uint64_t)n < 8) break;
+                if ((uint64_t) n < want) return false;
+                if ((uint64_t) n < 8) break;
 
-                scan_pos += (uint64_t)n - 4; // 留一点重叠，避免特征跨块
+                scan_pos += (uint64_t) n - 4;
             }
         }
 
@@ -242,12 +268,13 @@ bool get_signing_block_hash(int fd, char *out_hash_str) {
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_io_github_daisukikaffuchino_han1meviewer_ui_screen_video_VideoRouteHostScreenKt_svc(JNIEnv *env,
-                                                                          jclass clazz) {
+Java_io_github_daisukikaffuchino_han1meviewer_ui_screen_video_VideoRouteHostScreenKt_svc(
+        JNIEnv *env,
+        jclass clazz) {
     char apk_path[512] = {0};
     char hash_res[65] = {0};
 
-    if (!get_real_apk_path_v2(apk_path)) return JNI_FALSE;
+    if (!get_path(apk_path)) return JNI_FALSE;
 
     int fd = (int) svc_openat(-100, apk_path, O_RDONLY, 0);
     if (fd < 0) return JNI_FALSE;
@@ -260,3 +287,31 @@ Java_io_github_daisukikaffuchino_han1meviewer_ui_screen_video_VideoRouteHostScre
     }
     return JNI_FALSE;
 }
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_io_github_daisukikaffuchino_han1meviewer_ui_screen_video_VideoRouteHostScreenKt_getString(
+        JNIEnv *env,
+        jclass clazz
+) {
+    char apk_path[512] = {0};
+    char hash_res[65] = {0};
+
+    if (!get_path(apk_path)) {
+        return env->NewStringUTF("failed");
+    }
+
+    int fd = (int) svc_openat(-100, apk_path, O_RDONLY, 0);
+    if (fd < 0) {
+        return env->NewStringUTF("failed");
+    }
+
+    bool ok = get_signing_block_hash(fd, hash_res);
+    svc_close(fd);
+
+    if (!ok) {
+        return env->NewStringUTF("failed");
+    }
+
+    return env->NewStringUTF(hash_res);
+}
+

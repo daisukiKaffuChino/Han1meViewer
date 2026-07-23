@@ -10,9 +10,12 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.net.toUri
 import io.github.daisukikaffuchino.han1meviewer.Preferences.cloudFlareCookie
+import io.github.daisukikaffuchino.han1meviewer.Preferences.cloudFlareCookieHost
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.USER_AGENT
+import io.github.daisukikaffuchino.han1meviewer.logic.network.CloudflareVerificationCoordinator
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.web.CloudflareScreen
 import io.github.daisukikaffuchino.han1meviewer.util.CookieString
 
@@ -20,17 +23,21 @@ class CloudflareActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_URL = "request_url"
-        var onFinished: (() -> Unit)? = null
+        const val EXTRA_VERIFICATION_HOST = "verification_host"
     }
 
     private val progressState = mutableIntStateOf(0)
     private val tipTextState = mutableStateOf("")
+    private var verificationHost: String? = null
+    private var verificationCompleted = false
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         val url = intent.getStringExtra(EXTRA_URL) ?: run {
             finish()
             return
         }
+        verificationHost = intent.getStringExtra(EXTRA_VERIFICATION_HOST)
+            ?: url.toUri().host?.lowercase()
 
         tipTextState.value = getString(R.string.complete_cloudflare_verification_with_warning)
 
@@ -105,12 +112,20 @@ class CloudflareActivity : BaseActivity() {
                                     !html.contains("#challenge-success-text") &&
                                     !html.contains("#challenge-error-text")
                                 ) {
-                                    val cookies = cookieMgr.getCookie(url) ?: ""
-                                    if (cookies.contains("cf_clearance")) {
+                                    val completedUrl = view?.url ?: url
+                                    val cookies = cookieMgr.getCookie(completedUrl) ?: ""
+                                    if (cookies.containsCookie("cf_clearance")) {
+                                        val cookieHost = completedUrl.toUri().host?.lowercase()
+                                            ?: verificationHost
+                                            ?: return@evaluateJavascript
                                         cloudFlareCookie = CookieString(cookies)
+                                        cloudFlareCookieHost = cookieHost
                                         cookieMgr.flush()
-                                        onFinished?.invoke()
-                                        onFinished = null
+                                        verificationCompleted = true
+                                        CloudflareVerificationCoordinator.complete(
+                                            verificationHost ?: cookieHost,
+                                            succeeded = true,
+                                        )
                                         finish()
                                     }
                                 }
@@ -121,6 +136,19 @@ class CloudflareActivity : BaseActivity() {
             }
             loadUrl(url)
         }
+    }
+
+    override fun onDestroy() {
+        if (!verificationCompleted && !isChangingConfigurations) {
+            verificationHost?.let {
+                CloudflareVerificationCoordinator.complete(it, succeeded = false)
+            }
+        }
+        super.onDestroy()
+    }
+
+    private fun String.containsCookie(name: String): Boolean {
+        return split(';').any { it.trim().substringBefore('=') == name }
     }
 
 }

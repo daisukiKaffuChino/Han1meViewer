@@ -40,7 +40,6 @@
         <activity
             android:name=".ui.activity.CloudflareActivity"
             android:exported="false"
-            android:launchMode="singleTask"
             android:theme="@style/Theme.Hanime" />
 
         <service

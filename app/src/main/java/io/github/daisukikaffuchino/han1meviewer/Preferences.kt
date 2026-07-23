@@ -65,6 +65,10 @@ object Preferences {
         }
     val cloudFlareCookieStateFlow = MutableStateFlow(cloudFlareCookie)
 
+    var cloudFlareCookieHost: String
+        get() = getSpValue(CLOUDFLARE_COOKIE_HOST, EMPTY_STRING).lowercase()
+        set(value) = putSpValue(CLOUDFLARE_COOKIE_HOST, value.lowercase())
+
     // 更新 相關
 
     // 設定 相關

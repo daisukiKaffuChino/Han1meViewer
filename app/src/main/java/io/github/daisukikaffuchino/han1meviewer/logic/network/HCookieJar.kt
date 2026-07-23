@@ -31,7 +31,9 @@ class HCookieJar : CookieJar {
         cookieMap[host]?.let { cookies.addAll(it) }
 
         cookies.addAll(Preferences.loginCookieStateFlow.value.toLoginCookieList(host))
-        cookies.addAll(Preferences.cloudFlareCookieStateFlow.value.toLoginCookieList(host))
+        if (Preferences.cloudFlareCookieHost == host) {
+            cookies.addAll(Preferences.cloudFlareCookieStateFlow.value.toLoginCookieList(host))
+        }
 
         Log.d("HCookieJar", "loadForRequest for $host: $cookies")
 
