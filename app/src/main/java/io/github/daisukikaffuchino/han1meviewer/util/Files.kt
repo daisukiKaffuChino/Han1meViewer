@@ -8,10 +8,8 @@ import android.util.Log
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import io.github.daisukikaffuchino.han1meviewer.FILE_PROVIDER_AUTHORITY
-import io.github.daisukikaffuchino.han1meviewer.HFileManager
 import io.github.daisukikaffuchino.han1meviewer.HJson
 import io.github.daisukikaffuchino.han1meviewer.R
-import io.github.daisukikaffuchino.utils.application
 import io.github.daisukikaffuchino.utils.applicationContext
 import io.github.daisukikaffuchino.utils.showShortToast
 import kotlinx.coroutines.Dispatchers
@@ -23,41 +21,12 @@ import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 
-@Deprecated(
-    "Use alternative",
-    ReplaceWith(
-        "HFileManager.createVideoName(title, quality, suffix)",
-        imports = ["io.github.daisukikaffuchino.han1meviewer.HFileManager"]
-    )
-)
-fun createDownloadName(title: String, quality: String, suffix: String = HFileManager.DEF_VIDEO_TYPE) =
-    "${title}_${quality}.${suffix}"
-
-@Deprecated(
-    "Use alternative",
-    ReplaceWith(
-        "HFileManager.getDownloadVideoFile(videoCode, title, quality, suffix)",
-        imports = ["io.github.daisukikaffuchino.han1meviewer.HFileManager"]
-    )
-)
-fun getDownloadedHanimeFile(title: String, quality: String, suffix: String = HFileManager.DEF_VIDEO_TYPE): File {
-    return File(HFileManager.getAppDownloadFolder(application),
-        HFileManager.createVideoName(title, quality, suffix)
-    )
-}
-
-@Deprecated("不用了")
-fun checkDownloadedHanimeFile(startsWith: String): Boolean {
-    return HFileManager.getAppDownloadFolder(application).let { folder ->
-        folder.listFiles()?.any { it.name.startsWith(startsWith) }
-    } == true
-}
-
 /**
  * Must be Activity Context!
  */
 fun Context.openDownloadedHanimeVideoLocally(
-    uri: String, onFileNotFound: (() -> Unit)? = null,
+    uri: String,
+    onFileNotFound: (() -> Unit)? = null,
 ) {
     val videoUri = uri.toUri()
     if (videoUri.scheme == ContentResolver.SCHEME_CONTENT) {
@@ -132,7 +101,7 @@ suspend fun InputStream.copyTo(
                 }
                 bytes = read(buffer)
             }
-            Log.i("progress",bytesCopied.toString())
+            Log.i("progress", bytesCopied.toString())
             bytesCopied
         }
     }

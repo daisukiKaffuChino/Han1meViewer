@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -127,8 +127,8 @@ fun PlaylistScreen(
         title = stringResource(R.string.my_list),
         onBack = navigateBack,
         scrollBehavior = scrollBehavior,
-        actions = {
-            FilledIconButton(onClick = { showCreatePlaylistDialog = true }) {
+        floatingActionButton = {
+            FloatingActionButton(onClick = { showCreatePlaylistDialog = true }) {
                 Icon(
                     Icons.Default.Add,
                     contentDescription = stringResource(R.string.create_new_playlist)

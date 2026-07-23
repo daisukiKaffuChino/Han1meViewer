@@ -13,9 +13,6 @@ import coil3.toBitmap
 import io.github.daisukikaffuchino.han1meviewer.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 /**
  * 将首页分类转换为高级搜索请求参数。
@@ -30,7 +27,6 @@ internal fun HomeCategory.toAdvancedSearchParams(): Map<String, String> = buildM
     sort?.let { put("sort", it) }
     tags?.let { put("tags", it) }
 }
-
 /**
  * 下载远程图片并保存到系统相册。
  *
@@ -59,17 +55,4 @@ internal suspend fun saveImageToGallery(context: Context, imageUrl: String) {
     withContext(Dispatchers.Main) {
         Toast.makeText(context, context.getString(R.string.saved), Toast.LENGTH_SHORT).show()
     }
-}
-
-/**
- * 将公告秒级时间戳格式化为本地时间字符串。
- *
- * @param timestamp 秒级 Unix 时间戳。
- * @return 本地日期时间字符串。
- */
-fun formatTimestamp(timestamp: Long): String {
-    val instant = Instant.ofEpochSecond(timestamp)
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        .withZone(ZoneId.systemDefault())
-    return formatter.format(instant)
 }

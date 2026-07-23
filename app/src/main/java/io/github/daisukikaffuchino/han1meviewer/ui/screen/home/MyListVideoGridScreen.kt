@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -166,7 +166,7 @@ fun VideoGridScreen(
         },
         onBack = onBack,
         actions = {
-            FilledIconButton(onClick = { showHelpDialog = true }) {
+            IconButton(onClick = { showHelpDialog = true }) {
                 Icon(
                     painter = painterResource(R.drawable.ic_baseline_help_24),
                     contentDescription = stringResource(R.string.help),

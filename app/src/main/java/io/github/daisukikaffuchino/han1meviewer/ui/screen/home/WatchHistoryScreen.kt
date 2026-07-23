@@ -5,15 +5,13 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -126,30 +124,13 @@ fun WatchHistoryTabScreen(
     val currentOnlineSort by onlineSort.collectAsState()
     val currentOnlineLoadedPageCount by onlineLoadedPageCount.collectAsState()
     val currentOnlineIsLoadingMore by onlineIsLoadingMore.collectAsState()
-    var showHelpDialog by rememberSaveable { mutableStateOf(false) }
     var showDeleteAllLocalDialog by rememberSaveable { mutableStateOf(false) }
-
-    val helpMessage = if (pagerState.currentPage == 1) {
-        stringResource(R.string.watch_history_online_help)
-    } else {
-        stringResource(R.string.long_press_to_delete_all_histories)
-    }
 
     LaunchedEffect(pagerState.currentPage) {
         if (pagerState.currentPage == 1 && currentOnlineItems.isEmpty() && currentOnlineLoadedPageCount == 0 && currentOnlineState is PageLoadingState.Loading) {
             onRefreshOnline(currentOnlineSort)
         }
     }
-
-    ConfirmDialog(
-        visible = showHelpDialog,
-        title = stringResource(R.string.help),
-        message = helpMessage,
-        confirmText = stringResource(R.string.ok),
-        dismissText = stringResource(R.string.close),
-        onConfirm = { showHelpDialog = false },
-        onDismiss = { showHelpDialog = false },
-    )
 
     ConfirmDialog(
         visible = showDeleteAllLocalDialog,
@@ -199,14 +180,10 @@ fun WatchHistoryTabScreen(
                 modifier = Modifier.fillMaxSize(),
             ) { page ->
                 when (page) {
-                    0 -> WatchHistoryScreen(
+                    0 -> WatchHistoryListContent(
                         histories = localHistories,
-                        onBack = onBack,
                         onOpenVideo = onOpenLocalVideo,
                         onDeleteHistory = onDeleteLocalHistory,
-                        onDeleteAllHistories = onDeleteAllLocalHistories,
-                        useScaffold = false,
-                        showDeleteAllAction = false,
                         listState = localListState,
                     )
 
@@ -230,19 +207,13 @@ fun WatchHistoryTabScreen(
 }
 
 @Composable
-private fun WatchHistoryScreen(
+private fun WatchHistoryListContent(
     histories: List<WatchHistoryEntity>,
-    onBack: () -> Unit,
     onOpenVideo: (WatchHistoryEntity) -> Unit,
     onDeleteHistory: (WatchHistoryEntity) -> Unit,
-    onDeleteAllHistories: () -> Unit,
-    useScaffold: Boolean,
-    showDeleteAllAction: Boolean,
     listState: LazyListState = rememberLazyListState(),
 ) {
     var pendingDelete by remember { mutableStateOf<WatchHistoryEntity?>(null) }
-    var showDeleteAllDialog by rememberSaveable { mutableStateOf(false) }
-    var showHelpDialog by rememberSaveable { mutableStateOf(false) }
 
     ConfirmDialog(
         visible = pendingDelete != null,
@@ -257,85 +228,31 @@ private fun WatchHistoryScreen(
         onDismiss = { pendingDelete = null },
     )
 
-    ConfirmDialog(
-        visible = showDeleteAllDialog,
-        title = stringResource(R.string.watch_history_delete_all_title),
-        message = stringResource(R.string.sure_to_delete_all_histories),
-        confirmText = stringResource(R.string.watch_history_clear_all),
-        dismissText = stringResource(R.string.cancel),
-        onConfirm = {
-            onDeleteAllHistories()
-            showDeleteAllDialog = false
-        },
-        onDismiss = { showDeleteAllDialog = false },
-    )
-
-    ConfirmDialog(
-        visible = showHelpDialog,
-        title = stringResource(R.string.help),
-        message = stringResource(R.string.long_press_to_delete_all_histories),
-        confirmText = stringResource(R.string.ok),
-        dismissText = stringResource(R.string.close),
-        onConfirm = { showHelpDialog = false },
-        onDismiss = { showHelpDialog = false },
-    )
-
-    val content: @Composable (PaddingValues) -> Unit = { paddingValues ->
-        if (histories.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center,
-            ) {
-                EmptyContent(
-                    hint = stringResource(R.string.watch_history_empty_title),
-                    subHint = stringResource(R.string.watch_history_empty_description),
-                )
-            }
-        } else {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp),
-            ) {
-                items(histories, key = { it.id }) { history ->
-                    WatchHistoryCard(
-                        history = history,
-                        onClick = { onOpenVideo(history) },
-                        onLongClick = { pendingDelete = history },
-                    )
-                }
-            }
-        }
-    }
-
-    if (useScaffold) {
-        val showClearFab by rememberWatchHistoryFabVisibility(listState)
-        HanimeScaffold(
-            title = stringResource(R.string.watch_history),
-            subtitle = {
-                Text(
-                    text = stringResource(R.string.watch_history_total_count, histories.size),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            },
-            onBack = onBack,
-            floatingActionButton = {
-                WatchHistoryClearFab(
-                    visible = showDeleteAllAction && histories.isNotEmpty() && showClearFab,
-                    onClick = { showDeleteAllDialog = true },
-                )
-            },
-        ) { paddingValues ->
-            content(paddingValues)
+    if (histories.isEmpty()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            EmptyContent(
+                hint = stringResource(R.string.watch_history_empty_title),
+                subHint = stringResource(R.string.watch_history_empty_description),
+            )
         }
     } else {
-        content(PaddingValues())
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            items(histories, key = { it.id }) { history ->
+                WatchHistoryCard(
+                    history = history,
+                    onClick = { onOpenVideo(history) },
+                    onDeleteClick = { pendingDelete = history },
+                )
+            }
+        }
     }
 }
 
@@ -619,12 +536,11 @@ private fun OnlineHistorySortChip(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun WatchHistoryCard(
     history: WatchHistoryEntity,
     onClick: () -> Unit,
-    onLongClick: () -> Unit,
+    onDeleteClick: () -> Unit,
 ) {
     val fixTimestamp = { ts: Long -> if (ts < 9999999999L) ts * 1000 else ts }
     val dateFormatter = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
@@ -637,7 +553,7 @@ private fun WatchHistoryCard(
     ElevatedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .combinedClickable(onClick = onClick),
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
     ) {
         Row(
@@ -682,20 +598,13 @@ private fun WatchHistoryCard(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Row(
-                    verticalAlignment = Alignment.Top,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = history.title,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
+                Text(
+                    text = history.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
                 WatchHistoryMeta(
                     iconRes = R.drawable.ic_baseline_access_time_24,
                     label = stringResource(R.string.watch_history_watched_at, watchDate),
@@ -708,7 +617,7 @@ private fun WatchHistoryCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 4.dp),
-                    horizontalArrangement = Arrangement.End
+                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
                 ) {
                     AssistChip(
                         onClick = onClick,
@@ -731,11 +640,8 @@ private fun WatchHistoryCard(
                         ),
                         modifier = Modifier.height(28.dp)
                     )
-                    Spacer(
-                        modifier = Modifier.width(6.dp)
-                    )
                     FilledIconButton(
-                        onClick = onLongClick,
+                        onClick = onDeleteClick,
                         modifier = Modifier.size(25.dp)
                     ) {
                         Icon(
@@ -790,14 +696,10 @@ private fun WatchHistoryScreenPreview() {
         )
     }
     ComponentPreview {
-        WatchHistoryScreen(
+        WatchHistoryListContent(
             histories = previews,
-            onBack = {},
             onOpenVideo = {},
             onDeleteHistory = {},
-            onDeleteAllHistories = {},
-            useScaffold = true,
-            showDeleteAllAction = true,
         )
     }
 }
@@ -806,14 +708,10 @@ private fun WatchHistoryScreenPreview() {
 @Composable
 private fun WatchHistoryEmptyPreview() {
     ComponentPreview {
-        WatchHistoryScreen(
+        WatchHistoryListContent(
             histories = emptyList<WatchHistoryEntity>(),
-            onBack = {},
             onOpenVideo = {},
             onDeleteHistory = {},
-            onDeleteAllHistories = {},
-            useScaffold = true,
-            showDeleteAllAction = true,
         )
     }
 }

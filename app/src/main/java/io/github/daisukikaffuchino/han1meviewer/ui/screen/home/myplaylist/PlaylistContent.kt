@@ -6,23 +6,15 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LoadingIndicator
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -31,7 +23,9 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.Playlists
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.LoadMoreFooter
+import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
+import io.github.daisukikaffuchino.han1meviewer.ui.component.content.ErrorContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyVerticalGrid
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.getColumnCount
 
@@ -74,66 +68,53 @@ fun PlaylistContent(
         transitionSpec = {
             fadeIn(tween(300)) togetherWith fadeOut(tween(200))
         }
-    ) { target ->
-        when (target) {
-            is WebsiteState.Loading -> {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    LoadingIndicator()
-                }
-            }
-
-            is WebsiteState.Error -> {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            stringResource(
-                                R.string.load_failed_with_reason,
-                                target.throwable.message.orEmpty()
+    ) {
+        PageContent(
+            isLoading = rawState is WebsiteState.Loading,
+            isError = rawState is WebsiteState.Error,
+            isEmpty = rawState is WebsiteState.Success &&
+                rawState.info.playlists.isEmpty() && uiState.playlists.isEmpty(),
+            onRetry = { onEvent(PlaylistEvent.OnRefresh) },
+            error = {
+                ErrorContent(
+                    message = stringResource(
+                        R.string.load_failed_with_reason,
+                        (rawState as WebsiteState.Error).throwable.message.orEmpty(),
+                    ),
+                    onRetry = { onEvent(PlaylistEvent.OnRefresh) },
+                )
+            },
+            empty = { EmptyContent(stringResource(R.string.empty_content)) },
+        ) {
+            LazyVerticalGrid(
+                state = gridState,
+                columns = GridCells.Fixed(getColumnCount(180)),
+                contentPadding = PaddingValues(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(uiState.playlists) { playlist ->
+                    PlaylistItem(
+                        playlist = playlist,
+                        modifier = Modifier.height(140.dp)
+                    ) {
+                        onEvent(
+                            PlaylistEvent.OnPlaylistClick(
+                                playlist.listCode,
+                                playlist.title
                             )
                         )
-                        Spacer(Modifier.height(8.dp))
-                        Button(onClick = { onEvent(PlaylistEvent.OnRefresh) }) {
-                            Text(stringResource(R.string.retry))
-                        }
                     }
                 }
-            }
-
-            is WebsiteState.Success -> {
-                if (target.info.playlists.isEmpty() && uiState.playlists.isEmpty()) {
-                    EmptyContent(stringResource(R.string.empty_content))
-                    return@AnimatedContent
-                }
-                LazyVerticalGrid(
-                    state = gridState,
-                    columns = GridCells.Fixed(getColumnCount(180)),
-                    contentPadding = PaddingValues(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(uiState.playlists) { playlist ->
-                        PlaylistItem(
-                            playlist = playlist,
-                            modifier = Modifier.height(140.dp)
-                        ) {
-                            onEvent(
-                                PlaylistEvent.OnPlaylistClick(
-                                    playlist.listCode,
-                                    playlist.title
-                                )
-                            )
-                        }
-                    }
-                    if (uiState.playlists.isNotEmpty()) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            LoadMoreFooter(
-                                state = if (uiState.noMorePlaylists) PageLoadingState.NoMoreData
-                                else if (uiState.isLoadingMore) PageLoadingState.Loading
-                                else PageLoadingState.Success(Unit),
-                                loadedPage = uiState.playlistPage - 1,
-                                isLoadingMore = uiState.isLoadingMore
-                            )
-                        }
+                if (uiState.playlists.isNotEmpty()) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        LoadMoreFooter(
+                            state = if (uiState.noMorePlaylists) PageLoadingState.NoMoreData
+                            else if (uiState.isLoadingMore) PageLoadingState.Loading
+                            else PageLoadingState.Success(Unit),
+                            loadedPage = uiState.playlistPage - 1,
+                            isLoadingMore = uiState.isLoadingMore
+                        )
                     }
                 }
             }

@@ -22,6 +22,7 @@ fun SettingsScaffold(
     fallbackDestination: Any,
     onNavigateBack: (() -> Boolean)? = null,
     actions: @Composable RowScope.() -> Unit = {},
+    floatingActionButton: @Composable () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -46,6 +47,7 @@ fun SettingsScaffold(
                 )
             }
         },
+        floatingActionButton = floatingActionButton,
         containerColor = HanimeDefaults.Colors.Background,
     ) { innerPadding ->
         Box(

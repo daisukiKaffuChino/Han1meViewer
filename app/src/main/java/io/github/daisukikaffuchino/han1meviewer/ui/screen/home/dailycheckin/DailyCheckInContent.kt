@@ -94,9 +94,23 @@ fun DailyCheckInContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         StatsCard(
-            checkedDays = animatedCheckedDays,
-            monthlyTotal = animatedMonthlyTotal,
-            bestStreak = animatedBestStreak,
+            items = listOf(
+                StatsItem(
+                    R.drawable.calendar_month_24px,
+                    stringResource(R.string.this_month_checkin),
+                    stringResource(R.string.days, animatedCheckedDays),
+                ),
+                StatsItem(
+                    R.drawable.alarm_24px,
+                    stringResource(R.string.has_cum_days),
+                    stringResource(R.string.counts, animatedMonthlyTotal),
+                ),
+                StatsItem(
+                    R.drawable.calendar_view_week_24px,
+                    stringResource(R.string.best_streak),
+                    "${animatedBestStreak}${stringResource(R.string.day_unit)}",
+                ),
+            ),
         )
 
         Spacer(modifier = Modifier.height(16.dp))

@@ -1,11 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings
 
 import android.content.Context
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -39,16 +35,6 @@ private const val SHOW_COMMENT_WHEN_COUNTDOWN = "show_comment_when_countdown"
 private const val SHARED_H_KEYFRAMES_ENABLE = "shared_h_keyframes_enable"
 private const val SHARED_H_KEYFRAMES_USE_FIRST = "shared_h_keyframes_use_first"
 private const val WHEN_COUNTDOWN_REMIND = "when_countdown_remind"
-
-@Composable
-fun HKeyframesTopBarActions(onImportClick: () -> Unit) {
-    FilledIconButton(onClick = onImportClick) {
-        Icon(
-            imageVector = Icons.Filled.Add,
-            contentDescription = stringResource(R.string.h_keyframes_import_shared),
-        )
-    }
-}
 
 @Composable
 fun HKeyframesRouteScreen(

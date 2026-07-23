@@ -1,13 +1,8 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.navigation.main
 
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
-import android.widget.Toast
 import androidx.compose.runtime.Composable
-import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.DailyCheckInScreen
-import io.github.daisukikaffuchino.han1meviewer.ui.widget.CheckInWidgetProvider
 
 @Composable
 fun DailyCheckInRouteScreen(
@@ -17,21 +12,5 @@ fun DailyCheckInRouteScreen(
     DailyCheckInScreen(
         activity = activity,
         onBack = onBack,
-        onAddWidget = {
-            val mgr = AppWidgetManager.getInstance(activity)
-            Toast.makeText(
-                activity,
-                R.string.widget_pin_not_supported_manual_add,
-                Toast.LENGTH_SHORT
-            ).show()
-            if (mgr.isRequestPinAppWidgetSupported) {
-                mgr.requestPinAppWidget(
-                    ComponentName(activity, CheckInWidgetProvider::class.java),
-                    null, null,
-                )
-            } else {
-                Toast.makeText(activity, R.string.widget_not_supported, Toast.LENGTH_SHORT).show()
-            }
-        },
     )
 }

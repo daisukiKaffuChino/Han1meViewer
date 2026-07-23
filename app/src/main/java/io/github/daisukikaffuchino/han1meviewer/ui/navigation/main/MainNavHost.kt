@@ -8,7 +8,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -40,7 +42,6 @@ import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframe
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframeSettingsRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframesRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframesRouteScreen
-import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframesTopBarActions
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HomeSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HomeSettingsRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.MpvPlayerSettingsRoute
@@ -332,8 +333,13 @@ fun MainNavHost(
             SettingsScaffold(
                 navController = navController,
                 fallbackDestination = VideoPlaybackSettingsRoute,
-                actions = {
-                    HKeyframesTopBarActions(onImportClick = { showImportDialog = true })
+                floatingActionButton = {
+                    FloatingActionButton(onClick = { showImportDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = stringResource(R.string.h_keyframes_import_shared),
+                        )
+                    }
                 },
             ) {
                 HKeyframesRouteScreen(

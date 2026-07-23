@@ -16,8 +16,8 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -113,10 +113,10 @@ fun GetchuPreviewScreen(
             },
             onBack = onBack,
             actions = {
-                FilledIconButton(onClick = { dateCode = shiftGetchuMonthCode(dateCode, -1) }) {
+                IconButton(onClick = { dateCode = shiftGetchuMonthCode(dateCode, -1) }) {
                     Icon(Icons.AutoMirrored.Default.KeyboardArrowLeft, null)
                 }
-                FilledIconButton(onClick = { dateCode = shiftGetchuMonthCode(dateCode, 1) }) {
+                IconButton(onClick = { dateCode = shiftGetchuMonthCode(dateCode, 1) }) {
                     Icon(Icons.AutoMirrored.Default.KeyboardArrowRight, null)
                 }
             },

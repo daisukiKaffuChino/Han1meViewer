@@ -3,6 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -50,6 +51,24 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.component.verticalScrollbar
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DownloadDialogSurface(
+    onDismiss: () -> Unit,
+    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(12.dp),
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    BasicAlertDialog(onDismissRequest = onDismiss) {
+        ElevatedCard(shape = RoundedCornerShape(28.dp)) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = verticalArrangement,
+                content = content,
+            )
+        }
+    }
+}
+
 /**
  * 新建/管理分组对话框。
  *
@@ -87,12 +106,7 @@ fun CreateGroupDialog(
         )
     }
 
-    BasicAlertDialog(onDismissRequest = onDismiss) {
-        ElevatedCard(shape = RoundedCornerShape(28.dp)) {
-            Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
+    DownloadDialogSurface(onDismiss = onDismiss) {
                 Text(
                     stringResource(R.string.create_new_group),
                     style = MaterialTheme.typography.titleLarge
@@ -174,8 +188,6 @@ fun CreateGroupDialog(
                         Text(stringResource(R.string.confirm))
                     }
                 }
-            }
-        }
     }
 }
 
@@ -201,12 +213,10 @@ fun GroupRenameDialog(
     var name by remember(header.groupKey) { mutableStateOf(header.groupKey) }
     val group = groups.find { it.name == header.groupKey }
 
-    BasicAlertDialog(onDismissRequest = onDismiss) {
-        ElevatedCard(shape = RoundedCornerShape(28.dp)) {
-            Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
+    DownloadDialogSurface(
+        onDismiss = onDismiss,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
                 Text(
                     stringResource(R.string.rename_group),
                     style = MaterialTheme.typography.titleLarge
@@ -245,8 +255,6 @@ fun GroupRenameDialog(
                         Text(stringResource(R.string.confirm))
                     }
                 }
-            }
-        }
     }
 }
 
@@ -267,12 +275,7 @@ fun MoveGroupDialog(
     onConfirm: (VideoWithCategories, Int) -> Unit,
 ) {
     if (video == null) return
-    BasicAlertDialog(onDismissRequest = onDismiss) {
-        ElevatedCard(shape = RoundedCornerShape(28.dp)) {
-            Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
+    DownloadDialogSurface(onDismiss = onDismiss) {
                 Text(
                     text = stringResource(R.string.modify_video_group, video.video.title),
                     style = MaterialTheme.typography.titleMedium,
@@ -329,7 +332,5 @@ fun MoveGroupDialog(
                 ) {
                     Text(stringResource(R.string.cancel))
                 }
-            }
-        }
     }
 }

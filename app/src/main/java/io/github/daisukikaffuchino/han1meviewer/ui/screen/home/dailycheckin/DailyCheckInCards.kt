@@ -18,7 +18,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.daisukikaffuchino.han1meviewer.R
 import java.time.LocalDate
@@ -203,54 +203,37 @@ fun TodayCheckInCard(
     }
 }
 
-/**
- * 月度统计卡片。
- *
- * @param checkedDays 已打卡天数
- * @param monthlyTotal 累计打卡次数
- * @param bestStreak 最佳连续天数
- * @param modifier 修饰符
- */
+data class StatsItem(
+    val icon: Int,
+    val label: String,
+    val value: String,
+)
+
 @Composable
 fun StatsCard(
-    checkedDays: Int,
-    monthlyTotal: Int,
-    bestStreak: Int,
+    items: List<StatsItem>,
     modifier: Modifier = Modifier,
+    horizontalPadding: Dp = 12.dp,
+    verticalPadding: Dp = 8.dp,
 ) {
     Card(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal =12.dp, vertical = 8.dp),
+                .padding(horizontal = horizontalPadding, vertical = verticalPadding),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            StatItem(
-                icon = R.drawable.calendar_month_24px,
-                label = stringResource(R.string.this_month_checkin),
-                value = stringResource(R.string.days, checkedDays)
-            )
-            HorizontalDivider(
-                modifier = Modifier
-                    .height(48.dp)
-                    .width(1.dp)
-            )
-            StatItem(
-                icon = R.drawable.alarm_24px,
-                label = stringResource(R.string.has_cum_days),
-                value = stringResource(R.string.counts, monthlyTotal)
-            )
-            HorizontalDivider(
-                modifier = Modifier
-                    .height(48.dp)
-                    .width(1.dp)
-            )
-            StatItem(
-                icon = R.drawable.calendar_view_week_24px,
-                label = stringResource(R.string.best_streak),
-                value = "${bestStreak}${stringResource(R.string.day_unit)}"
-            )
+            items.forEachIndexed { index, item ->
+                StatItem(
+                    icon = item.icon,
+                    label = item.label,
+                    value = item.value,
+                )
+                if (index < items.lastIndex) {
+                    VerticalDivider(modifier = Modifier.height(48.dp))
+                }
+            }
         }
     }
 }
@@ -309,8 +292,10 @@ private fun PreviewTodayCheckInCard() {
 @Composable
 private fun PreviewStatsCard() {
     StatsCard(
-        checkedDays = 15,
-        monthlyTotal = 42,
-        bestStreak = 7,
+        items = listOf(
+            StatsItem(R.drawable.calendar_month_24px, "Monthly", "15 days"),
+            StatsItem(R.drawable.alarm_24px, "Total", "42 times"),
+            StatsItem(R.drawable.calendar_view_week_24px, "Streak", "7 days"),
+        ),
     )
 }

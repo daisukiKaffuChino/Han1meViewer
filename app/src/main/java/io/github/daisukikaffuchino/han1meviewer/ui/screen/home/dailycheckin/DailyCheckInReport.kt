@@ -20,13 +20,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -165,40 +160,27 @@ fun ContributionReportDialog(
                 val maxDay = filteredRecords.maxByOrNull { it.value }?.value ?: 0
 
                 if (totalDays > 0) {
-                    Card(modifier = Modifier.fillMaxWidth()) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            StatItem(
-                                icon = R.drawable.calendar_month_24px,
-                                label = stringResource(R.string.report_total),
-                                value = totalCount.toString()
-                            )
-                            HorizontalDivider(
-                                modifier = Modifier
-                                    .height(48.dp)
-                                    .width(1.dp)
-                            )
-                            StatItem(
-                                icon = R.drawable.alarm_24px,
-                                label = stringResource(R.string.report_days),
-                                value = totalDays.toString()
-                            )
-                            HorizontalDivider(
-                                modifier = Modifier
-                                    .height(48.dp)
-                                    .width(1.dp)
-                            )
-                            StatItem(
-                                icon = R.drawable.calendar_view_week_24px,
-                                label = stringResource(R.string.report_max_day),
-                                value = maxDay.toString()
-                            )
-                        }
-                    }
+                    StatsCard(
+                        items = listOf(
+                            StatsItem(
+                                R.drawable.calendar_month_24px,
+                                stringResource(R.string.report_total),
+                                totalCount.toString(),
+                            ),
+                            StatsItem(
+                                R.drawable.alarm_24px,
+                                stringResource(R.string.report_days),
+                                totalDays.toString(),
+                            ),
+                            StatsItem(
+                                R.drawable.calendar_view_week_24px,
+                                stringResource(R.string.report_max_day),
+                                maxDay.toString(),
+                            ),
+                        ),
+                        horizontalPadding = 16.dp,
+                        verticalPadding = 16.dp,
+                    )
                 } else {
                     Spacer(modifier = Modifier.height(24.dp))
                     Text(

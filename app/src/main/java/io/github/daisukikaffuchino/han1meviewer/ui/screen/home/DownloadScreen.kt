@@ -1,6 +1,12 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,7 +14,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonMenu
+import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
@@ -26,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.DownloadGroupEntity
@@ -91,12 +101,22 @@ fun DownloadScreen(
     var multiSelectMode by remember { mutableStateOf(false) }
     var selectedVideoIds by remember { mutableStateOf(setOf<Int>()) }
     var pendingBatchMove by remember { mutableStateOf(false) }
-    var pendingBatchMoveConfirm by remember { mutableStateOf<Pair<List<VideoWithCategories>, Int>?>(null) }
+    var pendingBatchMoveConfirm by remember {
+        mutableStateOf<Pair<List<VideoWithCategories>, Int>?>(
+            null
+        )
+    }
 
     val displayGroups = downloadedGroups.toDisplayGroups()
 
     val downloadedNodes =
-        remember(downloadedItems, displayGroups, collapseDownloadedGroup, downloadedHeaderNodes, downloadedGroupExpandedState) {
+        remember(
+            downloadedItems,
+            displayGroups,
+            collapseDownloadedGroup,
+            downloadedHeaderNodes,
+            downloadedGroupExpandedState
+        ) {
             val groupIdToNameMap = displayGroups.associate { it.id to it.name }
             if (downloadedItems.isEmpty()) {
                 downloadedHeaderNodes = emptyList()
@@ -132,13 +152,15 @@ fun DownloadScreen(
                 downloadedHeaderNodes = downloadedHeaderNodes.map {
                     if (it.groupKey == event.groupKey) {
                         val expanded = !it.isExpanded
-                        downloadedGroupExpandedState = downloadedGroupExpandedState + (it.groupKey to expanded)
+                        downloadedGroupExpandedState =
+                            downloadedGroupExpandedState + (it.groupKey to expanded)
                         it.copy(isExpanded = expanded)
                     } else {
                         it
                     }
                 }
             }
+
             is DownloadEvent.OnCreateGroupDialogChange -> showCreateGroupDialog = event.visible
             is DownloadEvent.OnPageChange -> {
                 scope.launch { pagerState.animateScrollToPage(event.page) }
@@ -148,6 +170,7 @@ fun DownloadScreen(
                 multiSelectMode = !multiSelectMode
                 if (!multiSelectMode) selectedVideoIds = emptySet()
             }
+
             is DownloadEvent.OnToggleVideoSelection -> {
                 selectedVideoIds = if (event.videoId in selectedVideoIds) {
                     selectedVideoIds - event.videoId
@@ -155,16 +178,21 @@ fun DownloadScreen(
                     selectedVideoIds + event.videoId
                 }
             }
+
             is DownloadEvent.OnSelectAllCurrentGroup -> {
-                val groupVideos = downloadedNodes.filterIsInstance<io.github.daisukikaffuchino.han1meviewer.logic.model.DownloadItemNode>()
-                    .filter { it.parentKey == event.groupKey }
+                val groupVideos =
+                    downloadedNodes.filterIsInstance<io.github.daisukikaffuchino.han1meviewer.logic.model.DownloadItemNode>()
+                        .filter { it.parentKey == event.groupKey }
                 selectedVideoIds = if (event.select) {
                     selectedVideoIds + groupVideos.map { it.data.video.id }.toSet()
                 } else {
                     selectedVideoIds - groupVideos.map { it.data.video.id }.toSet()
                 }
             }
-            is DownloadEvent.OnBatchMoveRequest -> { pendingBatchMove = true }
+
+            is DownloadEvent.OnBatchMoveRequest -> {
+                pendingBatchMove = true
+            }
             // 业务事件：透传给 Route
             else -> onEvent(event)
         }
@@ -177,54 +205,17 @@ fun DownloadScreen(
     HanimeScaffold(
         title = stringResource(R.string.download),
         onBack = onBack,
-        actions = {
-            if (uiState.currentPage == 0) {
-                FilledIconButton(
-                    onClick = { handleEvent(DownloadEvent.OnResumeAll(uiState.downloadingItems)) },
-                    enabled = uiState.downloadingItems.isNotEmpty()
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_baseline_play_arrow_24),
-                        contentDescription = stringResource(R.string.start_all),
-                    )
-                }
-                FilledIconButton(
-                    onClick = { handleEvent(DownloadEvent.OnPauseAll(uiState.downloadingItems)) },
-                    enabled = uiState.downloadingItems.isNotEmpty()
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_baseline_pause_24),
-                        contentDescription = stringResource(R.string.pause_all),
-                    )
-                }
-            } else {
-                if (!uiState.multiSelectMode) {
-                    FilledIconButton(
-                        onClick = { handleEvent(DownloadEvent.OnToggleMultiSelect) }
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.baseline_format_list_bulleted_24),
-                            contentDescription = stringResource(R.string.edit),
-                        )
-                    }
-                    FilledIconButton(
-                        onClick = { handleEvent(DownloadEvent.OnCreateGroupDialogChange(true)) }
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.baseline_add_24),
-                            contentDescription = stringResource(R.string.create_new_group),
-                        )
-                    }
-                    FilledIconButton(
-                        onClick = { handleEvent(DownloadEvent.OnImportDownloaded) }
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_baseline_download_24),
-                            contentDescription = stringResource(R.string.read_download_dir_title),
-                        )
-                    }
-                }
-            }
+        floatingActionButton = {
+            DownloadFabMenu(
+                currentPage = uiState.currentPage,
+                multiSelectMode = uiState.multiSelectMode,
+                hasDownloadingItems = uiState.downloadingItems.isNotEmpty(),
+                onResumeAll = { handleEvent(DownloadEvent.OnResumeAll(uiState.downloadingItems)) },
+                onPauseAll = { handleEvent(DownloadEvent.OnPauseAll(uiState.downloadingItems)) },
+                onToggleMultiSelect = { handleEvent(DownloadEvent.OnToggleMultiSelect) },
+                onCreateGroup = { handleEvent(DownloadEvent.OnCreateGroupDialogChange(true)) },
+                onImportDownloaded = { handleEvent(DownloadEvent.OnImportDownloaded) },
+            )
         },
     ) { paddingValues ->
         Column(
@@ -292,7 +283,7 @@ fun DownloadScreen(
         ConfirmDialog(
             visible = true,
             title = stringResource(R.string.move_group),
-            message = stringResource(R.string.confirm_move_videos,videos.size,groupName),
+            message = stringResource(R.string.confirm_move_videos, videos.size, groupName),
             confirmText = stringResource(R.string.confirm),
             dismissText = stringResource(R.string.cancel),
             onConfirm = {
@@ -303,6 +294,119 @@ fun DownloadScreen(
             },
             onDismiss = { pendingBatchMoveConfirm = null },
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun DownloadFabMenu(
+    currentPage: Int,
+    multiSelectMode: Boolean,
+    hasDownloadingItems: Boolean,
+    onResumeAll: () -> Unit,
+    onPauseAll: () -> Unit,
+    onToggleMultiSelect: () -> Unit,
+    onCreateGroup: () -> Unit,
+    onImportDownloaded: () -> Unit,
+) {
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    val visible = !multiSelectMode && (currentPage != 0 || hasDownloadingItems)
+
+    LaunchedEffect(currentPage, multiSelectMode, hasDownloadingItems) {
+        expanded = false
+    }
+
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn() + slideInVertically { it / 2 },
+        exit = fadeOut() + slideOutVertically { it / 2 },
+    ) {
+        Box(
+            modifier = Modifier.padding(8.dp)
+        ) {
+            FloatingActionButtonMenu(
+                expanded = expanded,
+                button = {
+                    FloatingActionButton(onClick = { expanded = !expanded }) {
+                        Icon(
+                            painter = painterResource(
+                                if (expanded) R.drawable.close_24px else R.drawable.menu_24px,
+                            ),
+                            contentDescription = stringResource(if (expanded) R.string.close else R.string.download),
+                        )
+                    }
+                },
+            ) {
+                if (currentPage == 0) {
+                    FloatingActionButtonMenuItem(
+                        text = { Text(stringResource(R.string.start_all)) },
+                        icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_baseline_play_arrow_24),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            onResumeAll()
+                            expanded = false
+                        },
+                    )
+                    FloatingActionButtonMenuItem(
+                        text = { Text(stringResource(R.string.pause_all)) },
+                        icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_baseline_pause_24),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            onPauseAll()
+                            expanded = false
+                        },
+                    )
+                } else {
+                    FloatingActionButtonMenuItem(
+                        text = { Text(stringResource(R.string.edit)) },
+                        icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.baseline_format_list_bulleted_24),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            onToggleMultiSelect()
+                            expanded = false
+                        },
+                    )
+                    FloatingActionButtonMenuItem(
+                        text = { Text(stringResource(R.string.create_new_group)) },
+                        icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.baseline_add_24),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            onCreateGroup()
+                            expanded = false
+                        },
+                    )
+                    FloatingActionButtonMenuItem(
+                        text = { Text(stringResource(R.string.read_download_dir_title)) },
+                        icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_baseline_download_24),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            onImportDownloaded()
+                            expanded = false
+                        },
+                    )
+                }
+            }
+        }
     }
 }
 

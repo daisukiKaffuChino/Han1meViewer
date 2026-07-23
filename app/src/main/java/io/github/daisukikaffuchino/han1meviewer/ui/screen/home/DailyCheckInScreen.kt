@@ -2,12 +2,13 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.home
 
 import android.app.Activity
 import android.widget.Toast
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults.pinnedScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -23,7 +24,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.daisukikaffuchino.han1meviewer.R
@@ -52,14 +55,12 @@ import kotlin.time.Duration.Companion.milliseconds
  *
  * @param activity 宿主 Activity，用于全屏/方向控制
  * @param onBack 返回回调
- * @param onAddWidget 添加桌面小组件回调
  * @param viewModel 打卡日历 ViewModel
  */
 @Composable
 fun DailyCheckInScreen(
     activity: Activity,
     onBack: () -> Unit,
-    onAddWidget: () -> Unit,
     viewModel: CheckInCalendarViewModel = viewModel(),
 ) {
     var showReport by rememberSaveable { mutableStateOf(false) }
@@ -173,17 +174,16 @@ fun DailyCheckInScreen(
         onBack = onBack,
         scrollBehavior = scrollBehavior,
         actions = {
-            FilledIconButton(onClick = { showReport = true }) {
+            TextButton(
+                onClick = { showReport = true }
+            ) {
                 Icon(
-                    imageVector = Icons.Filled.DateRange,
-                    contentDescription = stringResource(R.string.checkin_report)
+                    painter = painterResource(R.drawable.event_note_24px),
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
                 )
-            }
-            FilledIconButton(onClick = onAddWidget) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.add_widget)
-                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(stringResource(R.string.checkin_report))
             }
         },
     ) { innerPadding ->
