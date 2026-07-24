@@ -21,7 +21,6 @@ import androidx.compose.material3.ButtonShapes
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -30,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -65,31 +63,27 @@ private fun SettingSurface(
     ).value
     val shape = animatedShape(shapes, interactionSource)
 
-    if (onClick == null) {
-        Surface(
-            modifier = modifier.fillMaxWidth(),
-            shape = shape,
-            color = containerColor,
-            content = content,
-        )
+    val surfaceModifier = if (onClick == null) {
+        modifier.fillMaxWidth()
     } else {
-        Surface(
-            modifier = modifier
-                .fillMaxWidth()
-                .clip(shape)
-                .immediateClickable(
-                    enabled = enabled,
-                    interactionSource = interactionSource,
-                    onClick = {
-                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                        onClick()
-                    },
-                ),
-            shape = shape,
-            color = containerColor,
-            content = content,
-        )
+        modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .immediateClickable(
+                enabled = enabled,
+                interactionSource = interactionSource,
+                onClick = {
+                    view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                    onClick()
+                },
+            )
     }
+    CardContainerSurface(
+        modifier = surfaceModifier,
+        shape = shape,
+        color = containerColor,
+        content = content,
+    )
 }
 
 @Composable

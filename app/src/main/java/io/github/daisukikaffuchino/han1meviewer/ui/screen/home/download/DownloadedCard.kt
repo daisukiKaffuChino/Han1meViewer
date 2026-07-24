@@ -1,7 +1,10 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +23,7 @@ import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +31,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,8 +49,11 @@ import io.github.daisukikaffuchino.han1meviewer.LOCAL_DATE_TIME_FORMAT
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.VideoWithCategories
 import io.github.daisukikaffuchino.han1meviewer.logic.model.DownloadHeaderNode
+import io.github.daisukikaffuchino.han1meviewer.ui.component.CardContainerSurface
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeDownloadedNodes
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.shapeByInteraction
 import io.github.daisukikaffuchino.utils.formatFileSizeV2
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -61,17 +68,33 @@ import kotlin.time.Instant
  * @param onToggle 展开/折叠回调
  * @param onRename 重命名回调
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DownloadGroupHeader(
     header: DownloadHeaderNode,
     onToggle: () -> Unit,
     onRename: () -> Unit,
 ) {
-    ElevatedCard(shape = RoundedCornerShape(20.dp)) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val indication = LocalIndication.current
+    val pressed by interactionSource.collectIsPressedAsState()
+    val cardShape = shapeByInteraction(
+        shapes = HanimeDefaults.largerShapes(),
+        pressed = pressed,
+        animationSpec = HanimeDefaults.shapesDefaultAnimationSpec,
+    )
+    CardContainerSurface(
+        shape = cardShape,
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .combinedClickable(onClick = onToggle, onLongClick = onRename)
+                .combinedClickable(
+                    interactionSource = interactionSource,
+                    indication = indication,
+                    onClick = onToggle,
+                    onLongClick = onRename,
+                )
                 .padding(10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -127,7 +150,11 @@ fun DownloadGroupHeader(
  * @param isSelected 是否已选中
  * @param onToggleSelect 切换选中状态
  */
-@OptIn(ExperimentalFoundationApi::class, ExperimentalTime::class)
+@OptIn(
+    ExperimentalFoundationApi::class,
+    ExperimentalMaterial3ExpressiveApi::class,
+    ExperimentalTime::class,
+)
 @Composable
 fun DownloadedVideoCard(
     item: VideoWithCategories,
@@ -149,22 +176,34 @@ fun DownloadedVideoCard(
     } else {
         "2024-01-01 12:00"
     }
-
-    ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(
-                if (isMultiSelect) Modifier.combinedClickable(
-                    onClick = { onToggleSelect?.invoke() },
-                    onLongClick = {},
-                ) else Modifier.combinedClickable(
-                    onClick = onOpenVideo,
-                    onLongClick = onMoveGroup,
-                )
-            ),
-        shape = RoundedCornerShape(24.dp),
+    val interactionSource = remember { MutableInteractionSource() }
+    val indication = LocalIndication.current
+    val pressed by interactionSource.collectIsPressedAsState()
+    val cardShape = shapeByInteraction(
+        shapes = HanimeDefaults.largerShapes(),
+        pressed = pressed,
+        animationSpec = HanimeDefaults.shapesDefaultAnimationSpec,
+    )
+    CardContainerSurface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = cardShape,
     ) {
-        Column {
+        Column(
+            modifier = Modifier.combinedClickable(
+                interactionSource = interactionSource,
+                indication = indication,
+                onClick = {
+                    if (isMultiSelect) {
+                        onToggleSelect?.invoke()
+                    } else {
+                        onOpenVideo()
+                    }
+                },
+                onLongClick = {
+                    if (!isMultiSelect) onMoveGroup()
+                },
+            ),
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -242,7 +281,7 @@ fun DownloadedVideoCard(
                         VerticalDivider(
                             modifier = Modifier.height(14.dp),
                             thickness = 2.dp,
-                            color = MaterialTheme.colorScheme.outline
+                            color = MaterialTheme.colorScheme.outline,
                         )
                         Text(
                             text = item.video.length.formatFileSizeV2(),
@@ -260,16 +299,16 @@ fun DownloadedVideoCard(
                     onClick = onDeleteVideo,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.textButtonColors(),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_baseline_delete_24),
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp),
                         )
                         Text(stringResource(R.string.delete))
                     }
@@ -279,16 +318,16 @@ fun DownloadedVideoCard(
                     onClick = onExternalPlayback,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.textButtonColors(),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_ext_link),
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp),
                         )
                         Text(stringResource(R.string.ext_player))
                     }
@@ -298,16 +337,16 @@ fun DownloadedVideoCard(
                     onClick = onLocalPlayback,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.textButtonColors(),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_baseline_play_arrow_24),
                             contentDescription = null,
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp),
                         )
                         Text(stringResource(R.string.local_playback))
                     }

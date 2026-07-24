@@ -1,7 +1,11 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.myplaylist
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,11 +14,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,9 +31,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Playlists
+import io.github.daisukikaffuchino.han1meviewer.ui.component.CardContainerSurface
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakePlaylists
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.RetryableImage
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.shapeByInteraction
 
 /**
  * 播放列表项组件。
@@ -39,20 +47,35 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.RetryableImage
  * @param modifier 修饰符
  * @param onClick 点击回调，为 null 时不可点击
  */
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PlaylistItem(
     playlist: Playlists.Playlist,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
-    Card(
+    val interactionSource = remember { MutableInteractionSource() }
+    val indication = LocalIndication.current
+    val pressed by interactionSource.collectIsPressedAsState()
+    val cardShape = shapeByInteraction(
+        shapes = HanimeDefaults.largerShapes(),
+        pressed = pressed,
+        animationSpec = HanimeDefaults.shapesDefaultAnimationSpec,
+    )
+    CardContainerSurface(
         modifier = modifier
-            .width(180.dp)
-            .clickable(enabled = onClick != null) { onClick?.invoke() },
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            .width(180.dp),
+        shape = cardShape,
     ) {
-        Column {
+        Column(
+            modifier = Modifier.combinedClickable(
+                enabled = onClick != null,
+                interactionSource = interactionSource,
+                indication = indication,
+                onClick = { onClick?.invoke() },
+                onLongClick = {},
+            ),
+        ) {
             Box(modifier = Modifier.height(100.dp)) {
                 RetryableImage(
                     model = playlist.coverUrl ?: "",

@@ -18,13 +18,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -94,19 +92,11 @@ fun VideoCardItem(
         pressed = pressed,
         animationSpec = HanimeDefaults.shapesDefaultAnimationSpec,
     )
-    val tonalElevation by animateDpAsState(
-        targetValue = if (pressed) 0.dp else 1.dp,
-        animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
-        label = "video-card-elevation",
-    )
-    Surface(
+    CardContainerSurface(
         modifier = modifier
             .fillMaxWidth()
             .animateContentSize(),
         shape = cardShape,
-        tonalElevation = tonalElevation,
-        color = HanimeDefaults.Colors.Container,
-        contentColor = MaterialTheme.colorScheme.onSurface,
     ) {
         Box {
             Column(
