@@ -23,7 +23,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.TripleButtonDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomePageScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.HomeUiEvent
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.LocalSearchHistoryQuery
-import io.github.daisukikaffuchino.han1meviewer.ui.util.rememberCopyTextToClipboard
+import io.github.daisukikaffuchino.utils.rememberCopyTextToClipboard
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.CheckInCalendarViewModel
 import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.coroutines.flow.first

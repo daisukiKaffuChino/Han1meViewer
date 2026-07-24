@@ -14,7 +14,7 @@ import android.graphics.Rect
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.util.Base64
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import android.util.Rational
 import android.view.ContextThemeWrapper
 import android.view.View
@@ -26,9 +26,7 @@ import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -43,11 +41,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.window.Dialog
 import androidx.core.view.isVisible
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
@@ -81,8 +77,8 @@ import io.github.daisukikaffuchino.han1meviewer.ui.view.video.HMediaKernel
 import io.github.daisukikaffuchino.han1meviewer.ui.view.video.HanimeDataSource
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.CommentViewModel
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.VideoViewModel
-import io.github.daisukikaffuchino.han1meviewer.ui.util.rememberCopyTextToClipboard
-import io.github.daisukikaffuchino.han1meviewer.ui.util.rememberShareText
+import io.github.daisukikaffuchino.utils.rememberCopyTextToClipboard
+import io.github.daisukikaffuchino.utils.rememberShareText
 import io.github.daisukikaffuchino.han1meviewer.util.loadAssetAs
 import io.github.daisukikaffuchino.utils.OrientationManager
 import io.github.daisukikaffuchino.utils.dp
@@ -469,7 +465,7 @@ fun VideoRouteHostScreen(
         player.fullscreenListener = object : HJzvdStd.FullscreenListener {
             override fun onFullscreenChanged(isFullscreen: Boolean) {
                 jzBackCallback.isEnabled = isFullscreen
-                Log.i("JZVD screen state", isFullscreen.toString())
+                LogUtil.i("JZVD screen state", isFullscreen.toString())
             }
         }
         val initialHeight = if (Preferences.tabletMode) {

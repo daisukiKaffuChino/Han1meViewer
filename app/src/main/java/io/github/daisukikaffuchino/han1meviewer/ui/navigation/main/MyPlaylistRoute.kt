@@ -6,7 +6,7 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.getHanimeShareText
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.myplaylist.PlaylistScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.MyPlayListViewModelV2
-import io.github.daisukikaffuchino.han1meviewer.ui.util.rememberCopyTextToClipboard
+import io.github.daisukikaffuchino.utils.rememberCopyTextToClipboard
 import io.github.daisukikaffuchino.utils.SonnerToast
 
 @Composable

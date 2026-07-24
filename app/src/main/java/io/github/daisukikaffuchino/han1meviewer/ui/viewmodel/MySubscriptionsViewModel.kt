@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
@@ -70,7 +70,7 @@ class MySubscriptionsViewModel : ViewModel() {
                         if (info.subscriptionsVideos.isNotEmpty()) {
                             cachedVideos.addAll(info.subscriptionsVideos)
                             currentPage++
-                            Log.i("getMySubscriptions","currentPage:$currentPage")
+                            LogUtil.i("getMySubscriptions","currentPage:$currentPage")
                         } else {
                             hasMore = false
                         }

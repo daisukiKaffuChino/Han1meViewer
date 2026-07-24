@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.logic
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo.handleException
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo.throwRequestException
@@ -40,7 +40,7 @@ object GetchuNetworkRepo {
             if (!response.isSuccessful) return@runCatching emptyList()
             response.body()?.getchuString()?.let(GetchuParser::getchuSeriesItems).orEmpty()
         }.getOrDefault(emptyList()).let { seriesItems ->
-            Log.d(
+            LogUtil.d(
                 "GetchuPreviewParser",
                 "series ajax id=$id parentId=$parentId items=${seriesItems.size}"
             )

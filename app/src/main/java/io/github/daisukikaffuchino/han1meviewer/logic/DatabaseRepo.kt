@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.logic
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.DownloadDatabase
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.HistoryDatabase
@@ -84,9 +84,9 @@ object DatabaseRepo {
                         }.onFailure { e ->
                             // 文件不存在或解析错误
                             if (e is FileNotFoundException) {
-                                Log.w("HKeyframe", "未找到关键帧文件: $videoCode.json")
+                                LogUtil.w("HKeyframe", "未找到关键帧文件: $videoCode.json")
                             } else {
-                                Log.e("HKeyframe", "读取关键帧失败: ${e.message}", e)
+                                LogUtil.e("HKeyframe", "读取关键帧失败: ${e.message}", e)
                             }
                         }
                     } else {

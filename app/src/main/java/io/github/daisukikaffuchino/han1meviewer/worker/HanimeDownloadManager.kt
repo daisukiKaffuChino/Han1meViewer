@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.worker
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.lifecycle.Observer
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkInfo
@@ -98,19 +98,19 @@ object HanimeDownloadManager {
                 when (msg) {
                     is DownloadMsg.Add -> {
                         if (msg.args.videoCode in activeDownloads) {
-                            Log.d(TAG, "任务已存在：${msg.args.videoCode}")
+                            LogUtil.d(TAG, "任务已存在：${msg.args.videoCode}")
                         } else if (waitingQueue.any { it.videoCode == msg.args.videoCode }) {
-                            Log.d(TAG, "任务已在等待队列：${msg.args.videoCode}")
+                            LogUtil.d(TAG, "任务已在等待队列：${msg.args.videoCode}")
                         } else {
                             // Unknown 代表任务刚添加，未开始状态流转
                             if (activeDownloads.size < maxConcurrentDownloadCount &&
                                 (msg.state == DownloadState.Downloading || msg.state == DownloadState.Unknown)
                             ) {
-                                Log.d(TAG, "添加任务：${msg.args.videoCode}")
+                                LogUtil.d(TAG, "添加任务：${msg.args.videoCode}")
                                 activeDownloads[msg.args.videoCode] = msg.args
                                 launchDownload(msg.args, msg.redownload, msg.waiting)
                             } else {
-                                Log.d(TAG, "任务已满，加入等待队列：${msg.args.videoCode}")
+                                LogUtil.d(TAG, "任务已满，加入等待队列：${msg.args.videoCode}")
                                 when (msg.state) {
                                     DownloadState.Downloading -> {
                                         // 之前为 Downloading 的优先级更高
@@ -131,10 +131,10 @@ object HanimeDownloadManager {
 
                     is DownloadMsg.Resume -> {
                         if (msg.args.videoCode in activeDownloads) {
-                            Log.d(TAG, "任务已在下载中，无需恢复：${msg.args.videoCode}")
+                            LogUtil.d(TAG, "任务已在下载中，无需恢复：${msg.args.videoCode}")
                         } else {
                             waitingQueue.removeIf { it.videoCode == msg.args.videoCode }
-                            Log.d(TAG, "恢复任务：${msg.args.videoCode}")
+                            LogUtil.d(TAG, "恢复任务：${msg.args.videoCode}")
                             // 如果 active 已满，则暂停一个任务，加入等待队列
                             while (activeDownloads.size >= maxConcurrentDownloadCount && activeDownloads.isNotEmpty()) {
                                 val (videoCode, task) = activeDownloads.entries.first()
@@ -142,7 +142,7 @@ object HanimeDownloadManager {
                                 stopWork(task)
                                 waitingQueue.addLast(task)
                                 markQueued(task)
-                                Log.d(TAG, "任务已满，暂停任务：$videoCode")
+                                LogUtil.d(TAG, "任务已满，暂停任务：$videoCode")
                             }
                             activeDownloads[msg.args.videoCode] = msg.args
                             launchDownload(msg.args, redownload = false, waiting = false)
@@ -151,11 +151,11 @@ object HanimeDownloadManager {
 
                     is DownloadMsg.Stop -> {
                         if (activeDownloads.remove(msg.args.videoCode) != null) {
-                            Log.d(TAG, "停止任务：${msg.args.videoCode}")
+                            LogUtil.d(TAG, "停止任务：${msg.args.videoCode}")
                             stopWork(msg.args)
                             processNext()
                         } else {
-                            Log.e(TAG, "停止任务，不应该走到这里：${msg.args.videoCode}")
+                            LogUtil.e(TAG, "停止任务，不应该走到这里：${msg.args.videoCode}")
                             waitingQueue.removeIf { it.videoCode == msg.args.videoCode }
                             markPaused(msg.args)
                         }
@@ -163,10 +163,10 @@ object HanimeDownloadManager {
 
                     is DownloadMsg.Delete -> {
                         if (activeDownloads.remove(msg.args.videoCode) != null) {
-                            Log.d(TAG, "从正在下载列表中删除任务：${msg.args.videoCode}")
+                            LogUtil.d(TAG, "从正在下载列表中删除任务：${msg.args.videoCode}")
                         } else {
                             waitingQueue.removeIf { it.videoCode == msg.args.videoCode }
-                            Log.d(TAG, "从等待队列中删除任务：${msg.args.videoCode}")
+                            LogUtil.d(TAG, "从等待队列中删除任务：${msg.args.videoCode}")
                         }
                         deleteWork(msg.args)
                         processNext()
@@ -182,7 +182,7 @@ object HanimeDownloadManager {
      * 初始化，加载所有正在下载的任务
      */
     suspend fun init() {
-        Log.d(TAG, "init")
+        LogUtil.d(TAG, "init")
         val allDownloading =
             DownloadDatabase.instance.hanimeDownloadDao.loadAllDownloadingHanimeOnce()
         allDownloading.forEach { entity ->
@@ -230,7 +230,7 @@ object HanimeDownloadManager {
      * 处理等待队列中的下一个任务
      */
     private fun processNext() {
-        Log.d(TAG, "processNext")
+        LogUtil.d(TAG, "processNext")
         while (activeDownloads.size < maxConcurrentDownloadCount && waitingQueue.isNotEmpty()) {
             val next = waitingQueue.removeFirst()
             activeDownloads[next.videoCode] = next
@@ -249,12 +249,12 @@ object HanimeDownloadManager {
         scope.launch {
             // 如果当前处于等待状态，则直接启动任务。目的就是为了添加到列表，但不下载
             if (waiting) {
-                Log.d(TAG, "launchDownload (waiting): ${args.videoCode}")
+                LogUtil.d(TAG, "launchDownload (waiting): ${args.videoCode}")
                 markQueued(args)
             } else {
                 // 使用 semaphore.withPermit 来确保同时只有规定数量的任务在执行
                 semaphore.withPermit {
-                    Log.d(TAG, "launchDownload (start): ${args.videoCode}")
+                    LogUtil.d(TAG, "launchDownload (start): ${args.videoCode}")
                     // 启动 WorkManager 任务
                     val workId = startWork(args, redownload)
                     // 阻塞等待 WorkManager 任务完成
@@ -262,7 +262,7 @@ object HanimeDownloadManager {
                 }
                 // 下载完成或取消后，从 active 中移除，并尝试启动下一个任务
                 activeDownloads.remove(args.videoCode)
-                Log.d(TAG, "launchDownload (end): ${args.videoCode}")
+                LogUtil.d(TAG, "launchDownload (end): ${args.videoCode}")
                 downloadChannel.send(DownloadMsg.ProcessNext)
             }
         }
@@ -303,7 +303,7 @@ object HanimeDownloadManager {
         runSuspendCatching {
             workManager.cancelUniqueWork(args.videoCode).await()
             markPaused(args)
-            Log.d(TAG, "stopWork (cancelUniqueWork): ${args.videoCode}")
+            LogUtil.d(TAG, "stopWork (cancelUniqueWork): ${args.videoCode}")
         }.onFailure { t -> // 上述方法可能无法取消任务
             t.printStackTrace()
             markPaused(args)
@@ -349,12 +349,12 @@ object HanimeDownloadManager {
     private suspend fun awaitWorkCompletion(videoCode: String, workId: String) =
         suspendCancellableCoroutine { cont ->
             val liveData = workManager.getWorkInfosForUniqueWorkLiveData(videoCode)
-            Log.d(TAG, "获取 LiveData：$videoCode")
+            LogUtil.d(TAG, "获取 LiveData：$videoCode")
             val observer = object : Observer<List<WorkInfo>> {
                 override fun onChanged(value: List<WorkInfo>) {
                     val info = value.firstOrNull { it.id.toString() == workId } ?: return
                     if (info.state.isFinished) {
-                        Log.d(TAG, "任务完成，移除 observer：$videoCode")
+                        LogUtil.d(TAG, "任务完成，移除 observer：$videoCode")
                         liveData.removeObserver(this)
                         cont.resume(Unit)
                     }
@@ -362,7 +362,7 @@ object HanimeDownloadManager {
             }
             CoroutineScope(Dispatchers.Main).launch {
                 liveData.observeForever(observer)
-                Log.d(TAG, "添加 observer：$videoCode")
+                LogUtil.d(TAG, "添加 observer：$videoCode")
             }
             cont.invokeOnCancellation { liveData.removeObserver(observer) }
         }

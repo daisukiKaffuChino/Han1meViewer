@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.main
 
 import android.content.Intent
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -126,7 +126,7 @@ fun MainActivityContent(
             if (homeState is PageState.Error) {
                 val throwable = (homeState as PageState.Error).throwable
                 if (throwable is CloudFlareBlockedException) {
-                    Log.e("error", "被屏蔽时的处理")
+                    LogUtil.e("error", "被屏蔽时的处理")
                 }
             }
         }

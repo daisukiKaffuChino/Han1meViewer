@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.network.interceptor
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import okhttp3.Interceptor
 import okhttp3.Response
 import java.net.URLDecoder
@@ -11,7 +11,7 @@ class UrlLoggingInterceptor : Interceptor {
         val request = chain.request()
         val url = request.url.toString()
         val decodedUrl = URLDecoder.decode(url, StandardCharsets.UTF_8.name())
-        Log.i("NetworkRequest",decodedUrl)
+        LogUtil.i("NetworkRequest",decodedUrl)
         return chain.proceed(request)
     }
 }

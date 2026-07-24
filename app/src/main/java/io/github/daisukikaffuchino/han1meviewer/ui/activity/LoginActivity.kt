@@ -3,7 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.activity
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import android.view.KeyEvent
 import android.webkit.CookieManager
 import android.webkit.WebResourceError
@@ -50,7 +50,7 @@ class LoginActivity : BaseActivity() {
         ) { result ->
             if (result.resultCode == RESULT_OK) {
                 val cookie = result.data?.getStringExtra("cookie")
-                Log.i("LoginActivity", "扫描结果: $cookie")
+                LogUtil.i("LoginActivity", "扫描结果: $cookie")
                 login(cookie.toString())
                 setResult(RESULT_OK)
                 finish()
@@ -101,7 +101,7 @@ class LoginActivity : BaseActivity() {
                     if (request.isRedirect && isSameUrl) {
                         val url = request.url
                         val cookieManager = CookieManager.getInstance().getCookie(url.host)
-                        Log.d("login_cookie", cookieManager.toString())
+                        LogUtil.d("login_cookie", cookieManager.toString())
                         login(cookieManager)
                         setResult(RESULT_OK)
                         finish()

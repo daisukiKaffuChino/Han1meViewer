@@ -2,7 +2,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
 import android.app.Application
 import android.os.Parcelable
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import android.util.SparseArray
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -185,7 +185,7 @@ class SearchViewModel(
     fun insertSearchHistory(history: SearchHistoryEntity) {
         viewModelScope.launch(Dispatchers.IO) {
             DatabaseRepo.SearchHistory.insert(history)
-            Log.d("insert_search_hty", "$history DONE!")
+            LogUtil.d("insert_search_hty", "$history DONE!")
         }
     }
 
@@ -233,7 +233,7 @@ class SearchViewModel(
                 )
                 return@launch
             }
-            Log.i("insertAdvancedSearchHistory","记录重复！")
+            LogUtil.i("insertAdvancedSearchHistory","记录重复！")
 
         }
     }
@@ -241,7 +241,7 @@ class SearchViewModel(
     fun deleteSearchHistory(history: SearchHistoryEntity) {
         viewModelScope.launch(Dispatchers.IO) {
             DatabaseRepo.SearchHistory.delete(history)
-            Log.d("delete_search_hty", "$history DONE!")
+            LogUtil.d("delete_search_hty", "$history DONE!")
         }
     }
 
@@ -252,7 +252,7 @@ class SearchViewModel(
     fun deleteSearchHistoryByKeyword(query: String) {
         viewModelScope.launch(Dispatchers.IO) {
             DatabaseRepo.SearchHistory.deleteByKeyword(query)
-            Log.d("delete_search_hty", "$query DONE!")
+            LogUtil.d("delete_search_hty", "$query DONE!")
         }
     }
     val refreshTriggerFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)

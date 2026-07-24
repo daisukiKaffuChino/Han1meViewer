@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer
 import android.content.Context
 import android.os.Environment
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import java.io.File
 
 object HFileManager {
@@ -78,19 +78,19 @@ object HFileManager {
     @Deprecated("下载工具已经创建了nomedia，没必要重复创建")
     private fun File.makeFolderNoMedia() {
         if (!exists() && !mkdirs()) {
-            Log.w("HFileManager", "⚠️ 目录创建失败: $absolutePath")
+            LogUtil.w("HFileManager", "⚠️ 目录创建失败: $absolutePath")
             return
         }
 
         if (!isDirectory) {
-            Log.w("HFileManager", "⚠️ 已存在但不是文件夹: $absolutePath")
+            LogUtil.w("HFileManager", "⚠️ 已存在但不是文件夹: $absolutePath")
             return
         }
 
         val noMedia = File(this, ".nomedia")
         if (!noMedia.exists()) {
             runCatching { noMedia.createNewFile() }
-                .onFailure { Log.w("HFileManager", "⚠️ 创建 .nomedia 失败: ${it.message}") }
+                .onFailure { LogUtil.w("HFileManager", "⚠️ 创建 .nomedia 失败: ${it.message}") }
         }
     }
 }

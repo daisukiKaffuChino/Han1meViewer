@@ -13,7 +13,7 @@ import android.os.Looper
 import android.provider.Settings
 import android.provider.Settings.SettingNotFoundException
 import android.util.AttributeSet
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import android.view.GestureDetector
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
@@ -180,7 +180,7 @@ class HJzvdStd @JvmOverloads constructor(
             object : GestureDetector.SimpleOnGestureListener() {
                 override fun onDoubleTap(e: MotionEvent): Boolean {
                     if (state == STATE_PLAYING || state == STATE_PAUSE) {
-                        Log.d(TAG, "doubleClick [" + this.hashCode() + "] ")
+                        LogUtil.d(TAG, "doubleClick [" + this.hashCode() + "] ")
                         startButton.performClick()
                     }
                     return super.onDoubleTap(e)
@@ -493,10 +493,10 @@ class HJzvdStd @JvmOverloads constructor(
                     }
                 }
             } else {
-                Log.w("CustomJzvdStd-Settings", "清晰度 $preferredQuality 不可用，使用默认清晰度")
+                LogUtil.w("CustomJzvdStd-Settings", "清晰度 $preferredQuality 不可用，使用默认清晰度")
             }
         }
-        Log.d("CustomJzvdStd-Settings", buildString {
+        LogUtil.d("CustomJzvdStd-Settings", buildString {
             append("default_video_quality: ")
             appendLine(preferredQuality)
             append("showBottomProgress: ")
@@ -658,7 +658,7 @@ class HJzvdStd @JvmOverloads constructor(
     }
 
     override fun clickBack() {
-        Log.i("fun_clickBack", "player_backBtn_clicked")
+        LogUtil.i("fun_clickBack", "player_backBtn_clicked")
         if (context is MainActivity && screen == SCREEN_FULLSCREEN) {
             gotoNormalScreen()
             return
@@ -1057,7 +1057,7 @@ class HJzvdStd @JvmOverloads constructor(
         val absDeltaX = deltaX.absoluteValue
         val absDeltaY = deltaY.absoluteValue
         // 此處進行了修改，未全屏也能調節進度
-        Log.d(TAG, "mDownX=$mDownX, screenWidth=${JZUtils.getScreenWidth(context)}")
+        LogUtil.d(TAG, "mDownX=$mDownX, screenWidth=${JZUtils.getScreenWidth(context)}")
         if (screen != SCREEN_TINY && !isSpeedGestureDetected) {
             //拖动的是NavigationBar和状态栏
             if (mDownX > appScreenWidth
@@ -1077,7 +1077,7 @@ class HJzvdStd @JvmOverloads constructor(
                         }
                     } else {
                         //如果y轴滑动距离超过设置的处理范围，那么进行滑动事件处理
-                        Log.i("appScreenWidth",appScreenWidth.toString())
+                        LogUtil.i("appScreenWidth",appScreenWidth.toString())
                         if (mDownX < appScreenWidth * 0.5f) { //左侧改变亮度
                             mChangeBrightness = true
                             isAdjustBrightness = true
@@ -1088,7 +1088,7 @@ class HJzvdStd @JvmOverloads constructor(
                                         context.contentResolver,
                                         Settings.System.SCREEN_BRIGHTNESS
                                     ).toFloat()
-                                    Log.i(
+                                    LogUtil.i(
                                         TAG,
                                         "current system brightness: $mGestureDownBrightness"
                                     )
@@ -1097,7 +1097,7 @@ class HJzvdStd @JvmOverloads constructor(
                                 }
                             } else {
                                 mGestureDownBrightness = lp.screenBrightness * 255
-                                Log.i(
+                                LogUtil.i(
                                     TAG,
                                     "current activity brightness: $mGestureDownBrightness"
                                 )
@@ -1162,7 +1162,7 @@ class HJzvdStd @JvmOverloads constructor(
     override fun gotoNormalScreen() {
         gobakFullscreenTime = System.currentTimeMillis() // 退出全屏时间
         fullscreenListener?.onFullscreenChanged(false)
-        Log.i(TAG,"${isAdjustBrightness}、${screenBrightnessBK}、${JZUtils.getWindow(context).attributes.screenBrightness}")
+        LogUtil.i(TAG,"${isAdjustBrightness}、${screenBrightnessBK}、${JZUtils.getWindow(context).attributes.screenBrightness}")
         if (isAdjustBrightness) {
             val window = JZUtils.getWindow(context)
             if (window != null) {
@@ -1180,7 +1180,7 @@ class HJzvdStd @JvmOverloads constructor(
         if (originalContainer != null){
             CONTAINER_LIST.pop()
         } else {
-            Log.e("JZVD", "CONTAINER_LIST is empty!")
+            LogUtil.e("JZVD", "CONTAINER_LIST is empty!")
             return
         }
         var layoutParams = blockLayoutParams
@@ -1238,24 +1238,24 @@ class HJzvdStd @JvmOverloads constructor(
                 val mediaKernel = CURRENT_JZVD?.mediaInterface as? ExoMediaKernel
                 videoWidth  = mediaKernel?.videoRealWidth?:0
                 videoHeight = mediaKernel?.videoRealHeight?:0
-                Log.i(TAG,"mediaInterface:$mediaKernel,videoWidth:$videoWidth,videoHeight:$videoHeight")
+                LogUtil.i(TAG,"mediaInterface:$mediaKernel,videoWidth:$videoWidth,videoHeight:$videoHeight")
             }
             is MpvMediaKernel -> {
                 val mediaKernel = CURRENT_JZVD?.mediaInterface as? MpvMediaKernel
                 videoWidth  = mediaKernel?.videoRealWidth?:0
                 videoHeight = mediaKernel?.videoRealHeight?:0
-                Log.i(TAG,"mediaInterface:$mediaKernel,videoWidth:$videoWidth,videoHeight:$videoHeight")
+                LogUtil.i(TAG,"mediaInterface:$mediaKernel,videoWidth:$videoWidth,videoHeight:$videoHeight")
             }
             is SystemMediaKernel -> {
                 val mediaKernel = CURRENT_JZVD?.mediaInterface as? SystemMediaKernel
                 videoWidth  = mediaKernel?.videoRealWidth?:0
                 videoHeight = mediaKernel?.videoRealHeight?:0
-                Log.i(TAG,"mediaInterface:$mediaKernel,videoWidth:$videoWidth,videoHeight:$videoHeight")
+                LogUtil.i(TAG,"mediaInterface:$mediaKernel,videoWidth:$videoWidth,videoHeight:$videoHeight")
             }
         }
 
         val isPortraitVideo = videoWidth > 0 && videoHeight > 0 && videoWidth < videoHeight
-        Log.i(TAG,"mediaInterface:$mediaInterface,videoWidth:$videoWidth,videoHeight:$videoHeight")
+        LogUtil.i(TAG,"mediaInterface:$mediaInterface,videoWidth:$videoWidth,videoHeight:$videoHeight")
         if (isPortraitVideo) {
             pivotY = 0f
             scaleY = 0.5f
@@ -1285,7 +1285,7 @@ class HJzvdStd @JvmOverloads constructor(
 
 
     override fun onStatePreparingChangeUrl() {
-        Log.i(TAG, "onStatePreparingChangeUrl " + " [" + this.hashCode() + "] ")
+        LogUtil.i(TAG, "onStatePreparingChangeUrl " + " [" + this.hashCode() + "] ")
         state = STATE_PREPARING_CHANGE_URL
 
         // 原方法直接使用下面的方法，會導致全屏切換清晰度返回正常界面時重置影片。
@@ -1315,7 +1315,7 @@ class HJzvdStd @JvmOverloads constructor(
 
     // 原來是 300 period 我改成了 100 爲了計時準確
     override fun startProgressTimer() {
-        Log.i(TAG, "startProgressTimer: " + " [" + this.hashCode() + "] ")
+        LogUtil.i(TAG, "startProgressTimer: " + " [" + this.hashCode() + "] ")
         cancelProgressTimer()
         UPDATE_PROGRESS_TIMER = Timer()
         mProgressTimerTask = ProgressTimerTask()
@@ -1416,7 +1416,7 @@ class HJzvdStd @JvmOverloads constructor(
     }
 
     override fun onStatePlaying() {
-        Log.i(TAG, "onStatePlaying " + " [" + this.hashCode() + "] ")
+        LogUtil.i(TAG, "onStatePlaying " + " [" + this.hashCode() + "] ")
         onVideoStateChanged?.invoke(STATE_PLAYING)
         if (isNeedResumeProgress()) {
             post {
@@ -1426,7 +1426,7 @@ class HJzvdStd @JvmOverloads constructor(
             }
         }
         if (state == STATE_PREPARED) { //如果是准备完成视频后第一次播放，先判断是否需要跳转进度。
-            Log.d(TAG, "onStatePlaying:STATE_PREPARED ")
+            LogUtil.d(TAG, "onStatePlaying:STATE_PREPARED ")
             mAudioManager =
                 applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             val audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
@@ -1542,7 +1542,7 @@ class HJzvdStd @JvmOverloads constructor(
             val kernel = mediaInterface as MpvMediaKernel
             post {
                 if (fullscreen) {
-                    Log.i(TAG, "updateVideoPlayerSize: $width x $height")
+                    LogUtil.i(TAG, "updateVideoPlayerSize: $width x $height")
                     kernel.updateSurFaceSize(width, height)
                 } else {
                     kernel.updateSurFaceSize(width, height)

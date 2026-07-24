@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkManager
 import io.github.daisukikaffuchino.han1meviewer.worker.HanimeDownloadManager
@@ -36,7 +36,7 @@ object AppViewModel : ApplicationViewModel(application), IHCsrfToken {
 
         viewModelScope.launch(Dispatchers.IO) {
             HanimeDownloadWorker.getRunningWorkInfoCount(application).collect { count ->
-                Log.d(HanimeDownloadWorker.TAG, "getRunningWorkInfoCount: $count")
+                LogUtil.d(HanimeDownloadWorker.TAG, "getRunningWorkInfoCount: $count")
                 runningWorkInfoCountFlow.value = count
             }
         }

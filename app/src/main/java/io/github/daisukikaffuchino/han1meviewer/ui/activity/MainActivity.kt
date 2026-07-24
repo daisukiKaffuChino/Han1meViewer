@@ -11,7 +11,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.biometric.BiometricManager
@@ -68,10 +68,10 @@ class MainActivity : BaseActivity() {
     private var hasAuthenticated = false
     private val pipActionReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.i("pipmode", "✅ onReceive called with action: ${intent?.action}")
+            LogUtil.i("pipmode", "✅ onReceive called with action: ${intent?.action}")
             when (intent?.action) {
                 ACTION_TOGGLE_PLAY -> {
-                    Log.i("pipmode", "🎬 ACTION_TOGGLE_PLAY triggered")
+                    LogUtil.i("pipmode", "🎬 ACTION_TOGGLE_PLAY triggered")
                     togglePlayPause()
                 }
             }
@@ -194,11 +194,11 @@ class MainActivity : BaseActivity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(pipActionReceiver, filter, RECEIVER_NOT_EXPORTED)
-            Log.i("pipmode", "✅ registerReceiver with RECEIVER_NOT_EXPORTED")
+            LogUtil.i("pipmode", "✅ registerReceiver with RECEIVER_NOT_EXPORTED")
         } else {
             @SuppressLint("UnspecifiedRegisterReceiverFlag")
             registerReceiver(pipActionReceiver, filter)
-            Log.i("pipmode", "✅ registerReceiver (legacy)")
+            LogUtil.i("pipmode", "✅ registerReceiver (legacy)")
         }
     }
 
@@ -270,10 +270,10 @@ class MainActivity : BaseActivity() {
         val prefs = defaultSharedPreferences
         val allowPip = prefs.getBoolean("allow_pip_mode", true)
 
-        Log.i("pipmode", "enter pip mode?\n$currentFragment\nallowpip:$allowPip\n")
+        LogUtil.i("pipmode", "enter pip mode?\n$currentFragment\nallowpip:$allowPip\n")
 
         if (currentFragment?.shouldEnterPip() == true && allowPip) {
-            Log.i("pipmode", "enter pip mode")
+            LogUtil.i("pipmode", "enter pip mode")
             currentFragment.enterPipMode()
         }
     }

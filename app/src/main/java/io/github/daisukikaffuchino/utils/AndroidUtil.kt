@@ -25,10 +25,6 @@ val Context.activity: Activity?
         return null
     }
 
-inline fun <reified T : Activity> Context.findActivity(): T {
-    return findActivityOrNull() ?: error("No activity of type ${T::class.java.simpleName} found")
-}
-
 inline fun <reified T : Activity> Context.findActivityOrNull(): T? {
     var context = this
     while (context is ContextWrapper) {

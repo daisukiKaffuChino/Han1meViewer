@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
 import android.app.Application
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.annotation.StringRes
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.R
@@ -275,7 +275,7 @@ class CommentViewModel(application: Application) : ApplicationViewModel(applicat
         reportableId: String?
     ){
         viewModelScope.launch {
-            Log.i("ReportComment", "csrfToken:${csrfToken}")
+            LogUtil.i("ReportComment", "csrfToken:${csrfToken}")
             NetworkRepo.reportComment(
                 csrfToken = csrfToken,
                 reason = reason,

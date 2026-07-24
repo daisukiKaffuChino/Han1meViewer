@@ -7,7 +7,7 @@ import io.github.daisukikaffuchino.han1meviewer.getHanimeSearchShareText
 import io.github.daisukikaffuchino.han1meviewer.getHanimeShareText
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.SubscriptionScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.MySubscriptionsViewModel
-import io.github.daisukikaffuchino.han1meviewer.ui.util.rememberCopyTextToClipboard
+import io.github.daisukikaffuchino.utils.rememberCopyTextToClipboard
 import io.github.daisukikaffuchino.utils.SonnerToast
 
 @Composable

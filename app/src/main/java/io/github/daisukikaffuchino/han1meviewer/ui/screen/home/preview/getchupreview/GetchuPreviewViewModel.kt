@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.preview.getchupreview
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.logic.GetchuNetworkRepo.getGetchuPreview
@@ -33,16 +33,16 @@ class GetchuPreviewViewModel : ViewModel() {
 
     fun getPreview(date: String) {
         viewModelScope.launch {
-            Log.d("GetchuPreviewVM", "getPreview date=$date cacheHit=${previewCache.containsKey(date)}")
+            LogUtil.d("GetchuPreviewVM", "getPreview date=$date cacheHit=${previewCache.containsKey(date)}")
             previewCache[date]?.let {
                 _previewFlow.value = it
-                Log.d("GetchuPreviewVM", "emit cached list date=$date state=${it.logSummary()}")
+                LogUtil.d("GetchuPreviewVM", "emit cached list date=$date state=${it.logSummary()}")
                 return@launch
             }
             _previewFlow.value = PageState.Loading
             getGetchuPreview(date).collect { state ->
                 val pageState = state.toPageState()
-                Log.d("GetchuPreviewVM", "emit list date=$date state=${pageState.logSummary()}")
+                LogUtil.d("GetchuPreviewVM", "emit list date=$date state=${pageState.logSummary()}")
                 _previewFlow.value = pageState
                 if (pageState is PageState.Success || pageState is PageState.NoMoreData) {
                     previewCache[date] = pageState
@@ -53,16 +53,16 @@ class GetchuPreviewViewModel : ViewModel() {
 
     fun getDetail(id: String) {
         viewModelScope.launch {
-            Log.d("GetchuPreviewVM", "getDetail id=$id cacheHit=${detailCache.containsKey(id)}")
+            LogUtil.d("GetchuPreviewVM", "getDetail id=$id cacheHit=${detailCache.containsKey(id)}")
             detailCache[id]?.let { cachedState ->
                 setDetailState(id, cachedState)
-                Log.d("GetchuPreviewVM", "emit cached detail id=$id state=${cachedState.logSummary()}")
+                LogUtil.d("GetchuPreviewVM", "emit cached detail id=$id state=${cachedState.logSummary()}")
                 return@launch
             }
             setDetailState(id, PageState.Loading)
             getGetchuPreviewDetail(id).collect { state ->
                 val pageState = state.toPageState()
-                Log.d("GetchuPreviewVM", "emit detail id=$id state=${pageState.logSummary()}")
+                LogUtil.d("GetchuPreviewVM", "emit detail id=$id state=${pageState.logSummary()}")
                 setDetailState(id, pageState)
                 if (pageState is PageState.Success || pageState is PageState.NoMoreData) {
                     detailCache[id] = pageState

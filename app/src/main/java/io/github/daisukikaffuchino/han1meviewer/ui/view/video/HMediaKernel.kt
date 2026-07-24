@@ -10,7 +10,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
 import android.os.ParcelFileDescriptor
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import android.view.Surface
 import androidx.annotation.OptIn
 import androidx.core.net.toUri
@@ -115,10 +115,10 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
     @OptIn(UnstableApi::class)
     override fun prepare() {
         if (_exoPlayer != null) {
-            Log.w(TAG, "prepare called, but player already exists.")
+            LogUtil.w(TAG, "prepare called, but player already exists.")
             return // 防止误调用
         }
-        Log.i(TAG, "prepare")
+        LogUtil.i(TAG, "prepare")
         val context = jzvd.context
 
         release()
@@ -164,7 +164,7 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
                     .createMediaSource(MediaItem.fromUri(currUrl))
             }
 
-            Log.i(TAG, "URL Link = $currUrl")
+            LogUtil.i(TAG, "URL Link = $currUrl")
 
             exoPlayer.addListener(this)
 
@@ -181,7 +181,7 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
 
             val surfaceTexture = jzvd.textureView?.surfaceTexture
             if (surfaceTexture == null) {
-                Log.e(TAG, "❌ surfaceTexture is null, video surface not set")
+                LogUtil.e(TAG, "❌ surfaceTexture is null, video surface not set")
             }
             surfaceTexture?.let { exoPlayer.setVideoSurface(Surface(it)) }
         }
@@ -198,7 +198,7 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
         val realHeight = videoSize.height
         videoRealWidth = realWidth.toInt()
         videoRealHeight = realHeight
-        Log.i("JZVD-onVideoSizeChanged","realWidth:$realWidth,realHeight:$realHeight")
+        LogUtil.i("JZVD-onVideoSizeChanged","realWidth:$realWidth,realHeight:$realHeight")
         handler.post {
             jzvd.onVideoSizeChanged(realWidth.toInt(), realHeight)
         }
@@ -211,7 +211,7 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
     }
 
     override fun onRenderedFirstFrame() {
-        Log.i(TAG, "onRenderedFirstFrame")
+        LogUtil.i(TAG, "onRenderedFirstFrame")
     }
 
     override fun pause() {
@@ -312,27 +312,27 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
     }
 
     override fun onTimelineChanged(timeline: Timeline, reason: Int) {
-        Log.i(TAG, "onTimelineChanged")
+        LogUtil.i(TAG, "onTimelineChanged")
     }
 
     override fun onIsLoadingChanged(isLoading: Boolean) {
-        Log.i(TAG, "onIsLoadingChanged")
+        LogUtil.i(TAG, "onIsLoadingChanged")
     }
 
     override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
-        Log.i(TAG, "onPlayWhenReadyChanged: $playWhenReady, reason: $reason, " +
+        LogUtil.i(TAG, "onPlayWhenReadyChanged: $playWhenReady, reason: $reason, " +
                 "playbackState=${_exoPlayer?.playbackState}")
         if (playWhenReady && _exoPlayer?.playbackState == Player.STATE_READY) {
             handler?.post {
-                Log.i(TAG,"onPlayWhenReadyChanged_ready")
+                LogUtil.i(TAG,"onPlayWhenReadyChanged_ready")
                 jzvd.onStatePlaying()
             }
         }
-        Log.i(TAG,"onPlayWhenReadyChanged")
+        LogUtil.i(TAG,"onPlayWhenReadyChanged")
     }
 
     override fun onPlaybackStateChanged(playbackState: Int) {
-        Log.i(TAG, "onPlaybackStateChanged: $playbackState")
+        LogUtil.i(TAG, "onPlaybackStateChanged: $playbackState")
         handler?.post {
             when (playbackState) {
                 Player.STATE_BUFFERING -> {
@@ -343,7 +343,7 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
                 Player.STATE_READY -> {
 
                     runOnPlayerThread {
-                        Log.i(TAG, "STATE_READY, playWhenReady=${_exoPlayer?.playWhenReady}")
+                        LogUtil.i(TAG, "STATE_READY, playWhenReady=${_exoPlayer?.playWhenReady}")
                         if (_exoPlayer?.playWhenReady == true){
                             jzvd.onStatePlaying()
                         }
@@ -355,14 +355,14 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
                 }
 
                 else -> {
-                    Log.i(TAG, "onPlaybackStateChanged: $playbackState")
+                    LogUtil.i(TAG, "onPlaybackStateChanged: $playbackState")
                 }
             }
         }
     }
 
     override fun onPlayerError(error: PlaybackException) {
-        Log.e(TAG, "onPlayerError: $error")
+        LogUtil.e(TAG, "onPlayerError: $error")
         handler?.post { jzvd.onError(1000, 1000) }
     }
 
@@ -394,7 +394,7 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
     }
 
     override fun setSurface(surface: Surface?) {
-        Log.e(TAG, "setSurface: $surface")
+        LogUtil.e(TAG, "setSurface: $surface")
         _exoPlayer?.setVideoSurface(surface)
     }
 
@@ -409,7 +409,7 @@ class ExoMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd), Player.Listener, HMed
     override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
         if (SAVED_SURFACE == null) {
             SAVED_SURFACE = surface
-            Log.d(TAG, "onSurfaceTextureAvailable: $SAVED_SURFACE $width $height")
+            LogUtil.d(TAG, "onSurfaceTextureAvailable: $SAVED_SURFACE $width $height")
             if (_exoPlayer == null) {
                 prepare()
             } else {
@@ -613,13 +613,13 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd) {
 
     fun init() {
         mpvOptions.forEach { (key, value) ->
-            Log.i("MPV_config","$key,$value")
+            LogUtil.i("MPV_config","$key,$value")
             MPVLib.setOptionString(key, value)
         }
         try {
             val customParams = parseCustomMpvParams()
             customParams.forEach { (key, value) ->
-                Log.i("MPV_config","custom: $key,$value")
+                LogUtil.i("MPV_config","custom: $key,$value")
                 MPVLib.setOptionString(key, value)
             }
         } catch (e: Exception){
@@ -641,7 +641,7 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd) {
                 try {
                     currentPfd = context.contentResolver.openFileDescriptor(uri, "r")
                     detachFd = currentPfd?.detachFd()
-                    Log.d(TAG, "Detached FD = $detachFd")
+                    LogUtil.d(TAG, "Detached FD = $detachFd")
                     pfdFilePath = true
                     if (detachFd != null) {
                         "fd://$detachFd"
@@ -661,25 +661,25 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd) {
         if (!pfdFilePath) return
         try {
             currentPfd?.let {
-                Log.i(TAG, "Closing currentPfd: $it")
+                LogUtil.i(TAG, "Closing currentPfd: $it")
                 it.close()
             }
 
             detachFd?.let { fd ->
-                Log.i(TAG, "Closing detachFd: $fd")
+                LogUtil.i(TAG, "Closing detachFd: $fd")
                 try {
                     ParcelFileDescriptor.adoptFd(fd).close()
                 } catch (e: Exception) {
-                    Log.w(TAG, "detachFd $fd already closed or invalid", e)
+                    LogUtil.w(TAG, "detachFd $fd already closed or invalid", e)
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error releasing PFD", e)
+            LogUtil.e(TAG, "Error releasing PFD", e)
         } finally {
             currentPfd = null
             detachFd = null
             handler.postDelayed({
-                Log.i(TAG, "${from ?: "releaseCurrentPfd"} completed. PFD cleared.")
+                LogUtil.i(TAG, "${from ?: "releaseCurrentPfd"} completed. PFD cleared.")
             }, 200)
         }
     }
@@ -691,11 +691,11 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd) {
 
         val url = jzvd.jzDataSource.currentUrl.toString()
         if (url.isEmpty()) {
-            Log.e(TAG, "视频链接为空")
+            LogUtil.e(TAG, "视频链接为空")
             return
         }
 
-        Log.e(TAG, "URL Link = $url")
+        LogUtil.e(TAG, "URL Link = $url")
         MPVLib.setOptionString("force-window", "yes")
 
         val uri = url.toUri()
@@ -721,7 +721,7 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd) {
     }
 
     override fun seekTo(time: Long) {
-        Log.i("seekTo","${ (time / 1000.0)}")
+        LogUtil.i("seekTo","${ (time / 1000.0)}")
         MPVLib.command(arrayOf("seek", (time / 1000.0).toString(), "absolute", "exact"))
     }
 
@@ -772,12 +772,12 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd) {
     }
 
     fun updateSurFaceSize(width: Int, height: Int) {
-        Log.d(TAG, "updateSurFaceSize ${width}x${height}")
+        LogUtil.d(TAG, "updateSurFaceSize ${width}x${height}")
         MPVLib.setPropertyString("android-surface-size", "${width}x${height}")
     }
 
     override fun onSurfaceTextureSizeChanged(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
-        Log.d(TAG, "onSurfaceTextureSizeChanged ${width}x${height}")
+        LogUtil.d(TAG, "onSurfaceTextureSizeChanged ${width}x${height}")
         updateSurFaceSize(width, height)
     }
 
@@ -800,7 +800,7 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd) {
 
     private val mpvEventObserver = object : MPVLib.EventObserver {
         override fun eventProperty(property: String) {
-//            Log.d(TAG, "eventProperty: $property")
+//            LogUtil.d(TAG, "eventProperty: $property")
         }
 
         override fun eventProperty(property: String, value: Long) {
@@ -808,15 +808,15 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd) {
         }
 
         override fun eventProperty(property: String, value: Boolean) {
-//            Log.d(TAG, "eventProperty: $property $value")
+//            LogUtil.d(TAG, "eventProperty: $property $value")
         }
 
         override fun eventProperty(property: String, value: String) {
-//            Log.d(TAG, "eventProperty: $property $value")
+//            LogUtil.d(TAG, "eventProperty: $property $value")
         }
 
         override fun eventProperty(property: String, value: Double) {
-//            Log.d(TAG, "eventProperty: $property $value")
+//            LogUtil.d(TAG, "eventProperty: $property $value")
             when (property) {
                 "time-pos" -> mpvTimePos = value
                 "demuxer-cache-duration" -> mpvCacheDuration = value
@@ -858,7 +858,7 @@ class MpvMediaKernel(jzvd: Jzvd) : JZMediaInterface(jzvd) {
                         jzvd.onCompletion()
                     }
                     MPVLib.mpvEventId.MPV_EVENT_SHUTDOWN -> {
-                        Log.e(TAG, "event: $eventId")
+                        LogUtil.e(TAG, "event: $eventId")
                     }
                 }
             }

@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.annotation.IntDef
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoComments
 
@@ -33,16 +33,16 @@ class PreviewCommentPrefetcher private constructor(
                 it.activityMask = it.activityMask and scope.inv()
                 if (it.activityMask == 0) {
                     prefetcher = null
-                    Log.i(TAG, "bye executed successfully")
+                    LogUtil.i(TAG, "bye executed successfully")
                 } else {
                     if (it.activityMask and Scope.PREVIEW_ACTIVITY != 0) {
-                        Log.i(
+                        LogUtil.i(
                             TAG, "bye executed failed: " +
                                     "prefetcher is still alive cuz of PreviewActivity"
                         )
                     }
                     if (it.activityMask and Scope.PREVIEW_COMMENT_ACTIVITY != 0) {
-                        Log.i(
+                        LogUtil.i(
                             TAG, "bye executed failed: " +
                                     "prefetcher is still alive cuz of PreviewCommentActivity"
                         )

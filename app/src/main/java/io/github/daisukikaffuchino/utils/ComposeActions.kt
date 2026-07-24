@@ -1,4 +1,4 @@
-package io.github.daisukikaffuchino.han1meviewer.ui.util
+package io.github.daisukikaffuchino.utils
 
 import android.content.ClipData
 import android.content.Intent

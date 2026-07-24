@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.network
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.util.CookieString
 import io.github.daisukikaffuchino.han1meviewer.util.toLoginCookieList
@@ -35,7 +35,7 @@ class HCookieJar : CookieJar {
             cookies.addAll(Preferences.cloudFlareCookieStateFlow.value.toLoginCookieList(host))
         }
 
-        Log.d("HCookieJar", "loadForRequest for $host: $cookies")
+        LogUtil.d("HCookieJar", "loadForRequest for $host: $cookies")
 
         return cookies
     }

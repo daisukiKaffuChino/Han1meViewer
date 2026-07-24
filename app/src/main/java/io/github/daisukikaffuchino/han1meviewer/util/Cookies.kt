@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.util
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import okhttp3.Cookie
 
@@ -28,18 +28,18 @@ fun CookieString.toLoginCookieList(domain: String): List<Cookie> {
                         .value(cleanValue)
                         .build()
                 } catch (e: IllegalArgumentException) {
-                    Log.w(
+                    LogUtil.w(
                         "CookieString",
                         "无效Cookie: $cleanedName=$cleanValue, error=${e.message}"
                     )
                 }
             } else {
-                Log.w("CookieString", "无效键值: $cookie")
+                LogUtil.w("CookieString", "无效键值: $cookie")
             }
         }
     }
     return cookieList.also {
-        Log.d("CookieString", "toCookieList: $it")
+        LogUtil.d("CookieString", "toCookieList: $it")
     }
 }
 

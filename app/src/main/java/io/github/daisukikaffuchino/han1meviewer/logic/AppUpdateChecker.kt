@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.logic
 
 import android.util.Base64
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.core.content.edit
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.R
@@ -77,7 +77,7 @@ object AppUpdateChecker {
         val cachedJson = preferences.getString(CACHED_JSON_KEY, null)
 
         val responseJson = runCatching { requestUpdateJson() }
-            .onFailure { Log.e(TAG, "Failed to check for updates", it) }
+            .onFailure { LogUtil.e(TAG, "Failed to check for updates", it) }
             .getOrNull()
 
         preferences.edit {
@@ -88,7 +88,7 @@ object AppUpdateChecker {
 
         val jsonToUse = responseJson ?: cachedJson
         if (responseJson == null) {
-            jsonToUse?.let { Log.d(TAG, "Using stale update JSON: $it") }
+            jsonToUse?.let { LogUtil.d(TAG, "Using stale update JSON: $it") }
         }
         jsonToUse.toUpdateCheckResult()
     }
@@ -111,7 +111,7 @@ object AppUpdateChecker {
         return client.newCall(request).execute().use { response ->
             check(response.isSuccessful) { "Update check failed with HTTP ${response.code}" }
             response.body.string().also { json ->
-                Log.d(TAG, "Update response JSON: $json")
+                LogUtil.d(TAG, "Update response JSON: $json")
             }
         }
     }
@@ -125,7 +125,7 @@ object AppUpdateChecker {
                 announcement = payload.toAnnouncementOrNull(),
             )
         }.onFailure {
-            Log.e(TAG, "Invalid update JSON", it)
+            LogUtil.e(TAG, "Invalid update JSON", it)
         }.getOrDefault(AppUpdateCheckResult())
     }
 
@@ -134,7 +134,7 @@ object AppUpdateChecker {
         val downloadUrl = downloadUrl?.trim().orEmpty()
         if (versionName.isBlank() || versionCode <= 0 || downloadUrl.isBlank()) return null
         if (downloadUrl.toHttpUrlOrNull() == null) {
-            Log.e(TAG, "downloadUrl is invalid")
+            LogUtil.e(TAG, "downloadUrl is invalid")
             return null
         }
 

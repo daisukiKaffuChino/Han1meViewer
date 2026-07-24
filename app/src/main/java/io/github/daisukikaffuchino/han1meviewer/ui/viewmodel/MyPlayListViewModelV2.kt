@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
@@ -111,7 +111,7 @@ class MyPlayListViewModelV2 : ViewModel() {
 
     // 加载所有playlist
     fun loadMyPlayList(page: Int = 1, forceReload: Boolean = false) {
-        Log.i("current_page",page.toString())
+        LogUtil.i("current_page",page.toString())
         if (page > 1 && (_isLoadingMorePlaylists.value || _noMorePlaylists.value)) return
         if (page == 1 || forceReload) {
             playlistPage = 1
@@ -156,12 +156,12 @@ class MyPlayListViewModelV2 : ViewModel() {
 
     // 获取单个playlist内容
     fun getPlaylistItems(page: Int = 1, listCode: String, refresh: Boolean = false) {
-        Log.i("getPlaylistItems","isLoadingMore:$isLoadingMore,listCode:$listCode,")
+        LogUtil.i("getPlaylistItems","isLoadingMore:$isLoadingMore,listCode:$listCode,")
         if (isLoadingMore) return
         isLoadingMore = true
         viewModelScope.launch {
             if (listCode.isBlank()) return@launch
-            Log.i("getPlaylistItems","page:$page,refresh:$refresh")
+            LogUtil.i("getPlaylistItems","page:$page,refresh:$refresh")
             // 如果是第一页或刷新，重置状态
             if (page == 1 || refresh) {
                 _playlistFlow.value = emptyList()
@@ -171,10 +171,10 @@ class MyPlayListViewModelV2 : ViewModel() {
                 _playlistStateFlow.value = PageLoadingState.Loading
             }
             NetworkRepo.getMyPlayListItems(page, listCode).collect { state ->
-                Log.i("getPlaylistItems","state:$state")
+                LogUtil.i("getPlaylistItems","state:$state")
                 when (state) {
                     is PageLoadingState.Success -> {
-                        Log.i("getPlaylistItems","list size:${state.info.hanimeInfo.size}")
+                        LogUtil.i("getPlaylistItems","list size:${state.info.hanimeInfo.size}")
                         _playlistDesc.value = state.info.desc
                         val newList = state.info.hanimeInfo
                         if (newList.isEmpty()) {
@@ -227,7 +227,7 @@ class MyPlayListViewModelV2 : ViewModel() {
     val modifyPlaylistFlow = _modifyPlaylistFlow.asSharedFlow()
     // 编辑Playlist
     fun modifyPlaylist(listCode: String, title: String, desc: String, delete: Boolean) {
-        Log.i("modify_playlist","${listCode},${title},${desc}")
+        LogUtil.i("modify_playlist","${listCode},${title},${desc}")
         viewModelScope.launch {
             NetworkRepo.modifyPlaylist(listCode, title, desc, delete, csrfToken).collect {
                 _modifyPlaylistFlow.emit(it)

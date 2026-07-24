@@ -2,7 +2,7 @@ package io.github.daisukikaffuchino.han1meviewer
 
 import android.content.ComponentName
 import android.content.pm.PackageManager
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
@@ -42,10 +42,10 @@ class HanimeApplication : Application(), Application.ActivityLifecycleCallbacks 
         MPVLib.init()
 
         if (AnimeShaders.copyShaderAssets(applicationContext) <= 0) {
-            Log.w(TAG, "Shader 复制失败")
+            LogUtil.w(TAG, "Shader 复制失败")
         }
         if (AnimeShaders.copyCertAssets(applicationContext) <= 0) {
-            Log.w(TAG, "cert 复制失败")
+            LogUtil.w(TAG, "cert 复制失败")
         }
         val selected = Preferences.fakeLauncherIcon
         switchLauncher(selected)

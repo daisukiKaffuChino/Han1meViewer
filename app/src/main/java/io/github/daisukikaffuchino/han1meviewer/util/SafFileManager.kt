@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Environment
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
@@ -255,7 +255,7 @@ object SafFileManager {
         val hanimeDownloadFolder = File(privateFolder, HANIME_DOWNLOAD_FOLDER)
 
         if (!hanimeDownloadFolder.exists() || !hanimeDownloadFolder.isDirectory) {
-            Log.e("Migrate", "hanime_download 文件夹不存在")
+            LogUtil.e("Migrate", "hanime_download 文件夹不存在")
             withContext(Dispatchers.Main) {
                 onProgress?.invoke(0, 0)
             }
@@ -267,7 +267,7 @@ object SafFileManager {
             withContext(Dispatchers.Main) {
                 onProgress?.invoke(0, -1)
             }
-            Log.e("Migrate", "SAF treeUri 为空")
+            LogUtil.e("Migrate", "SAF treeUri 为空")
             return@launch
         }
 
@@ -276,7 +276,7 @@ object SafFileManager {
             withContext(Dispatchers.Main) {
                 onProgress?.invoke(0, -1)
             }
-            Log.e("Migrate", "无法获取 DocumentFile 根目录")
+            LogUtil.e("Migrate", "无法获取 DocumentFile 根目录")
             return@launch
         }
 
@@ -287,7 +287,7 @@ object SafFileManager {
             withContext(Dispatchers.Main) {
                 onProgress?.invoke(0, -1)
             }
-            Log.e("Migrate", "创建/获取 HANIME_DOWNLOAD_FOLDER 失败")
+            LogUtil.e("Migrate", "创建/获取 HANIME_DOWNLOAD_FOLDER 失败")
             return@launch
         }
 
@@ -295,10 +295,10 @@ object SafFileManager {
         val total = folders.size
         var migrated = 0
 
-        Log.d("Migrate", "开始迁移，总文件夹数: $total")
+        LogUtil.d("Migrate", "开始迁移，总文件夹数: $total")
 
         for (folder in folders) {
-            Log.d("Migrate", "正在迁移文件夹: ${folder.name}")
+            LogUtil.d("Migrate", "正在迁移文件夹: ${folder.name}")
 
             // 检查目标文件夹是否已存在
             var folderDoc = hanimeDownloadDoc.findFile(folder.name)
@@ -306,7 +306,7 @@ object SafFileManager {
             if (folderDoc == null) {
                 folderDoc = hanimeDownloadDoc.createDirectory(folder.name)
                 if (folderDoc == null) {
-                    Log.e("Migrate", "创建视频文件夹失败: ${folder.name}")
+                    LogUtil.e("Migrate", "创建视频文件夹失败: ${folder.name}")
                     continue
                 }
             } else {
@@ -315,7 +315,7 @@ object SafFileManager {
                         val existingFile = folderDoc.findFile(file.name)
                         if (existingFile != null) {
                             existingFile.delete()
-                            Log.d("Migrate", "删除冲突文件: ${file.name}")
+                            LogUtil.d("Migrate", "删除冲突文件: ${file.name}")
                         }
                     }
                 }
@@ -327,7 +327,7 @@ object SafFileManager {
                         val mimeType = mimeForExt(file.extension.lowercase())
                         val newFile = folderDoc.createFile(mimeType, file.name)
                         if (newFile == null) {
-                            Log.e("Migrate", "创建文件失败: ${file.name}")
+                            LogUtil.e("Migrate", "创建文件失败: ${file.name}")
                             return@forEach
                         }
 
@@ -338,12 +338,12 @@ object SafFileManager {
                                         input.copyTo(output)
                                     }
                             }
-                            Log.d("Migrate", "已迁移文件: ${file.name}")
+                            LogUtil.d("Migrate", "已迁移文件: ${file.name}")
                         } catch (e: Exception) {
-                            Log.e("Migrate", "复制文件出错: ${file.name}", e)
+                            LogUtil.e("Migrate", "复制文件出错: ${file.name}", e)
                         }
                     } else {
-                        Log.d("Migrate", "文件已存在，跳过: ${file.name}")
+                        LogUtil.d("Migrate", "文件已存在，跳过: ${file.name}")
                     }
                 }
             }
@@ -352,7 +352,7 @@ object SafFileManager {
             folder.deleteRecursively()
 
             migrated++
-            Log.d("Migrate", "已完成文件夹: ${folder.name} ($migrated/$total)")
+            LogUtil.d("Migrate", "已完成文件夹: ${folder.name} ($migrated/$total)")
 
             withContext(Dispatchers.Main) {
                 onProgress?.invoke(migrated, total)
@@ -363,12 +363,12 @@ object SafFileManager {
                 scanAndImportHanimeDownloads(context, dao)
             }
         } catch (e: Exception) {
-            Log.e("saf", e.message.toString())
+            LogUtil.e("saf", e.message.toString())
         }
         withContext(Dispatchers.Main) {
             onProgress?.invoke(migrated, total)
         }
-        Log.d("Migrate", "迁移完成，总文件夹数: $total")
+        LogUtil.d("Migrate", "迁移完成，总文件夹数: $total")
     }
 
     /**
@@ -435,7 +435,7 @@ object SafFileManager {
                                 //                               quality = quality
                             )
                             dao.update(updated)
-                            Log.d("ImportHanime", "已存在，更新 videoUri/coverUri: $videoCode")
+                            LogUtil.d("ImportHanime", "已存在，更新 videoUri/coverUri: $videoCode")
                         } else {
                             val entity = HanimeDownloadEntity(
                                 coverUrl = coverUrl,
@@ -451,11 +451,11 @@ object SafFileManager {
                                 state = DownloadState.Finished
                             )
                             dao.insert(entity)
-                            Log.d("ImportHanime", "导入完成: $videoCode")
+                            LogUtil.d("ImportHanime", "导入完成: $videoCode")
                         }
                     }
                 } catch (e: Exception) {
-                    Log.e("ImportHanime", "导入失败: $videoCode", e)
+                    LogUtil.e("ImportHanime", "导入失败: $videoCode", e)
                 }
             }
     }
@@ -512,7 +512,7 @@ object SafFileManager {
             testFile?.delete()
             result
         } catch (e: Exception) {
-            Log.w("HFileMigrator", "SAF 权限检查失败", e)
+            LogUtil.w("HFileMigrator", "SAF 权限检查失败", e)
             false
         }
     }

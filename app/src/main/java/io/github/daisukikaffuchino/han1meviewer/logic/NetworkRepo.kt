@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.logic
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import io.github.daisukikaffuchino.han1meviewer.Preferences.isAlreadyLogin
@@ -281,7 +281,7 @@ object NetworkRepo {
             )
         }
     ) {
-        Log.d("add_to_fav_body", it)
+        LogUtil.d("add_to_fav_body", it)
         return@websiteIOFlow WebsiteState.Success(likeStatus)
     }
 
@@ -308,7 +308,7 @@ object NetworkRepo {
             )
         }
     ) {
-        Log.d("rate_video_body", it)
+        LogUtil.d("rate_video_body", it)
         return@websiteIOFlow WebsiteState.Success(isPositive)
     }
 
@@ -325,7 +325,7 @@ object NetworkRepo {
         },
         permittedSuccessCode = intArrayOf(500)
     ) {
-        Log.d("create_playlist_body", it)
+        LogUtil.d("create_playlist_body", it)
         return@websiteIOFlow WebsiteState.Success(Unit)
     }
 
@@ -342,7 +342,7 @@ object NetworkRepo {
             )
         }
     ) {
-        Log.d("add_to_playlist_body", it)
+        LogUtil.d("add_to_playlist_body", it)
         return@websiteIOFlow WebsiteState.Success(position)
     }
 
@@ -362,7 +362,7 @@ object NetworkRepo {
         },
         permittedSuccessCode = intArrayOf(302)
     ) {
-        Log.d("modify_playlist_body", it)
+        LogUtil.d("modify_playlist_body", it)
         return@websiteIOFlow WebsiteState.Success(
             ModifiedPlaylistArgs(
                 title = title, desc = description, isDeleted = delete,
@@ -398,7 +398,7 @@ object NetworkRepo {
             )
         }
     ) {
-        Log.d("post_comment_body", it)
+        LogUtil.d("post_comment_body", it)
         return@websiteIOFlow WebsiteState.Success(Unit)
     }
 
@@ -413,7 +413,7 @@ object NetworkRepo {
             )
         }
     ) {
-        Log.d("post_comment_reply_body", it)
+        LogUtil.d("post_comment_reply_body", it)
         return@websiteIOFlow WebsiteState.Success(Unit)
     }
 
@@ -439,7 +439,7 @@ object NetworkRepo {
             )
         }
     ) {
-        Log.d("like_comment_body", it)
+        LogUtil.d("like_comment_body", it)
         return@websiteIOFlow WebsiteState.Success(
             VideoCommentArgs(
                 commentPosition, isPositive, comment
@@ -486,7 +486,7 @@ object NetworkRepo {
             )
         }
     ) {
-        Log.d("subscribe_artist_body", it)
+        LogUtil.d("subscribe_artist_body", it)
         return@websiteIOFlow WebsiteState.Success(status)
     }
 
@@ -507,7 +507,7 @@ object NetworkRepo {
             if (loginPageAgain.code() == 404) {
                 // Cookie 會返回 XSRF-TOKEN 和 hanime1_session，我們只需要後者
                 // 错误的，还需要 remember_web 字段！但我没找到！
-                Log.d("login_headers", req.headers().toMultimap().toString())
+                LogUtil.d("login_headers", req.headers().toMultimap().toString())
                 emit(WebsiteState.Success(req.headers().values("Set-Cookie")))
             } else {
                 emit(WebsiteState.Error(IllegalStateException(getString(R.string.account_or_password_wrong))))

@@ -4,7 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import io.github.daisukikaffuchino.han1meviewer.FILE_PROVIDER_AUTHORITY
@@ -101,7 +101,7 @@ suspend fun InputStream.copyTo(
                 }
                 bytes = read(buffer)
             }
-            Log.i("progress", bytesCopied.toString())
+            LogUtil.i("progress", bytesCopied.toString())
             bytesCopied
         }
     }

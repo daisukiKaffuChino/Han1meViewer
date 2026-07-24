@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer
 
 import android.content.Context
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.annotation.WorkerThread
 import androidx.core.content.edit
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
@@ -49,18 +49,18 @@ object HCacheManager {
                 // --- SAF 写入 ---
                 context.contentResolver.openOutputStream(cacheUri, "rwt")?.use { os ->
                     HJson.encodeToStream(info, os)
-                    Log.d("FileSave", "✅ SAF write completed")
+                    LogUtil.d("FileSave", "✅ SAF write completed")
                 } ?: throw IOException("无法打开 SAF Uri 输出流: $cacheUri")
             } else {
-                Log.d("FileSave", "📝 Using regular file write method")
+                LogUtil.d("FileSave", "📝 Using regular file write method")
                 // --- 普通文件写入 ---
                 cacheFile.atomicWrite { outputStream ->
                     HJson.encodeToStream(info, outputStream)
-                    Log.d("FileSave", "✅ Regular write completed")
+                    LogUtil.d("FileSave", "✅ Regular write completed")
                 }
             }
 
-            Log.i("FileSave", "✅ Save video info OK: ${cacheFile.absolutePath}\n${info}")
+            LogUtil.i("FileSave", "✅ Save video info OK: ${cacheFile.absolutePath}\n${info}")
 
         } catch (e: IOException) {
             val errorMsg = e.message.orEmpty()
@@ -72,17 +72,17 @@ object HCacheManager {
 
             if (shouldSwitch) {
                 notifyStorageSwitch()
-                Log.w("FileSave", "⛔ 写入失败 (${e.message})，切换为私有路径")
+                LogUtil.w("FileSave", "⛔ 写入失败 (${e.message})，切换为私有路径")
                 Preferences.preferenceSp.edit {
                     putBoolean(SettingsPreferenceKeys.USE_PRIVATE_STORAGE, true)
                 }
                 return saveHanimeVideoInfo(context, videoCode, info) // ⬅️ 重试一次
             }
 
-            Log.e("FileSave", "❌ Save video info failed: ${cacheFile.absolutePath}", e)
+            LogUtil.e("FileSave", "❌ Save video info failed: ${cacheFile.absolutePath}", e)
             throw e
         } catch (e: Exception) {
-            Log.e("FileSave", "❌ Unexpected error: ${cacheFile.absolutePath}", e)
+            LogUtil.e("FileSave", "❌ Unexpected error: ${cacheFile.absolutePath}", e)
             throw e
         }
     }

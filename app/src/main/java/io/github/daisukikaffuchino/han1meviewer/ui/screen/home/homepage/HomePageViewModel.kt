@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.annotation.StringRes
 import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
@@ -140,14 +140,14 @@ class HomePageViewModel: ViewModel() {
     fun deleteWatchHistory(history: WatchHistoryEntity) {
         viewModelScope.launch(Dispatchers.IO) {
             DatabaseRepo.WatchHistory.delete(history)
-            Log.d("delete_watch_hty", "$history DONE!")
+            LogUtil.d("delete_watch_hty", "$history DONE!")
         }
     }
 
     fun deleteAllWatchHistories() {
         viewModelScope.launch(Dispatchers.IO) {
             DatabaseRepo.WatchHistory.deleteAll()
-            Log.d("del_all_watch_hty", "DONE!")
+            LogUtil.d("del_all_watch_hty", "DONE!")
         }
     }
 
@@ -159,7 +159,7 @@ class HomePageViewModel: ViewModel() {
     fun removeHKeyframe(videoCode: String, hKeyframe: HKeyframeEntity.Keyframe) {
         viewModelScope.launch(Dispatchers.IO) {
             DatabaseRepo.HKeyframe.removeKeyframe(videoCode, hKeyframe)
-            Log.d("HKeyframe", "removeHKeyframe:$hKeyframe DONE!")
+            LogUtil.d("HKeyframe", "removeHKeyframe:$hKeyframe DONE!")
             _modifyHKeyframeFlow.emit(true)
         }
     }
@@ -169,7 +169,7 @@ class HomePageViewModel: ViewModel() {
     ) {
         viewModelScope.launch {
             DatabaseRepo.HKeyframe.modifyKeyframe(videoCode, oldKeyframe, keyframe)
-            Log.d("HKeyframe", "modifyHKeyframe:$keyframe DONE!")
+            LogUtil.d("HKeyframe", "modifyHKeyframe:$keyframe DONE!")
             _modifyHKeyframeFlow.emit(true)
         }
     }

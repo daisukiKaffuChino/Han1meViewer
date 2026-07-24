@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
 import android.app.Application
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -340,7 +340,7 @@ class VideoViewModel(application: Application) : ApplicationViewModel(applicatio
     fun insertWatchHistory(history: WatchHistoryEntity) {
         viewModelScope.launch(Dispatchers.IO) {
             DatabaseRepo.WatchHistory.insert(history)
-            Log.d("insert_watch_hty", "$history DONE!")
+            LogUtil.d("insert_watch_hty", "$history DONE!")
         }
     }
 
@@ -410,7 +410,7 @@ class VideoViewModel(application: Application) : ApplicationViewModel(applicatio
             run {
                 this@VideoViewModel.hKeyframes?.keyframes?.forEach { keyframeInDb ->
                     if (abs(keyframeInDb.position - hKeyframe.position) < MIN_H_KEYFRAME_SAVE_INTERVAL) {
-                        Log.d("HKeyframe", "append_hkeyframe:time conflict: $keyframeInDb")
+                        LogUtil.d("HKeyframe", "append_hkeyframe:time conflict: $keyframeInDb")
                         _modifyHKeyframeFlow.emit(
                             false to application.getString(
                                 R.string.interval_must_greater_than_d,
@@ -421,7 +421,7 @@ class VideoViewModel(application: Application) : ApplicationViewModel(applicatio
                     }
                 }
                 DatabaseRepo.HKeyframe.appendKeyframe(videoCode, title, hKeyframe)
-                Log.d("HKeyframe", "append_hkeyframe:$hKeyframe DONE!")
+                LogUtil.d("HKeyframe", "append_hkeyframe:$hKeyframe DONE!")
                 _modifyHKeyframeFlow.emit(true to application.getString(R.string.add_success))
                 _forceRefresh.emit(Unit)
             }

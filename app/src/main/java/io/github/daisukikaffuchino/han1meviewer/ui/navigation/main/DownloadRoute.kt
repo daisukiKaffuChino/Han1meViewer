@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.navigation.main
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -153,7 +153,7 @@ fun DownloadRouteScreen(
                         scanAndImportHanimeDownloads(context, dao)
                         true
                     } catch (e: Exception) {
-                        Log.e("ImportHanime", "Failed to import downloaded videos", e)
+                        LogUtil.e("ImportHanime", "Failed to import downloaded videos", e)
                         false
                     }
                 }

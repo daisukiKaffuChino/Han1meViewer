@@ -5,7 +5,7 @@ import android.app.Notification
 import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.ParcelFileDescriptor
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
@@ -189,7 +189,7 @@ class HanimeDownloadWorker(
             try {
                 // SAF 优先
                 val safUri = SafFileManager.getDownloadVideoFileUri(context, videoCode, createVideoName(hanimeName, quality, videoType))
-                Log.i(TAG,safUri.toString())
+                LogUtil.i(TAG,safUri.toString())
                 if (safUri != null) {
                     context.contentResolver.openFileDescriptor(safUri, "rw")?.closeQuietly()
                 } else {
@@ -291,7 +291,7 @@ class HanimeDownloadWorker(
                     createNewRaf(file)
                     DatabaseRepo.HanimeDownload.find(videoCode, quality)
                         ?: return@withContext run {
-                            Log.d(TAG, "entity is null, create new raf failed")
+                            LogUtil.d(TAG, "entity is null, create new raf failed")
                             val reason = context.getString(R.string.download_error_file_info)
                             showFailureNotification(reason)
                             mainScope.launch {

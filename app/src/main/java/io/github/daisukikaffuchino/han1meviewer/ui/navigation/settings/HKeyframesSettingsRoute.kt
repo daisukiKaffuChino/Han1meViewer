@@ -25,7 +25,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.HKeyframeSett
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.HKeyframesScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.SharedHKeyframesScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.SettingsViewModel
-import io.github.daisukikaffuchino.han1meviewer.ui.util.rememberCopyTextToClipboard
+import io.github.daisukikaffuchino.utils.rememberCopyTextToClipboard
 import io.github.daisukikaffuchino.utils.decodeFromStringByBase64
 import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.serialization.json.Json

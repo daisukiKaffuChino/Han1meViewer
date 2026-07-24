@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.network
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_HOSTNAME
 import io.github.daisukikaffuchino.han1meviewer.Preferences
 import okhttp3.Dns
@@ -112,7 +112,7 @@ class HDns : Dns {
         if (!dohUrl.isNullOrBlank()) {
             return runCatching { lookupByDoH(dohUrl, hostname) }
                 .getOrElse {
-                    Log.w("DOH", "lookup failed for $hostname: ${it.message}")
+                    LogUtil.w("DOH", "lookup failed for $hostname: ${it.message}")
                     Dns.SYSTEM.lookup(hostname)
                 }
         }
@@ -128,7 +128,7 @@ class HDns : Dns {
         )
         val dns = getOrCreateDohDns(config)
         return dns.lookup(hostname).also {
-            Log.i("DOH", it.toString())
+            LogUtil.i("DOH", it.toString())
         }
     }
 

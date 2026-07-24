@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -46,7 +46,7 @@ fun RetryableImage(
             .crossfade(true)
             .listener(
                 onError = { _, result ->
-                    Log.e("CoilError", "Image load failed", result.throwable)
+                    LogUtil.e("CoilError", "Image load failed", result.throwable)
                 }
             ).build(),
         contentDescription = contentDescription,

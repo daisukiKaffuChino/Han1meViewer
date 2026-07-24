@@ -2,7 +2,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.login.ManualInputCookiesScreen
 
 class ManualInputCookiesActivity : BaseActivity() {
@@ -13,7 +13,7 @@ class ManualInputCookiesActivity : BaseActivity() {
                 onCookieScanned = { scannedCookie ->
                     val resultIntent = Intent().apply {
                         putExtra("cookie", scannedCookie)
-                        Log.i("LoginActivity", scannedCookie)
+                        LogUtil.i("LoginActivity", scannedCookie)
                     }
                     setResult(RESULT_OK, resultIntent)
                     finish()

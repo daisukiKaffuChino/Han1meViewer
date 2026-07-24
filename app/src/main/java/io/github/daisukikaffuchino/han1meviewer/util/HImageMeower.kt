@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.util
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import android.widget.ImageView
 import coil.ImageLoader
 import coil.imageLoader
@@ -28,7 +28,7 @@ object HImageMeower {
         .build()
 
     suspend fun execute(data: Any): ImageResult {
-        Log.d(TAG, "execute: $data")
+        LogUtil.d(TAG, "execute: $data")
         return imageLoader.execute(
             ImageRequest.Builder(applicationContext).data(data).build()
         )
@@ -38,7 +38,7 @@ object HImageMeower {
         "https://picsum.photos/$width/$height/?blur=$blur"
 
     fun ImageView.loadUnhappily(data: Any?, fallbackData: Any?) {
-        Log.d(TAG, "primary: $data, fallback: $fallbackData")
+        LogUtil.d(TAG, "primary: $data, fallback: $fallbackData")
         val primaryRequest = ImageRequest.Builder(context)
             .data(data ?: fallbackData)
             .crossfade(true)

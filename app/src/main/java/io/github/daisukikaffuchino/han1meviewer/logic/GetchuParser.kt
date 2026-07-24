@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.logic
 
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
 import io.github.daisukikaffuchino.han1meviewer.GETCHU_BASE_URL
 import io.github.daisukikaffuchino.han1meviewer.logic.model.GetchuPreview
@@ -15,7 +15,7 @@ import kotlin.runCatching
 object GetchuParser {
     fun getchuPreview(body: String, dateCode: String): WebsiteState<GetchuPreview> {
         val parseBody = Jsoup.parse(body, GETCHU_BASE_URL).body()
-        Log.d(
+        LogUtil.d(
             "GetchuPreviewParser",
             "parse list date=$dateCode bodyLength=${body.length} title=${
                 parseBody.ownerDocument()?.title()
@@ -28,7 +28,7 @@ object GetchuParser {
         parseBody.select("div.category_anime_t2").forEach { header ->
             val releaseDate = header.text().replace("発売タイトル", EMPTY_STRING).trim()
             val container = header.parent()?.nextCategoryAnimeBody()
-            Log.d(
+            LogUtil.d(
                 "GetchuPreviewParser",
                 "group header=${header.text().cleanGetchuText()} releaseDate=$releaseDate " +
                         "containerFound=${container != null} containerProducts=${container?.select("div.div_product")?.size ?: 0}"
@@ -66,7 +66,7 @@ object GetchuParser {
                 groups.add(GetchuPreview.Group(releaseDate = releaseDate, items = items))
             }
         }
-        Log.d(
+        LogUtil.d(
             "GetchuPreviewParser",
             "parse list result date=$dateCode groups=${groups.size} totalItems=${groups.sumOf { it.items.size }}"
         )
@@ -76,7 +76,7 @@ object GetchuParser {
 
     fun getchuPreviewDetail(body: String, id: String): WebsiteState<GetchuPreviewDetail> {
         val parseBody = Jsoup.parse(body, GETCHU_BASE_URL).body()
-        Log.d(
+        LogUtil.d(
             "GetchuPreviewParser",
             "parse detail id=$id bodyLength=${body.length} title=${
                 parseBody.ownerDocument()?.title()
@@ -199,7 +199,7 @@ object GetchuParser {
             .distinctBy { it.id }
             .filterNot { it.id == id }
 
-        Log.d(
+        LogUtil.d(
             "GetchuPreviewParser",
             "parse detail result id=$id title=${title.take(80)} sections=${sections.size} " +
                     "sectionTitles=${sections.joinToString { it.title }} brand=$brand releaseDate=$releaseDate price=$price samples=${sampleImages.size} " +

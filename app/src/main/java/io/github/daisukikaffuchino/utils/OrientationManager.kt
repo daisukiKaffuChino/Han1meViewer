@@ -6,7 +6,7 @@ import android.content.pm.ActivityInfo
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import android.view.OrientationEventListener
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -63,7 +63,7 @@ class OrientationManager(
         }
         if (newOrientation != screenOrientation) {
             screenOrientation = newOrientation
-            Log.d("OrientationManager", "screenOrientation updated to $screenOrientation")
+            LogUtil.d("OrientationManager", "screenOrientation updated to $screenOrientation")
         }
         try {
             val isRotateEnabled = Settings.System.getInt(

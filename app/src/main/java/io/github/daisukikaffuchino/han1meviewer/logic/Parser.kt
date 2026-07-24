@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.logic
 
 import android.annotation.SuppressLint
-import android.util.Log
+import io.github.daisukikaffuchino.utils.LogUtil
 import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
 import io.github.daisukikaffuchino.han1meviewer.HanimeResolution
@@ -72,7 +72,7 @@ object Parser {
 
         val userIdRegex = Regex("""/user/(\d+)""")
         val userId: String = userIdRegex.find(userHomePageLink)?.groupValues?.get(1) ?: ""
-        Log.i("userInfo","name:$username;id:$userId")
+        LogUtil.i("userInfo","name:$username;id:$userId")
 
         // 头图及其描述
         val bannerCSS = parseBody.selectFirst("div[id=home-banner-wrapper]")
@@ -331,7 +331,7 @@ object Parser {
                 hanimeNormalItemVer2(hanimeSearchItem)?.let(hanimeSearchList::add)
             }
         }
-        Log.d("search_result", "$hanimeSearchList")
+        LogUtil.d("search_result", "$hanimeSearchList")
         return PageLoadingState.Success(hanimeSearchList)
     }
 
@@ -361,7 +361,7 @@ object Parser {
 
         var likeStatus = parseBody.selectFirst("[name=like-status]")
             ?.attr("value")
-        Log.i("likeStatus", likeStatus.toString())
+        LogUtil.i("likeStatus", likeStatus.toString())
         if (!likeStatus.isNullOrEmpty()) {
             likeStatus = "1"
         }
@@ -556,14 +556,14 @@ object Parser {
             } else {
                 relatedAnimeList.addAll(relatedTabContent.extractHanimeInfo())
 //                children?.forEachStep2 { each ->
-//                    Log.i("children",each.toString())
+//                    LogUtil.i("children",each.toString())
 //                    relatedAnimeList.addAll(each.extractHanimeInfo())
 ////                    val item = each.select("div[class^=video-item-container]")[0]
 ////                    hanimeNormalItemVer2(item)?.let(relatedAnimeList::add)
 //                }
             }
         }
-        Log.d("related_anime_list", relatedAnimeList.toString())
+        LogUtil.d("related_anime_list", relatedAnimeList.toString())
 
         val hanimeResolution = HanimeResolution()
         val videoClass = parseBody.selectFirst("video[id=player]")
@@ -944,7 +944,7 @@ object Parser {
                 )
             )
         }
-        Log.d("commentList", commentList.toString())
+        LogUtil.d("commentList", commentList.toString())
         return WebsiteState.Success(
             VideoComments(
                 commentList,
@@ -1055,7 +1055,7 @@ object Parser {
     fun getMySubscriptions(body: String): WebsiteState<MySubscriptions> {
         val parseBody = Jsoup.parse(body).body()
         val maxPage = parseMaxPage(parseBody)
-        Log.i("getMySubscriptions", "MaxPageList=$maxPage")
+        LogUtil.i("getMySubscriptions", "MaxPageList=$maxPage")
         val subscriptionsRoot = parseBody.selectFirst("div.subscriptions-nav")
             ?: return WebsiteState.Error(IllegalStateException("找不到 subscriptions-nav"))
         val subscriptionsVideosRoot = parseBody.selectFirst("div.content-padding-new")
@@ -1174,10 +1174,10 @@ object Parser {
         if (it == null) {
             if (loginNeeded) {
                 if (isAlreadyLogin) {
-                    Log.d("Parse::$funcName", "[$varName] is null. 而且處於登入狀態，這有點不正常")
+                    LogUtil.d("Parse::$funcName", "[$varName] is null. 而且處於登入狀態，這有點不正常")
                 }
             } else {
-                Log.d("Parse::$funcName", "[$varName] is null. 這有點不正常")
+                LogUtil.d("Parse::$funcName", "[$varName] is null. 這有點不正常")
             }
         }
     }
