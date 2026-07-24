@@ -99,6 +99,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.theme.SpacingNormal
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.VideoNormalCardMinWidth
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.VideoSimplifiedCardMinWidth
 import io.github.daisukikaffuchino.han1meviewer.util.DisplayTextLocalizer
+import io.github.daisukikaffuchino.utils.SonnerToast
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.format
@@ -591,42 +592,61 @@ private fun MyListDialog(
     var selectedStates by remember(myList.myListInfo) {
         mutableStateOf(myList.myListInfo.map { it.isSelected })
     }
+    val hasCustomPlaylist = myList.myListInfo.any { it.code != "save" }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.add_to_playlist)) },
         text = {
-            LazyColumn(
-                modifier = Modifier.heightIn(max = 320.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                items(myList.myListInfo.indices.toList()) { index ->
-                    val info = myList.myListInfo[index]
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .toggleable(
-                                value = selectedStates[index],
-                                onValueChange = { checked ->
-                                    selectedStates =
-                                        selectedStates.toMutableList().also { it[index] = checked }
-                                },
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (!hasCustomPlaylist) {
+                    Text(
+                        text = stringResource(R.string.no_custom_playlist_hint),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 320.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(myList.myListInfo.indices.toList()) { index ->
+                        val info = myList.myListInfo[index]
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .toggleable(
+                                    value = selectedStates[index],
+                                    onValueChange = { checked ->
+                                        selectedStates =
+                                            selectedStates.toMutableList().also { it[index] = checked }
+                                    },
+                                )
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            Checkbox(
+                                checked = selectedStates[index],
+                                onCheckedChange = null,
                             )
-                            .padding(vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        Checkbox(
-                            checked = selectedStates[index],
-                            onCheckedChange = null,
-                        )
-                        Text(info.title)
+                            Text(info.title)
+                        }
                     }
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(selectedStates) }) {
+            TextButton(
+                onClick = {
+                    if (selectedStates.none { it }) {
+                        onDismiss()
+                        SonnerToast.warning(R.string.select_at_least_one_playlist)
+                    } else {
+                        onConfirm(selectedStates)
+                    }
+                },
+            ) {
                 Text(stringResource(R.string.confirm))
             }
         },

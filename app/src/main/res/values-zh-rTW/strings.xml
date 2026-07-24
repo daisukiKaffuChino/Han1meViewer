@@ -91,6 +91,8 @@
     <string name="playlist_title">標題</string>
     <string name="playlist_description">介紹</string>
     <string name="add_to_playlist">加入清單</string>
+    <string name="no_custom_playlist_hint">尚未建立自訂清單。你可以前往側邊欄的「播放清單」建立自訂清單。</string>
+    <string name="select_at_least_one_playlist">請至少選擇一個清單</string>
     <string name="player_settings">播放器設定</string>
     <string name="tablet_mode">平板模式</string>
     <string name="tablet_mode_summary">開啟後影片頁面將以平板版面顯示，提供更大的觀看區域</string>

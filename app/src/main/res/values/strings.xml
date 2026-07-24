@@ -91,6 +91,8 @@
     <string name="playlist_title">Title</string>
     <string name="playlist_description">Description</string>
     <string name="add_to_playlist">Add to Playlist</string>
+    <string name="no_custom_playlist_hint">No custom playlists yet. Create one from Playlists in the navigation drawer.</string>
+    <string name="select_at_least_one_playlist">Select at least one playlist</string>
     <string name="player_settings">Player Settings</string>
     <string name="tablet_mode">Tablet Mode</string>
     <string name="tablet_mode_summary">Enable tablet layout for the video page, providing a larger viewing area</string>
