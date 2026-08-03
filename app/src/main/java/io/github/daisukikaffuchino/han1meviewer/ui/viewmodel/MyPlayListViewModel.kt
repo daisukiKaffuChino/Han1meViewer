@@ -4,8 +4,10 @@ import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
-import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
+import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
+import io.github.daisukikaffuchino.han1meviewer.logic.entity.mylist.LocalPlaylistEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ModifiedPlaylistArgs
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
@@ -14,6 +16,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.myplaylist.PlaylistUiState
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel.csrfToken
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -22,15 +25,28 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 data class PlaylistSheetScrollState(
     val firstVisibleItemIndex: Int = 0,
     val firstVisibleItemScrollOffset: Int = 0,
 )
 
+/**
+ * 播放清单 ViewModel。
+ *
+ * 已登录时数据来自云端（NetworkRepo），未登录时数据来自本地数据库
+ * （mylist.db），两种模式共用同一套 UI 状态流。
+ *
+ * @project Han1meViewer
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
 class MyPlayListViewModel : ViewModel() {
 
     private val _myPlaylistsFlow = MutableStateFlow<WebsiteState<Playlists>>(WebsiteState.Loading)
@@ -82,6 +98,42 @@ class MyPlayListViewModel : ViewModel() {
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PlaylistUiState())
 
+    init {
+        viewModelScope.launch {
+            SettingsRepository.loginStateFlow.flatMapLatest { loggedIn ->
+                if (loggedIn) {
+                    _cachedMyPlayList.value = emptyList()
+                    _myPlaylistsFlow.value = WebsiteState.Loading
+                    loadMyPlayList(1, forceReload = true)
+                    flow {
+                        emit(Unit)
+                    }
+                } else {
+                    observeLocalPlaylists().onEach { playlists ->
+                        _cachedMyPlayList.value = playlists
+                        _myPlaylistsFlow.value = WebsiteState.Success(Playlists(playlists))
+                        _isLoadingMorePlaylists.value = false
+                        _noMorePlaylists.value = true
+                        runCatching { _refreshCompleted.emit(Unit) }
+                    }
+                }
+            }.collect()
+        }
+    }
+
+    private fun observeLocalPlaylists() =
+        DatabaseRepo.LocalMylist.observePlaylists().flatMapLatest { playlists ->
+            flow {
+                emit(playlists.map { playlist ->
+                    Playlists.Playlist(
+                        listCode = playlist.code,
+                        title = playlist.name,
+                        total = DatabaseRepo.LocalMylist.getPlaylistItems(playlist.code).size,
+                    )
+                })
+            }
+        }
+
     fun setShowSheet(value: Boolean) {
         _showSheet.value = value
     }
@@ -111,6 +163,7 @@ class MyPlayListViewModel : ViewModel() {
 
     // 加载所有playlist
     fun loadMyPlayList(page: Int = 1, forceReload: Boolean = false) {
+        if (!SettingsRepository.isAlreadyLogin) return
         LogUtil.i("current_page",page.toString())
         if (page > 1 && (_isLoadingMorePlaylists.value || _noMorePlaylists.value)) return
         if (page == 1 || forceReload) {
@@ -156,6 +209,23 @@ class MyPlayListViewModel : ViewModel() {
 
     // 获取单个playlist内容
     fun getPlaylistItems(page: Int = 1, listCode: String, refresh: Boolean = false) {
+        if (!SettingsRepository.isAlreadyLogin) {
+            localItemsJob?.cancel()
+            localItemsJob = viewModelScope.launch {
+                DatabaseRepo.LocalMylist.observePlaylistItems(listCode).collect { items ->
+                    val hanimeInfos = items.map { it.toHanimeInfo() }
+                    _playlistDesc.value = null
+                    _playlistFlow.value = hanimeInfos
+                    _playlistStateFlow.value = if (hanimeInfos.isEmpty()) {
+                        PageLoadingState.NoMoreData
+                    } else {
+                        PageLoadingState.Success(MyListItems(hanimeInfos))
+                    }
+                    isLoadingMore = false
+                }
+            }
+            return
+        }
         LogUtil.i("getPlaylistItems","isLoadingMore:$isLoadingMore,listCode:$listCode,")
         if (isLoadingMore) return
         isLoadingMore = true
@@ -207,13 +277,33 @@ class MyPlayListViewModel : ViewModel() {
         }
     }
 
+    private var localItemsJob: kotlinx.coroutines.Job? = null
+
     private val _deleteFromPlaylistFlow = MutableSharedFlow<WebsiteState<Int>>()
     val deleteFromPlaylistFlow = _deleteFromPlaylistFlow.asSharedFlow()
     // 从详情页删除某视频
     fun deleteFromPlaylist(listCode: String, videoCode: String, position: Int) {
         viewModelScope.launch {
+            if (!SettingsRepository.isAlreadyLogin) {
+                val item = DatabaseRepo.LocalMylist
+                    .getPlaylistItemCodes(listCode, listOf(videoCode))
+                    .firstOrNull()
+                if (item == null) {
+                    _deleteFromPlaylistFlow.emit(WebsiteState.Error(IllegalStateException("cannot delete it ?!")))
+                    return@launch
+                }
+                DatabaseRepo.LocalMylist.deletePlaylistItem(listCode, videoCode)
+                _deleteFromPlaylistFlow.emit(WebsiteState.Success(position))
+                _playlistFlow.update { prevList ->
+                    prevList.toMutableList().apply { removeAt(position) }
+                }
+                return@launch
+            }
             NetworkRepo.deleteMyListItems(listCode, videoCode, position, csrfToken).collect {
                 _deleteFromPlaylistFlow.emit(it)
+                if (it is WebsiteState.Success) {
+                    DatabaseRepo.LocalMylist.deletePlaylistItem(listCode, videoCode)
+                }
                 _playlistFlow.update { prevList ->
                     if (it is WebsiteState.Success) {
                         prevList.toMutableList().apply { removeAt(position) }
@@ -229,8 +319,39 @@ class MyPlayListViewModel : ViewModel() {
     fun modifyPlaylist(listCode: String, title: String, desc: String, delete: Boolean) {
         LogUtil.i("modify_playlist","${listCode},${title},${desc}")
         viewModelScope.launch {
+            if (!SettingsRepository.isAlreadyLogin) {
+                if (delete) {
+                    DatabaseRepo.LocalMylist.deletePlaylist(listCode)
+                    DatabaseRepo.LocalMylist.deleteAllPlaylistItems(listCode)
+                } else {
+                    DatabaseRepo.LocalMylist.findPlaylist(listCode)?.let { playlist ->
+                        DatabaseRepo.LocalMylist.upsertPlaylist(
+                            playlist.copy(name = title, description = desc)
+                        )
+                    }
+                }
+                _modifyPlaylistFlow.emit(
+                    WebsiteState.Success(ModifiedPlaylistArgs(title, desc, delete))
+                )
+                if (delete) {
+                    clearMyListItems()
+                }
+                return@launch
+            }
             NetworkRepo.modifyPlaylist(listCode, title, desc, delete, csrfToken).collect {
                 _modifyPlaylistFlow.emit(it)
+                if (it is WebsiteState.Success) {
+                    if (delete) {
+                        DatabaseRepo.LocalMylist.deletePlaylist(listCode)
+                        DatabaseRepo.LocalMylist.deleteAllPlaylistItems(listCode)
+                    } else {
+                        DatabaseRepo.LocalMylist.findPlaylist(listCode)?.let { playlist ->
+                            DatabaseRepo.LocalMylist.upsertPlaylist(
+                                playlist.copy(name = title, description = desc)
+                            )
+                        }
+                    }
+                }
                 if (delete) {
                     clearMyListItems()
                 }
@@ -248,8 +369,33 @@ class MyPlayListViewModel : ViewModel() {
     //创建Playlist
     fun createPlaylist(title: String, description: String) {
         viewModelScope.launch {
+            if (!SettingsRepository.isAlreadyLogin) {
+                DatabaseRepo.LocalMylist.upsertPlaylist(
+                    LocalPlaylistEntity(
+                        code = UUID.randomUUID().toString(),
+                        name = title,
+                        description = description,
+                        createdTime = System.currentTimeMillis(),
+                        synced = false,
+                    )
+                )
+                _createPlaylistFlow.emit(WebsiteState.Success(Unit))
+                return@launch
+            }
             NetworkRepo.createPlaylist(EMPTY_STRING, title, description, csrfToken).collect {
                 _createPlaylistFlow.emit(it)
+                if (it is WebsiteState.Success) {
+                    // 本地镜像：同步引擎登录后按名称匹配补齐云端 code
+                    DatabaseRepo.LocalMylist.upsertPlaylist(
+                        LocalPlaylistEntity(
+                            code = UUID.randomUUID().toString(),
+                            name = title,
+                            description = description,
+                            createdTime = System.currentTimeMillis(),
+                            synced = false,
+                        )
+                    )
+                }
             }
         }
     }
