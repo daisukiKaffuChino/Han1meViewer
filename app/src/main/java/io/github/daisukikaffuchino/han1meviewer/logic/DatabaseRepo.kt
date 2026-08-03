@@ -4,6 +4,7 @@ import io.github.daisukikaffuchino.utils.LogUtil
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.DownloadDatabase
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.HistoryDatabase
+import io.github.daisukikaffuchino.han1meviewer.logic.dao.LocalMylistDatabase
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.MiscellanyDatabase
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeHeader
@@ -13,6 +14,10 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.SearchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.WatchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.DownloadGroupEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeDownloadEntity
+import io.github.daisukikaffuchino.han1meviewer.logic.entity.mylist.LocalMylistTombstoneEntity
+import io.github.daisukikaffuchino.han1meviewer.logic.entity.mylist.LocalPlaylistEntity
+import io.github.daisukikaffuchino.han1meviewer.logic.entity.mylist.LocalPlaylistItemEntity
+import io.github.daisukikaffuchino.han1meviewer.logic.entity.mylist.LocalVideoEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
 import io.github.daisukikaffuchino.utils.applicationContext
 import kotlinx.coroutines.flow.Flow
@@ -278,5 +283,62 @@ object DatabaseRepo {
 
         suspend fun updateGroup(group: DownloadGroupEntity)=
             downloadGroupDao.update(group)
+    }
+
+    object LocalMylist {
+        private val dao = LocalMylistDatabase.instance.localMylistDao
+
+        //<editor-fold desc="收藏 / 稍后观看">
+
+        fun observeFavorites() = dao.observeFavorites()
+        fun observeWatchLater() = dao.observeWatchLater()
+        suspend fun findBy(videoCode: String) = dao.findBy(videoCode)
+        suspend fun getAll() = dao.getAll()
+        suspend fun getFavCodes() = dao.getFavCodes()
+        suspend fun getWatchLaterCodes() = dao.getWatchLaterCodes()
+        suspend fun getDirtyFavorites() = dao.getDirtyFavorites()
+        suspend fun getDirtyWatchLater() = dao.getDirtyWatchLater()
+        suspend fun upsertVideo(entity: LocalVideoEntity) = dao.upsertVideo(entity)
+        suspend fun upsertVideos(entities: List<LocalVideoEntity>) = dao.upsertVideos(entities)
+        suspend fun deleteVideo(videoCode: String) = dao.deleteVideo(videoCode)
+
+        //</editor-fold>
+
+        //<editor-fold desc="播放清单">
+
+        fun observePlaylists() = dao.observePlaylists()
+        suspend fun getAllPlaylists() = dao.getAllPlaylists()
+        suspend fun findPlaylist(code: String) = dao.findPlaylist(code)
+        suspend fun getDirtyPlaylists() = dao.getDirtyPlaylists()
+        suspend fun upsertPlaylist(entity: LocalPlaylistEntity) = dao.upsertPlaylist(entity)
+        suspend fun upsertPlaylists(entities: List<LocalPlaylistEntity>) = dao.upsertPlaylists(entities)
+        suspend fun deletePlaylist(code: String) = dao.deletePlaylist(code)
+
+        //</editor-fold>
+
+        //<editor-fold desc="清单内视频">
+
+        fun observePlaylistItems(playlistCode: String) = dao.observePlaylistItems(playlistCode)
+        suspend fun getPlaylistItems(playlistCode: String) = dao.getPlaylistItems(playlistCode)
+        suspend fun getPlaylistItemCodes(playlistCode: String, videoCodes: List<String>) =
+            dao.getPlaylistItemCodes(playlistCode, videoCodes)
+        suspend fun getDirtyPlaylistItems() = dao.getDirtyPlaylistItems()
+        suspend fun getAllPlaylistItems() = dao.getAllPlaylistItems()
+        suspend fun upsertPlaylistItem(entity: LocalPlaylistItemEntity) = dao.upsertPlaylistItem(entity)
+        suspend fun upsertPlaylistItems(entities: List<LocalPlaylistItemEntity>) = dao.upsertPlaylistItems(entities)
+        suspend fun deletePlaylistItem(playlistCode: String, videoCode: String) =
+            dao.deletePlaylistItem(playlistCode, videoCode)
+        suspend fun deleteAllPlaylistItems(playlistCode: String) = dao.deleteAllPlaylistItems(playlistCode)
+
+        //</editor-fold>
+
+        //<editor-fold desc="删除墓碑">
+
+        suspend fun getTombstones() = dao.getTombstones()
+        suspend fun findTombstone(videoCode: String) = dao.findTombstone(videoCode)
+        suspend fun upsertTombstone(entity: LocalMylistTombstoneEntity) = dao.upsertTombstone(entity)
+        suspend fun deleteTombstone(videoCode: String) = dao.deleteTombstone(videoCode)
+
+        //</editor-fold>
     }
 }
