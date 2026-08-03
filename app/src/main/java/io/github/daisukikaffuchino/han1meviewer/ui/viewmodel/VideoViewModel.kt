@@ -343,7 +343,11 @@ class VideoViewModel(
         }
     }
 
-    private suspend fun upsertTombstone(videoCode: String, isFav: Boolean, isWatchLater: Boolean = false) {
+    private suspend fun upsertTombstone(
+        videoCode: String,
+        isFav: Boolean = false,
+        isWatchLater: Boolean = false,
+    ) {
         val existing = DatabaseRepo.LocalMylist.findTombstone(videoCode)
         DatabaseRepo.LocalMylist.upsertTombstone(
             existing?.copy(

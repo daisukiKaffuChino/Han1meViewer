@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -115,7 +116,7 @@ class MyPlayListViewModel : ViewModel() {
                         _isLoadingMorePlaylists.value = false
                         _noMorePlaylists.value = true
                         runCatching { _refreshCompleted.emit(Unit) }
-                    }
+                    }.map { Unit }
                 }
             }.collect()
         }

@@ -17,14 +17,14 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Entity(tableName = "LocalVideoEntity")
 data class LocalVideoEntity(
-    @PrimaryKey val videoCode: String,
-    val title: String,
-    val coverUrl: String,
-    val duration: String? = null,
-    val views: String? = null,
-    val reviews: String? = null,
-    val currentArtist: String? = null,
-    val uploadTime: String? = null,
+    @PrimaryKey override val videoCode: String,
+    override val title: String,
+    override val coverUrl: String,
+    override val duration: String? = null,
+    override val views: String? = null,
+    override val reviews: String? = null,
+    override val currentArtist: String? = null,
+    override val uploadTime: String? = null,
     val isFav: Boolean = false,
     val isWatchLater: Boolean = false,
     val favSynced: Boolean = false,
