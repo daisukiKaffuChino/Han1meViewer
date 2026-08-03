@@ -85,10 +85,6 @@ class VideoRouteActions(
     }
 
     fun toggleFavorite(video: HanimeVideo) {
-        if (!SettingsRepository.isAlreadyLogin) {
-            SonnerToast.warning(R.string.login_first)
-            return
-        }
         if (video.isFav) {
             viewModel.removeFromFavVideo(viewModel.videoCode, video.currentUserId)
         } else {
@@ -97,6 +93,15 @@ class VideoRouteActions(
     }
 
     fun rateVideo(video: HanimeVideo, isPositive: Boolean) {
+        if (isPositive) {
+            // 赞即收藏，与收藏按钮同逻辑（本地优先）
+            if (video.isFav) {
+                viewModel.removeFromFavVideo(viewModel.videoCode, video.currentUserId)
+            } else {
+                viewModel.addToFavVideo(viewModel.videoCode, video.currentUserId)
+            }
+            return
+        }
         if (!SettingsRepository.isAlreadyLogin) {
             SonnerToast.warning(R.string.login_first)
             return
@@ -108,10 +113,7 @@ class VideoRouteActions(
         myList: HanimeVideo.MyList?,
         selectedStates: List<Boolean>,
     ) {
-        if (!SettingsRepository.isAlreadyLogin || myList == null || myList.myListInfo.isEmpty()) {
-            SonnerToast.warning(R.string.login_first)
-            return
-        }
+        if (myList == null || myList.myListInfo.isEmpty()) return
         myList.myListInfo.forEachIndexed { index, info ->
             val newChecked = selectedStates.getOrNull(index) ?: return@forEachIndexed
             if (info.isSelected != newChecked) {

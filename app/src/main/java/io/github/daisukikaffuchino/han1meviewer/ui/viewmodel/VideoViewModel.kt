@@ -15,9 +15,13 @@ import io.github.daisukikaffuchino.han1meviewer.HanimeResolution
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.WatchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeDownloadEntity
+import io.github.daisukikaffuchino.han1meviewer.logic.entity.mylist.LocalMylistTombstoneEntity
+import io.github.daisukikaffuchino.han1meviewer.logic.entity.mylist.LocalPlaylistItemEntity
+import io.github.daisukikaffuchino.han1meviewer.logic.entity.mylist.LocalVideoEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo
 import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
@@ -249,6 +253,7 @@ class VideoViewModel(
                 if (emitState is VideoLoadingState.Success) {
                     _hanimeVideoFlow.update { emitState.info }
                     csrfToken = emitState.info.csrfToken
+                    applyLocalMylistState(videoCode)
                 }
             }
         }
@@ -280,23 +285,77 @@ class VideoViewModel(
         currentUserId: String?,
     ) = modifyFavVideoInternal(videoCode, likeStatus = true, currentUserId)
 
+    /**
+     * 收藏 / 取消收藏（本地优先）。
+     *
+     * 未登录时只写本地（sync 标记为 false，登录后由同步引擎推送云端）；
+     * 已登录时写本地镜像并同步调用云端，云端失败则回滚 sync 标记等待下次同步。
+     */
     private fun modifyFavVideoInternal(
         videoCode: String,
         likeStatus: Boolean,
         currentUserId: String?,
     ) {
+        val newFav = !likeStatus
         viewModelScope.launch {
-            NetworkRepo.addToMyFavVideo(
-                videoCode, likeStatus, currentUserId, csrfToken
-            ).collect { state ->
-                _addToFavVideoFlow.emit(state)
-                if (likeStatus) {
-                    _hanimeVideoFlow.update { it?.rateVideo(isPositive = true) }
-                } else {
-                    _hanimeVideoFlow.update { it?.rateVideo(isPositive = true) }
+            val video = _hanimeVideoFlow.value
+            val local = DatabaseRepo.LocalMylist.findBy(videoCode)
+            val base = local ?: LocalVideoEntity(
+                videoCode = videoCode,
+                title = video?.title.orEmpty(),
+                coverUrl = video?.coverUrl.orEmpty(),
+                duration = video?.views,
+                views = video?.views,
+                reviews = video?.ratingCount?.toString(),
+                currentArtist = video?.artist?.name,
+                uploadTime = video?.uploadTime?.toString(),
+            )
+            DatabaseRepo.LocalMylist.upsertVideo(
+                base.copy(
+                    isFav = newFav,
+                    favTime = System.currentTimeMillis(),
+                    favSynced = SettingsRepository.isAlreadyLogin,
+                )
+            )
+            _hanimeVideoFlow.update { it?.copy(isFav = newFav) }
+            if (SettingsRepository.isAlreadyLogin) {
+                NetworkRepo.addToMyFavVideo(
+                    videoCode, likeStatus, currentUserId, csrfToken
+                ).collect { state ->
+                    _addToFavVideoFlow.emit(state)
+                    DatabaseRepo.LocalMylist.findBy(videoCode)?.let { entity ->
+                        DatabaseRepo.LocalMylist.upsertVideo(
+                            entity.copy(favSynced = state is WebsiteState.Success)
+                        )
+                    }
+                    // 云端删除失败时记录墓碑，登录同步时补偿，避免被云端数据「复活」
+                    if (likeStatus && state is WebsiteState.Error) {
+                        upsertTombstone(videoCode, isFav = true)
+                    }
                 }
+            } else {
+                // 未登录的取消收藏：记录墓碑，登录后推送到云端删除
+                if (likeStatus) {
+                    upsertTombstone(videoCode, isFav = true)
+                }
+                _addToFavVideoFlow.emit(WebsiteState.Success(true))
             }
         }
+    }
+
+    private suspend fun upsertTombstone(videoCode: String, isFav: Boolean, isWatchLater: Boolean = false) {
+        val existing = DatabaseRepo.LocalMylist.findTombstone(videoCode)
+        DatabaseRepo.LocalMylist.upsertTombstone(
+            existing?.copy(
+                isFav = existing.isFav || isFav,
+                isWatchLater = existing.isWatchLater || isWatchLater,
+            ) ?: LocalMylistTombstoneEntity(
+                videoCode = videoCode,
+                isFav = isFav,
+                isWatchLater = isWatchLater,
+                deletedTime = System.currentTimeMillis(),
+            )
+        )
     }
 
     fun rateVideo(video: HanimeVideo, isPositive: Boolean) {
@@ -322,6 +381,13 @@ class VideoViewModel(
     private val _modifyMyListFlow = MutableSharedFlow<WebsiteState<Int>>()
     val modifyMyListFlow = _modifyMyListFlow.asSharedFlow()
 
+    /**
+     * 修改视频的清单勾选状态（本地优先，兼容未登录）。
+     *
+     * listCode 为 "save" 时代表稍后观看，否则为播放清单 code。
+     * 已登录时同步调用云端并写本地镜像；未登录时只写本地，
+     * 登录后由 MylistSyncManager 推送云端。
+     */
     fun modifyMyList(
         listCode: String,
         videoCode: String,
@@ -329,15 +395,145 @@ class VideoViewModel(
         position: Int,
     ) {
         viewModelScope.launch {
-            NetworkRepo.addToMyList(listCode, videoCode, isChecked, position, csrfToken).collect {
-                _modifyMyListFlow.emit(it)
+            val video = _hanimeVideoFlow.value
+            val local = DatabaseRepo.LocalMylist.findBy(videoCode)
+            if (listCode == "save") {
+                val base = local ?: LocalVideoEntity(
+                    videoCode = videoCode,
+                    title = video?.title.orEmpty(),
+                    coverUrl = video?.coverUrl.orEmpty(),
+                    views = video?.views,
+                    currentArtist = video?.artist?.name,
+                )
+                DatabaseRepo.LocalMylist.upsertVideo(
+                    base.copy(
+                        isWatchLater = isChecked,
+                        watchLaterTime = System.currentTimeMillis(),
+                        watchLaterSynced = SettingsRepository.isAlreadyLogin,
+                    )
+                )
                 _hanimeVideoFlow.update { prev ->
-                    val myList = prev?.myList?.myListInfo.orEmpty().toMutableList()
-                    myList[position] = myList[position].copy(isSelected = isChecked)
-                    prev?.copy(myList = prev.myList?.copy(myListInfo = myList))
+                    prev?.copy(myList = prev.myList?.copy(isWatchLater = isChecked))
                 }
+                if (SettingsRepository.isAlreadyLogin) {
+                    NetworkRepo.addToMyList(listCode, videoCode, isChecked, position, csrfToken).collect { state ->
+                        _modifyMyListFlow.emit(state)
+                        DatabaseRepo.LocalMylist.findBy(videoCode)?.let { entity ->
+                            DatabaseRepo.LocalMylist.upsertVideo(
+                                entity.copy(watchLaterSynced = state is WebsiteState.Success)
+                            )
+                        }
+                        if (!isChecked && state is WebsiteState.Error) {
+                            upsertTombstone(videoCode, isWatchLater = true)
+                        }
+                    }
+                } else {
+                    if (!isChecked) {
+                        upsertTombstone(videoCode, isWatchLater = true)
+                    }
+                    _modifyMyListFlow.emit(WebsiteState.Success(position))
+                }
+            } else {
+                modifyLocalPlaylistItem(listCode, videoCode, isChecked, video)
+                if (SettingsRepository.isAlreadyLogin) {
+                    NetworkRepo.addToMyList(listCode, videoCode, isChecked, position, csrfToken).collect { state ->
+                        _modifyMyListFlow.emit(state)
+                        DatabaseRepo.LocalMylist.getPlaylistItemCodes(
+                            listCode, listOf(videoCode)
+                        ).firstOrNull()?.let { item ->
+                            DatabaseRepo.LocalMylist.upsertPlaylistItem(
+                                item.copy(synced = state is WebsiteState.Success)
+                            )
+                        }
+                    }
+                } else {
+                    _modifyMyListFlow.emit(WebsiteState.Success(position))
+                }
+                updateMyListSelectionUi(listCode, isChecked)
             }
         }
+    }
+
+    private suspend fun modifyLocalPlaylistItem(
+        listCode: String,
+        videoCode: String,
+        isChecked: Boolean,
+        video: HanimeVideo?,
+    ) {
+        val existing = DatabaseRepo.LocalMylist.getPlaylistItemCodes(listCode, listOf(videoCode))
+        if (isChecked && existing.isEmpty()) {
+            val count = DatabaseRepo.LocalMylist.getPlaylistItems(listCode).size
+            DatabaseRepo.LocalMylist.upsertPlaylistItem(
+                LocalPlaylistItemEntity(
+                    playlistCode = listCode,
+                    videoCode = videoCode,
+                    title = video?.title.orEmpty(),
+                    coverUrl = video?.coverUrl.orEmpty(),
+                    views = video?.views,
+                    currentArtist = video?.artist?.name,
+                    position = count,
+                    addedTime = System.currentTimeMillis(),
+                    synced = SettingsRepository.isAlreadyLogin,
+                )
+            )
+        } else if (!isChecked) {
+            DatabaseRepo.LocalMylist.deletePlaylistItem(listCode, videoCode)
+        }
+    }
+
+    private fun updateMyListSelectionUi(listCode: String, isChecked: Boolean) {
+        _hanimeVideoFlow.update { prev ->
+            val myListInfo = prev?.myList?.myListInfo?.map { info ->
+                if (info.code == listCode) info.copy(isSelected = isChecked) else info
+            }.orEmpty()
+            prev?.copy(myList = prev.myList?.copy(myListInfo = myListInfo))
+        }
+    }
+
+    /**
+     * 视频加载成功后，用本地数据合并收藏 / 稍后观看状态。
+     * 未登录时（服务端没有 myList 数据）从本地数据库构造清单列表。
+     */
+    private suspend fun applyLocalMylistState(code: String) {
+        val local = DatabaseRepo.LocalMylist.findBy(code)
+        _hanimeVideoFlow.update { prev ->
+            prev ?: return@update null
+            val myList = when {
+                prev.myList != null -> prev.myList.copy(
+                    isWatchLater = prev.myList.isWatchLater || (local?.isWatchLater == true)
+                )
+                else -> buildLocalMyList(code, local)
+            }
+            prev.copy(
+                isFav = prev.isFav || (local?.isFav == true),
+                myList = myList,
+            )
+        }
+    }
+
+    private suspend fun buildLocalMyList(
+        code: String,
+        local: LocalVideoEntity?,
+    ): HanimeVideo.MyList {
+        val playlists = DatabaseRepo.LocalMylist.getAllPlaylists()
+        val savedInLists = playlists.map { playlist ->
+            val selected = DatabaseRepo.LocalMylist
+                .getPlaylistItemCodes(playlist.code, listOf(code))
+                .isNotEmpty()
+            HanimeVideo.MyList.MyListInfo(
+                code = playlist.code,
+                title = playlist.name,
+                isSelected = selected,
+            )
+        }
+        return HanimeVideo.MyList(
+            isWatchLater = local?.isWatchLater ?: false,
+            myListInfo = savedInLists + HanimeVideo.MyList.MyListInfo(
+                code = "save",
+                title = "save",
+                isSelected = local?.isWatchLater ?: false,
+            ),
+        )
     }
 
     fun insertWatchHistory(history: WatchHistoryEntity) {

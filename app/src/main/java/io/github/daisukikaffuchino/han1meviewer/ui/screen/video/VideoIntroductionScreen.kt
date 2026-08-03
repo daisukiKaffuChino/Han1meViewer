@@ -666,7 +666,13 @@ private fun MyListDialog(
                                 checked = selectedStates[index],
                                 onCheckedChange = null,
                             )
-                            Text(info.title)
+                            Text(
+                                text = if (info.code == "save") {
+                                    stringResource(R.string.watch_later)
+                                } else {
+                                    info.title
+                                }
+                            )
                         }
                     }
                 }
