@@ -3,6 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer
 import android.webkit.CookieManager
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import androidx.core.text.parseAsHtml
+import io.github.daisukikaffuchino.han1meviewer.logic.MylistSyncManager
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HCookieJar
 import io.github.daisukikaffuchino.han1meviewer.util.CookieString
 import kotlinx.serialization.json.Json
@@ -68,8 +69,11 @@ suspend fun logout() {
     CookieManager.getInstance().removeAllCookies(null)
 }
 
-suspend fun login(cookies: String) =
+suspend fun login(cookies: String) {
     SettingsRepository.update { it.copy(isAlreadyLogin = true, loginCookie = cookies) }
+    // 登录成功后把本地收藏 / 稍后观看 / 播放清单与云端双向合并
+    runCatching { MylistSyncManager.syncOnLogin() }
+}
 
 suspend fun login(cookies: List<String>) {
     login(cookies.joinToString(";") {
