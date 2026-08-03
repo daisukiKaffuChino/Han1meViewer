@@ -12,6 +12,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.CheckInRecordDatabase
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.DownloadDatabase
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.HistoryDatabase
+import io.github.daisukikaffuchino.han1meviewer.logic.dao.LocalMylistDatabase
 import io.github.daisukikaffuchino.han1meviewer.logic.dao.MiscellanyDatabase
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.CheckInRecordEntity
@@ -20,6 +21,10 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.DownloadCa
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.DownloadGroupEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeCategoryCrossRef
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeDownloadEntity
+import io.github.daisukikaffuchino.han1meviewer.logic.entity.mylist.LocalMylistTombstoneEntity
+import io.github.daisukikaffuchino.han1meviewer.logic.entity.mylist.LocalPlaylistEntity
+import io.github.daisukikaffuchino.han1meviewer.logic.entity.mylist.LocalPlaylistItemEntity
+import io.github.daisukikaffuchino.han1meviewer.logic.entity.mylist.LocalVideoEntity
 import io.github.daisukikaffuchino.han1meviewer.ui.widget.CheckInWidget
 import io.github.daisukikaffuchino.han1meviewer.util.AppLanguageManager
 import io.github.daisukikaffuchino.han1meviewer.worker.HanimeDownloadManager
@@ -50,6 +55,10 @@ object BackupManager {
         val downloads: List<HanimeDownloadEntity>? = null,
         val downloadCategories: List<DownloadCategoryEntity>? = null,
         val downloadCategoryCrossRefs: List<HanimeCategoryCrossRef>? = null,
+        val localVideos: List<LocalVideoEntity>? = null,
+        val localPlaylists: List<LocalPlaylistEntity>? = null,
+        val localPlaylistItems: List<LocalPlaylistItemEntity>? = null,
+        val localMylistTombstones: List<LocalMylistTombstoneEntity>? = null,
     )
 
     @Serializable
@@ -138,6 +147,27 @@ object BackupManager {
             }
         }
 
+        if (backup.localVideos != null || backup.localPlaylists != null ||
+            backup.localPlaylistItems != null || backup.localMylistTombstones != null
+        ) {
+            val dao = LocalMylistDatabase.instance.localMylistDao
+            backup.localVideos?.let { localVideos ->
+                dao.deleteAllVideos()
+                dao.upsertVideos(localVideos)
+            }
+            backup.localPlaylists?.let { localPlaylists ->
+                dao.deleteAllPlaylists()
+                dao.upsertPlaylists(localPlaylists)
+            }
+            backup.localPlaylistItems?.let { localPlaylistItems ->
+                dao.deleteAllPlaylistItems()
+                dao.upsertPlaylistItems(localPlaylistItems)
+            }
+            backup.localMylistTombstones?.let { tombstones ->
+                tombstones.forEach { dao.upsertTombstone(it) }
+            }
+        }
+
         backup.settings?.let { settings ->
             DataStoreManager.restoreBackup(settings.mapValues { (_, value) -> value.rawValue })
             AppLanguageManager.setAppLanguage(SettingsRepository.current.appLanguage)
@@ -165,6 +195,10 @@ object BackupManager {
             downloads = DownloadDatabase.instance.hanimeDownloadDao.getAll(),
             downloadCategories = DownloadDatabase.instance.downloadCategoryDao.getAllCategoriesOnce(),
             downloadCategoryCrossRefs = DownloadDatabase.instance.downloadCategoryDao.getAllCrossRefs(),
+            localVideos = LocalMylistDatabase.instance.localMylistDao.getAll(),
+            localPlaylists = LocalMylistDatabase.instance.localMylistDao.getAllPlaylists(),
+            localPlaylistItems = LocalMylistDatabase.instance.localMylistDao.getAllPlaylistItems(),
+            localMylistTombstones = LocalMylistDatabase.instance.localMylistDao.getTombstones(),
         )
         outputStream.bufferedWriter().use { writer ->
             writer.write(json.encodeToString(backup))
