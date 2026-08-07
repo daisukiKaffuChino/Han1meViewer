@@ -56,7 +56,7 @@ fun RenderVideoIntroductionContent(
     stringLongPressShare: String,
 ) {
     val videoState = viewModel.hanimeVideoStateFlow.collectAsStateWithLifecycle().value
-    val video = viewModel.hanimeVideoFlow.collectAsStateWithLifecycle().value
+    val video = viewModel.displayVideoFlow.collectAsStateWithLifecycle().value
     val checkInEnabled by SettingsRepository.checkInEnabledFlow.collectAsStateWithLifecycle()
     val videoShareText = video?.title?.let { title ->
         getHanimeShareText(title, videoCode)

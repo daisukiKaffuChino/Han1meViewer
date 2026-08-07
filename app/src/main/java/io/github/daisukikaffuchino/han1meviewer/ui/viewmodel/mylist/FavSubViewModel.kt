@@ -13,22 +13,23 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.CoroutineScope
 
-class FavSubViewModel(scope: CoroutineScope) : MyListSubViewModel(scope) {
+class FavSubViewModel(scope: CoroutineScope) :
+    MyListSubViewModel(scope), FavVideoListController {
 
-    var favVideoPage = 1
+    override var favVideoPage = 1
     private var csrfToken: String? = null
 
-    val favVideoStateFlow: StateFlow<PageLoadingState<MyListItems<HanimeInfo>>> = itemsStateFlow.asStateFlow()
-    val favVideoFlow: StateFlow<List<HanimeInfo>> = itemsFlow.asStateFlow()
+    override val favVideoStateFlow: StateFlow<PageLoadingState<MyListItems<HanimeInfo>>> = itemsStateFlow.asStateFlow()
+    override val favVideoFlow: StateFlow<List<HanimeInfo>> = itemsFlow.asStateFlow()
 
-    fun getMyFavVideoItems(userId: String, page: Int) {
+    override fun getMyFavVideoItems(userId: String, page: Int) {
         loadItems(MyListType.FAV_VIDEO, userId, page) { csrfToken = it.csrfToken }
     }
 
     private val _deleteMyFavVideoFlow = MutableSharedFlow<WebsiteState<Boolean>>()
-    val deleteMyFavVideoFlow = _deleteMyFavVideoFlow.asSharedFlow()
+    override val deleteMyFavVideoFlow = _deleteMyFavVideoFlow.asSharedFlow()
 
-    fun deleteMyFavVideo(videoCode: String, position: Int) {
+    override fun deleteMyFavVideo(videoCode: String, position: Int) {
         deleteItem(
             deleteCall = {
                 NetworkRepo.addToMyFavVideo(

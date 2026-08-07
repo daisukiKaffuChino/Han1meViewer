@@ -14,21 +14,22 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.CoroutineScope
 
-class WatchLaterSubViewModel(scope: CoroutineScope) : MyListSubViewModel(scope) {
+class WatchLaterSubViewModel(scope: CoroutineScope) :
+    MyListSubViewModel(scope), WatchLaterListController {
 
-    var watchLaterPage = 1
+    override var watchLaterPage = 1
 
-    val watchLaterStateFlow: StateFlow<PageLoadingState<MyListItems<HanimeInfo>>> = itemsStateFlow.asStateFlow()
-    val watchLaterFlow: StateFlow<List<HanimeInfo>> = itemsFlow.asStateFlow()
+    override val watchLaterStateFlow: StateFlow<PageLoadingState<MyListItems<HanimeInfo>>> = itemsStateFlow.asStateFlow()
+    override val watchLaterFlow: StateFlow<List<HanimeInfo>> = itemsFlow.asStateFlow()
 
-    fun getMyWatchLaterItems(page: Int) {
+    override fun getMyWatchLaterItems(page: Int) {
         loadItems(MyListType.WATCH_LATER, SettingsRepository.savedUserId, page)
     }
 
     private val _deleteMyWatchLaterFlow = MutableSharedFlow<WebsiteState<Boolean>>()
-    val deleteMyWatchLaterFlow = _deleteMyWatchLaterFlow.asSharedFlow()
+    override val deleteMyWatchLaterFlow = _deleteMyWatchLaterFlow.asSharedFlow()
 
-    fun deleteMyWatchLater(videoCode: String, position: Int) {
+    override fun deleteMyWatchLater(videoCode: String, position: Int) {
         deleteItem(
             deleteCall = {
                 NetworkRepo.addToMyList(

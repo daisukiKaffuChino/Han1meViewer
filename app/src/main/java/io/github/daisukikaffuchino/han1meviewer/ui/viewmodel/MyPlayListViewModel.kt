@@ -31,40 +31,40 @@ data class PlaylistSheetScrollState(
     val firstVisibleItemScrollOffset: Int = 0,
 )
 
-class MyPlayListViewModel : ViewModel() {
+class MyPlayListViewModel : ViewModel(), PlaylistController {
 
     private val _myPlaylistsFlow = MutableStateFlow<WebsiteState<Playlists>>(WebsiteState.Loading)
-    val myPlaylistsFlow: StateFlow<WebsiteState<Playlists>> = _myPlaylistsFlow.asStateFlow()
+    override val myPlaylistsFlow: StateFlow<WebsiteState<Playlists>> = _myPlaylistsFlow.asStateFlow()
 
     private val _cachedMyPlayList = MutableStateFlow<List<Playlists.Playlist>>(emptyList())
 
     private val _playlistStateFlow =
         MutableStateFlow<PageLoadingState<MyListItems<HanimeInfo>>>(PageLoadingState.Loading)
-    val playlistStateFlow = _playlistStateFlow.asStateFlow()
+    override val playlistStateFlow = _playlistStateFlow.asStateFlow()
     private val _playlistDesc = MutableStateFlow<String?>(null)
-    val playlistDesc = _playlistDesc.asStateFlow()
+    override val playlistDesc = _playlistDesc.asStateFlow()
 
     private val _playlistFlow = MutableStateFlow(emptyList<HanimeInfo>())
-    val playlistFlow = _playlistFlow.asStateFlow()
+    override val playlistFlow = _playlistFlow.asStateFlow()
     private val _currentListInfo = MutableStateFlow<Pair<String, String>?>(null)
-    val currentListInfo = _currentListInfo.asStateFlow()
+    override val currentListInfo = _currentListInfo.asStateFlow()
     private val _playlistSheetScrollStates = MutableStateFlow<Map<String, PlaylistSheetScrollState>>(emptyMap())
 
 
     private val _refreshCompleted = MutableSharedFlow<Unit>()
-    val refreshCompleted: SharedFlow<Unit> = _refreshCompleted
+    override val refreshCompleted: SharedFlow<Unit> = _refreshCompleted
 
     private val _showSheet = MutableStateFlow(false)
-    var currentPage = 1
-    var isLoadingMore = false
+    override var currentPage = 1
+    override var isLoadingMore = false
         private set
 
-    var playlistPage = 1
+    override var playlistPage = 1
     private val _isLoadingMorePlaylists = MutableStateFlow(false)
     private val _noMorePlaylists = MutableStateFlow(false)
 
     /** 对外暴露的唯一主页面 UI 状态流。 */
-    val mainUiState: StateFlow<PlaylistUiState> = combine(
+    override val mainUiState: StateFlow<PlaylistUiState> = combine(
         _cachedMyPlayList,
         _showSheet,
         _currentListInfo,
@@ -82,14 +82,14 @@ class MyPlayListViewModel : ViewModel() {
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PlaylistUiState())
 
-    fun setShowSheet(value: Boolean) {
+    override fun setShowSheet(value: Boolean) {
         _showSheet.value = value
     }
-    fun setListInfo(code: String, title: String) {
+    override fun setListInfo(code: String, title: String) {
         _currentListInfo.value = code to title
     }
 
-    fun updatePlaylistSheetScrollState(
+    override fun updatePlaylistSheetScrollState(
         listCode: String,
         firstVisibleItemIndex: Int,
         firstVisibleItemScrollOffset: Int,
@@ -105,12 +105,12 @@ class MyPlayListViewModel : ViewModel() {
         }
     }
 
-    fun getPlaylistSheetScrollState(listCode: String): PlaylistSheetScrollState {
+    override fun getPlaylistSheetScrollState(listCode: String): PlaylistSheetScrollState {
         return _playlistSheetScrollStates.value[listCode] ?: PlaylistSheetScrollState()
     }
 
     // 加载所有playlist
-    fun loadMyPlayList(page: Int = 1, forceReload: Boolean = false) {
+    override fun loadMyPlayList(page: Int, forceReload: Boolean) {
         LogUtil.i("current_page",page.toString())
         if (page > 1 && (_isLoadingMorePlaylists.value || _noMorePlaylists.value)) return
         if (page == 1 || forceReload) {
@@ -155,7 +155,7 @@ class MyPlayListViewModel : ViewModel() {
     }
 
     // 获取单个playlist内容
-    fun getPlaylistItems(page: Int = 1, listCode: String, refresh: Boolean = false) {
+    override fun getPlaylistItems(page: Int, listCode: String, refresh: Boolean) {
         LogUtil.i("getPlaylistItems","isLoadingMore:$isLoadingMore,listCode:$listCode,")
         if (isLoadingMore) return
         isLoadingMore = true
@@ -208,9 +208,9 @@ class MyPlayListViewModel : ViewModel() {
     }
 
     private val _deleteFromPlaylistFlow = MutableSharedFlow<WebsiteState<Int>>()
-    val deleteFromPlaylistFlow = _deleteFromPlaylistFlow.asSharedFlow()
+    override val deleteFromPlaylistFlow = _deleteFromPlaylistFlow.asSharedFlow()
     // 从详情页删除某视频
-    fun deleteFromPlaylist(listCode: String, videoCode: String, position: Int) {
+    override fun deleteFromPlaylist(listCode: String, videoCode: String, position: Int) {
         viewModelScope.launch {
             NetworkRepo.deleteMyListItems(listCode, videoCode, position, csrfToken).collect {
                 _deleteFromPlaylistFlow.emit(it)
@@ -224,9 +224,9 @@ class MyPlayListViewModel : ViewModel() {
     }
 
     private val _modifyPlaylistFlow = MutableSharedFlow<WebsiteState<ModifiedPlaylistArgs>>()
-    val modifyPlaylistFlow = _modifyPlaylistFlow.asSharedFlow()
+    override val modifyPlaylistFlow = _modifyPlaylistFlow.asSharedFlow()
     // 编辑Playlist
-    fun modifyPlaylist(listCode: String, title: String, desc: String, delete: Boolean) {
+    override fun modifyPlaylist(listCode: String, title: String, desc: String, delete: Boolean) {
         LogUtil.i("modify_playlist","${listCode},${title},${desc}")
         viewModelScope.launch {
             NetworkRepo.modifyPlaylist(listCode, title, desc, delete, csrfToken).collect {
@@ -240,13 +240,13 @@ class MyPlayListViewModel : ViewModel() {
     fun clearMyListItems() {
         _playlistStateFlow.value = PageLoadingState.Loading
     }
-    fun clearCurrentList(){
+    override fun clearCurrentList() {
         _playlistFlow.value = emptyList()
     }
     private val _createPlaylistFlow = MutableSharedFlow<WebsiteState<Unit>>()
-    val createPlaylistFlow = _createPlaylistFlow.asSharedFlow()
+    override val createPlaylistFlow = _createPlaylistFlow.asSharedFlow()
     //创建Playlist
-    fun createPlaylist(title: String, description: String) {
+    override fun createPlaylist(title: String, description: String) {
         viewModelScope.launch {
             NetworkRepo.createPlaylist(EMPTY_STRING, title, description, csrfToken).collect {
                 _createPlaylistFlow.emit(it)

@@ -88,7 +88,7 @@ class VideoRouteActions(
 
     fun toggleFavorite(video: HanimeVideo) {
         if (!SettingsRepository.isAlreadyLogin) {
-            SonnerToast.warning(R.string.login_first)
+            viewModel.toggleLocalFavorite()
             return
         }
         if (video.isFav) {
@@ -110,7 +110,13 @@ class VideoRouteActions(
         myList: HanimeVideo.MyList?,
         selectedStates: List<Boolean>,
     ) {
-        if (!SettingsRepository.isAlreadyLogin || myList == null || myList.myListInfo.isEmpty()) {
+        if (!SettingsRepository.isAlreadyLogin) {
+            if (myList != null && myList.myListInfo.isNotEmpty()) {
+                viewModel.updateLocalMyListSelection(myList, selectedStates)
+            }
+            return
+        }
+        if (myList == null || myList.myListInfo.isEmpty()) {
             SonnerToast.warning(R.string.login_first)
             return
         }

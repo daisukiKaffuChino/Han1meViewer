@@ -533,6 +533,7 @@ private fun OnlineWatchHistoryGrid(
             ) { item ->
                 VideoCardItem(
                     videoItem = item,
+                    showDeleteAction = true,
                     onClickVideosItem = { onOpenVideo(item) },
                     onLongClickVideosItem = { _, _ -> onDeleteVideo(item) },
                 )

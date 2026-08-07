@@ -62,7 +62,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.screen.RetryableImage
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.SpacingNormal
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.VideoNormalCardMinWidth
-import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.MyPlayListViewModel
+import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.PlaylistController
 import io.github.daisukikaffuchino.utils.SonnerToast
 
 /**
@@ -84,7 +84,7 @@ fun PlaylistBottomSheet(
     playListTitle: String,
     onClickItem: (String) -> Unit,
     onLongClickItem: (String, String) -> Unit,
-    vm: MyPlayListViewModel,
+    vm: PlaylistController,
     context: Context,
 ) {
     val playlistState by vm.playlistStateFlow.collectAsState()
@@ -210,7 +210,7 @@ private fun PlaylistSheetContent(
     playlistDesc: kotlinx.coroutines.flow.StateFlow<String?>,
     playlistState: PageLoadingState<*>,
     onClickItem: (String) -> Unit,
-    viewModel: MyPlayListViewModel,
+    viewModel: PlaylistController,
     context: Context,
 ) {
     var showDeletePlaylistConfirm by remember { mutableStateOf(false) }
@@ -329,6 +329,7 @@ private fun PlaylistSheetContent(
                     VideoCardItem(
                         videoItem = item,
                         isHorizontalCard = true,
+                        showDeleteAction = true,
                         onClickVideosItem = onClickItem
                     ) { videoCode, _ ->
                         showDeleteItemConfirm = Triple(listCode, videoCode, index)

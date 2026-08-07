@@ -1,0 +1,39 @@
+name: Build Debug APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "test-local-mylist" ]
+    paths-ignore:
+      - "**.md"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug -x lint --no-daemon
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Han1meViewer-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error

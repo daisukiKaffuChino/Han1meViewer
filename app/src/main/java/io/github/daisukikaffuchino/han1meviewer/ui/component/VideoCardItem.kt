@@ -76,6 +76,7 @@ fun VideoCardItem(
     isHomePage: Boolean = false,
     isWatched: Boolean = false,
     isPlaying: Boolean = false,
+    showDeleteAction: Boolean = false,
     containerColor: Color? = null,
     onClickVideosItem: (String) -> Unit,
     onLongClickVideosItem: (String, String) -> Unit,
@@ -327,6 +328,15 @@ fun VideoCardItem(
                             (context as? MainActivity)?.mainBackStack?.add(
                                 SearchRoute(query = currentArtist)
                             )
+                        },
+                    )
+                }
+                if (showDeleteAction) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.delete)) },
+                        onClick = {
+                            showContextMenu = false
+                            onLongClickVideosItem(videoItem.videoCode, videoItem.title)
                         },
                     )
                 }
