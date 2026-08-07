@@ -184,7 +184,7 @@ object LocalListRepository {
             uploadTime = uploadTime,
             genre = genre,
             isPlaying = false,
-            itemType = itemType,
+            itemType = HanimeInfo.NORMAL,
             reviews = reviews ?: "",
             currentArtist = currentArtist ?: "",
             watched = false,
@@ -205,7 +205,6 @@ object LocalListRepository {
             genre = null,
             reviews = null,
             currentArtist = artist?.name,
-            itemType = HanimeInfo.NORMAL,
             addedAt = System.currentTimeMillis(),
         )
 
@@ -228,7 +227,6 @@ object LocalListRepository {
             genre = genre,
             reviews = reviews,
             currentArtist = currentArtist,
-            itemType = itemType,
             addedAt = addedAt,
         )
 
@@ -247,7 +245,6 @@ object LocalListRepository {
             genre = genre,
             reviews = reviews,
             currentArtist = currentArtist,
-            itemType = itemType,
             addedAt = if (addedAt > 0) addedAt else fallbackAddedAt,
         )
 }

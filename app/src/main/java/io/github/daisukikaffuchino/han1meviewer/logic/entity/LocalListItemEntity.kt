@@ -25,6 +25,5 @@ data class LocalListItemEntity(
     val genre: String? = null,
     val reviews: String? = null,
     val currentArtist: String? = null,
-    val itemType: Int = 0,
     val addedAt: Long,
 )

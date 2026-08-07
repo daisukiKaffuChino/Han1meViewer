@@ -251,7 +251,6 @@ object OnlineListsBackup {
             genre = genre,
             reviews = reviews,
             currentArtist = currentArtist,
-            itemType = itemType,
             addedAt = 0,
         )
 }
