@@ -90,6 +90,7 @@ fun HomeSettingsRouteScreen(
     val uriHandler = LocalUriHandler.current
     val coroutineScope = rememberCoroutineScope()
     val settings by SettingsRepository.settings.collectAsStateWithLifecycle()
+    val isLoggedIn by SettingsRepository.loginStateFlow.collectAsStateWithLifecycle()
     var cacheKey by remember { mutableIntStateOf(0) }
     var showClearCacheConfirm by remember { mutableStateOf(false) }
     var showRestartConfirmDialog by remember { mutableStateOf(false) }
@@ -128,7 +129,9 @@ fun HomeSettingsRouteScreen(
                 }
             }.onFailure {
                 withContext(Dispatchers.Main) {
-                    SonnerToast.error(R.string.local_data_export_failed)
+                    SonnerToast.error(
+                        it.message ?: context.getString(R.string.local_data_export_failed)
+                    )
                 }
             }
         }
@@ -149,7 +152,9 @@ fun HomeSettingsRouteScreen(
                 }
             }.onFailure {
                 withContext(Dispatchers.Main) {
-                    SonnerToast.error(R.string.local_data_import_failed)
+                    SonnerToast.error(
+                        it.message ?: context.getString(R.string.local_data_import_failed)
+                    )
                 }
             }
         }
@@ -170,7 +175,9 @@ fun HomeSettingsRouteScreen(
                 }
             }.onFailure {
                 withContext(Dispatchers.Main) {
-                    SonnerToast.error(R.string.online_data_export_failed)
+                    SonnerToast.error(
+                        it.message ?: context.getString(R.string.online_data_export_failed)
+                    )
                 }
             }
         }
@@ -195,7 +202,9 @@ fun HomeSettingsRouteScreen(
                 }
             }.onFailure {
                 withContext(Dispatchers.Main) {
-                    SonnerToast.error(R.string.online_data_import_failed)
+                    SonnerToast.error(
+                        it.message ?: context.getString(R.string.online_data_import_failed)
+                    )
                 }
             }
         }
@@ -248,6 +257,7 @@ fun HomeSettingsRouteScreen(
     HomeSettingsScreen(
         page = page,
         state = uiState,
+        isLoggedIn = isLoggedIn,
         onVideoLanguageChange = { value ->
             if (value != SettingsRepository.videoLanguage) {
                 coroutineScope.launch {

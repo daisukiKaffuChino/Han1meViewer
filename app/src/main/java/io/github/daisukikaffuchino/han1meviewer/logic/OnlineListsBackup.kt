@@ -8,6 +8,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListType
 import io.github.daisukikaffuchino.han1meviewer.logic.model.PlaylistExport
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Playlists
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -49,7 +50,11 @@ object OnlineListsBackup {
 
     suspend fun importOnlineLists(data: ListsExport) {
         val userId = requireLoggedInUserId()
-        val csrfToken = fetchCsrfToken(userId)
+        val probeVideoCode = data.watchLater.firstOrNull()?.videoCode
+            ?: data.favorites.firstOrNull()?.videoCode
+            ?: data.playlists.firstOrNull()?.items?.firstOrNull()?.videoCode
+        val csrfToken = probeVideoCode?.let { fetchVideoCsrfToken(it) }
+            ?: fetchCsrfToken(userId)
 
         data.watchLater.forEachIndexed { index, item ->
             awaitWebsiteSuccess(
@@ -74,25 +79,30 @@ object OnlineListsBackup {
         }
 
         val existingPlaylists = fetchAllPlaylists(userId).associate { it.title to it.listCode }
+        val knownCodes = existingPlaylists.values.toMutableSet()
         val createdCodes = mutableMapOf<String, String>()
         data.playlists.forEach { playlist ->
-            val listCode = createdCodes[playlist.title]
+            var listCode = createdCodes[playlist.title]
                 ?: existingPlaylists[playlist.title]
-                ?: run {
-                    awaitWebsiteSuccess(
-                        NetworkRepo.createPlaylist(
-                            EMPTY_STRING,
-                            playlist.title,
-                            playlist.desc,
-                            csrfToken,
-                        )
+            if (listCode == null) {
+                awaitWebsiteSuccess(
+                    NetworkRepo.createPlaylist(
+                        EMPTY_STRING,
+                        playlist.title,
+                        playlist.desc,
+                        csrfToken,
                     )
-                    val fresh = fetchAllPlaylists(userId)
-                    val code = fresh.firstOrNull { it.title == playlist.title }?.listCode
-                        ?: error("Failed to find created playlist: ${playlist.title}")
-                    createdCodes[playlist.title] = code
-                    code
-                }
+                )
+                val fresh = fetchAllPlaylists(userId)
+                listCode = fresh.firstOrNull { it.listCode !in knownCodes }?.listCode
+                    ?: fresh.firstOrNull { it.title == playlist.title }?.listCode
+                    ?: playlist.items.firstOrNull()?.videoCode?.let { probeCode ->
+                        fetchPlaylistCodeFromVideoPage(probeCode, playlist.title)
+                    }
+                    ?: error("Failed to find created playlist: ${playlist.title}")
+                knownCodes += listCode
+                createdCodes[playlist.title] = listCode
+            }
             playlist.items.forEachIndexed { index, item ->
                 awaitWebsiteSuccess(
                     NetworkRepo.addToMyList(
@@ -190,6 +200,34 @@ object OnlineListsBackup {
             is WebsiteState.Success -> state.info.csrfToken ?: error("Missing CSRF token")
             is WebsiteState.Error -> throw state.throwable
             is WebsiteState.Loading -> error("Missing CSRF token")
+        }
+    }
+
+    private suspend fun fetchVideoCsrfToken(videoCode: String): String? {
+        val state = NetworkRepo.getHanimeVideo(videoCode)
+            .first { it !is VideoLoadingState.Loading }
+        return when (state) {
+            is VideoLoadingState.Success -> state.info.csrfToken
+            is VideoLoadingState.Error -> throw state.throwable
+            is VideoLoadingState.Loading -> null
+            is VideoLoadingState.NoContent -> null
+        }
+    }
+
+    private suspend fun fetchPlaylistCodeFromVideoPage(
+        videoCode: String,
+        playlistTitle: String,
+    ): String? {
+        val state = NetworkRepo.getHanimeVideo(videoCode)
+            .first { it !is VideoLoadingState.Loading }
+        return when (state) {
+            is VideoLoadingState.Success -> state.info.myList?.myListInfo
+                ?.firstOrNull { it.title == playlistTitle }
+                ?.code
+
+            is VideoLoadingState.Error -> throw state.throwable
+            is VideoLoadingState.Loading -> null
+            is VideoLoadingState.NoContent -> null
         }
     }
 

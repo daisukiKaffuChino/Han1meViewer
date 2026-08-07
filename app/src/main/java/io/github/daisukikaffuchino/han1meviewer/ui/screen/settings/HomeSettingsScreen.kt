@@ -60,6 +60,7 @@ private enum class HomeSettingsChoiceDialog {
 fun HomeSettingsScreen(
     page: HomeSettingsPage,
     state: HomeSettingsUiState,
+    isLoggedIn: Boolean,
     onVideoLanguageChange: (String) -> Unit,
     onVideoQualityChange: (String) -> Unit,
     onDarkModeChange: (String) -> Unit,
@@ -498,20 +499,22 @@ fun HomeSettingsScreen(
                         )
                     }
                 }
-                item {
-                    SettingsSection(stringResource(R.string.online_data_section)) {
-                        SettingNavigationItem(
-                            title = stringResource(R.string.online_data_export_title),
-                            summary = stringResource(R.string.online_data_export_summary),
-                            iconRes = R.drawable.ic_export,
-                            onClick = onExportOnlineLists,
-                        )
-                        SettingNavigationItem(
-                            title = stringResource(R.string.online_data_import_title),
-                            summary = stringResource(R.string.online_data_import_summary),
-                            iconRes = R.drawable.ic_download,
-                            onClick = onImportOnlineLists,
-                        )
+                if (isLoggedIn) {
+                    item {
+                        SettingsSection(stringResource(R.string.online_data_section)) {
+                            SettingNavigationItem(
+                                title = stringResource(R.string.online_data_export_title),
+                                summary = stringResource(R.string.online_data_export_summary),
+                                iconRes = R.drawable.ic_export,
+                                onClick = onExportOnlineLists,
+                            )
+                            SettingNavigationItem(
+                                title = stringResource(R.string.online_data_import_title),
+                                summary = stringResource(R.string.online_data_import_summary),
+                                iconRes = R.drawable.ic_download,
+                                onClick = onImportOnlineLists,
+                            )
+                        }
                     }
                 }
             }
@@ -625,6 +628,7 @@ private fun HomeSettingsScreenPreview() {
         HomeSettingsScreen(
             page = HomeSettingsPage.Appearance,
             state = previewHomeSettingsState(),
+            isLoggedIn = true,
             onVideoLanguageChange = {},
             onVideoQualityChange = {},
             onDarkModeChange = {},
