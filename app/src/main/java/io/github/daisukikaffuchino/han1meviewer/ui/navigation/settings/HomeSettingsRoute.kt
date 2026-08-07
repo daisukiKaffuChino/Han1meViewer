@@ -50,6 +50,8 @@ import io.github.daisukikaffuchino.han1meviewer.HanimeApplication
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.BackupManager
+import io.github.daisukikaffuchino.han1meviewer.logic.LocalListRepository
+import io.github.daisukikaffuchino.han1meviewer.logic.OnlineListsBackup
 import io.github.daisukikaffuchino.han1meviewer.logic.model.AppLanguage
 import io.github.daisukikaffuchino.han1meviewer.logic.model.DisplayDensity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.PaletteStyle
@@ -110,7 +112,94 @@ fun HomeSettingsRouteScreen(
     ) { uri ->
         pendingImportUri = uri
     }
-
+    val localListsExportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        coroutineScope.launch(Dispatchers.IO) {
+            runCatching {
+                val jsonText = LocalListRepository.exportLocalListsJson()
+                context.contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { writer ->
+                    writer.write(jsonText)
+                } ?: error("Unable to open output file")
+            }.onSuccess {
+                withContext(Dispatchers.Main) {
+                    SonnerToast.success(R.string.local_data_export_success)
+                }
+            }.onFailure {
+                withContext(Dispatchers.Main) {
+                    SonnerToast.error(R.string.local_data_export_failed)
+                }
+            }
+        }
+    }
+    val localListsImportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        coroutineScope.launch(Dispatchers.IO) {
+            runCatching {
+                val jsonText = context.contentResolver.openInputStream(uri)?.bufferedReader()?.use {
+                    it.readText()
+                } ?: error("Unable to open input file")
+                LocalListRepository.importLocalListsJson(jsonText, merge = true)
+            }.onSuccess {
+                withContext(Dispatchers.Main) {
+                    SonnerToast.success(R.string.local_data_import_success)
+                }
+            }.onFailure {
+                withContext(Dispatchers.Main) {
+                    SonnerToast.error(R.string.local_data_import_failed)
+                }
+            }
+        }
+    }
+    val onlineListsExportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        coroutineScope.launch(Dispatchers.IO) {
+            runCatching {
+                val jsonText = OnlineListsBackup.exportOnlineListsJson()
+                context.contentResolver.openOutputStream(uri)?.bufferedWriter()?.use { writer ->
+                    writer.write(jsonText)
+                } ?: error("Unable to open output file")
+            }.onSuccess {
+                withContext(Dispatchers.Main) {
+                    SonnerToast.success(R.string.online_data_export_success)
+                }
+            }.onFailure {
+                withContext(Dispatchers.Main) {
+                    SonnerToast.error(R.string.online_data_export_failed)
+                }
+            }
+        }
+    }
+    val onlineListsImportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        if (!SettingsRepository.isAlreadyLogin) {
+            SonnerToast.warning(R.string.login_first)
+            return@rememberLauncherForActivityResult
+        }
+        coroutineScope.launch(Dispatchers.IO) {
+            runCatching {
+                val jsonText = context.contentResolver.openInputStream(uri)?.bufferedReader()?.use {
+                    it.readText()
+                } ?: error("Unable to open input file")
+                OnlineListsBackup.importOnlineListsJson(jsonText)
+            }.onSuccess {
+                withContext(Dispatchers.Main) {
+                    SonnerToast.success(R.string.online_data_import_success)
+                }
+            }.onFailure {
+                withContext(Dispatchers.Main) {
+                    SonnerToast.error(R.string.online_data_import_failed)
+                }
+            }
+        }
+    }
     val hanimeAppName = stringResource(R.string.hanime_app_name)
     val fakeNameCalc = stringResource(R.string.app_name_fake_calc)
     val fakeNameCornhub = stringResource(R.string.app_name_fake_cornhub)
@@ -312,6 +401,30 @@ fun HomeSettingsRouteScreen(
         },
         onImportBackup = {
             importLauncher.launch(arrayOf("application/json", "text/*", "*/*"))
+        },
+        onExportLocalLists = {
+            localListsExportLauncher.launch(
+                "Han1meViewer-local-lists-${System.currentTimeMillis()}.json"
+            )
+        },
+        onImportLocalLists = {
+            localListsImportLauncher.launch(arrayOf("application/json", "text/*", "*/*"))
+        },
+        onExportOnlineLists = {
+            if (!SettingsRepository.isAlreadyLogin) {
+                SonnerToast.warning(R.string.login_first)
+                return@HomeSettingsScreen
+            }
+            onlineListsExportLauncher.launch(
+                "Han1meViewer-online-lists-${System.currentTimeMillis()}.json"
+            )
+        },
+        onImportOnlineLists = {
+            if (!SettingsRepository.isAlreadyLogin) {
+                SonnerToast.warning(R.string.login_first)
+                return@HomeSettingsScreen
+            }
+            onlineListsImportLauncher.launch(arrayOf("application/json", "text/*", "*/*"))
         },
         onSubmitBug = { uriHandler.openUri(HA1_GITHUB_ISSUE_URL) },
         onOpenForum = { uriHandler.openUri(HA1_GITHUB_FORUM_URL) },

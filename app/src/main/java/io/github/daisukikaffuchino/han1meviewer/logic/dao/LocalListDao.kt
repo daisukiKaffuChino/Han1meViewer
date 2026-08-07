@@ -59,6 +59,12 @@ interface LocalListDao {
     @Query("DELETE FROM LocalListItemEntity WHERE listCode = :listCode")
     suspend fun deletePlaylistItems(listCode: String)
 
+    @Query("DELETE FROM LocalListItemEntity")
+    suspend fun deleteAllItems()
+
+    @Query("DELETE FROM LocalListEntity")
+    suspend fun deleteAllPlaylists()
+
     @Query("SELECT * FROM LocalListItemEntity WHERE listCode = :listCode ORDER BY addedAt DESC")
     fun observeItems(listCode: String): Flow<List<LocalListItemEntity>>
 

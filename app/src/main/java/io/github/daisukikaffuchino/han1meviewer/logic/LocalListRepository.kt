@@ -7,9 +7,13 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.LocalListEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.LocalListItemEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo
+import io.github.daisukikaffuchino.han1meviewer.logic.model.ListItemExport
+import io.github.daisukikaffuchino.han1meviewer.logic.model.ListsExport
+import io.github.daisukikaffuchino.han1meviewer.logic.model.PlaylistExport
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Playlists
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.json.Json
 import java.util.UUID
 
 /**
@@ -22,6 +26,11 @@ object LocalListRepository {
     const val PLAYLIST_KIND = "playlist"
 
     private val dao: LocalListDao = LocalListDatabase.instance.localListDao
+    private val json = Json {
+        ignoreUnknownKeys = true
+        prettyPrint = true
+        encodeDefaults = true
+    }
 
     fun observeWatchLater(): Flow<List<HanimeInfo>> =
         dao.observeItems(WATCH_LATER_CODE).map { rows -> rows.map { it.toHanimeInfo() } }
@@ -107,6 +116,51 @@ object LocalListRepository {
     suspend fun getPlaylistItemsOnce(listCode: String): List<HanimeInfo> =
         dao.getItems(listCode).map { it.toHanimeInfo() }
 
+    suspend fun exportLocalLists(): ListsExport =
+        ListsExport(
+            watchLater = dao.getItems(WATCH_LATER_CODE).map { it.toExport() },
+            favorites = dao.getItems(FAVORITE_CODE).map { it.toExport() },
+            playlists = dao.getPlaylistsOnce().map { row ->
+                PlaylistExport(
+                    title = row.title,
+                    desc = row.desc,
+                    items = dao.getItems(row.listCode).map { it.toExport() },
+                )
+            },
+        )
+
+    suspend fun exportLocalListsJson(): String =
+        json.encodeToString(exportLocalLists())
+
+    suspend fun importLocalListsJson(jsonText: String, merge: Boolean = true) =
+        importLocalLists(json.decodeFromString<ListsExport>(jsonText), merge)
+
+    suspend fun importLocalLists(data: ListsExport, merge: Boolean) {
+        if (!merge) {
+            dao.deleteAllItems()
+            dao.deleteAllPlaylists()
+        }
+        val now = System.currentTimeMillis()
+        val existingPlaylists =
+            if (merge) dao.getPlaylistsOnce().associateBy { it.title } else emptyMap()
+        val createdCodes = mutableMapOf<String, String>()
+        data.playlists.forEach { playlist ->
+            val listCode = createdCodes[playlist.title]
+                ?: existingPlaylists[playlist.title]?.listCode
+                ?: createPlaylist(playlist.title, playlist.desc).listCode
+            createdCodes[playlist.title] = listCode
+            playlist.items.forEachIndexed { index, item ->
+                dao.upsertItem(item.toEntity(listCode, now - index))
+            }
+        }
+        data.watchLater.forEachIndexed { index, item ->
+            dao.upsertItem(item.toEntity(WATCH_LATER_CODE, now - index))
+        }
+        data.favorites.forEachIndexed { index, item ->
+            dao.upsertItem(item.toEntity(FAVORITE_CODE, now - index))
+        }
+    }
+
     private suspend fun setItem(
         listCode: String,
         videoCode: String,
@@ -161,5 +215,39 @@ object LocalListRepository {
             title = title,
             total = total,
             coverUrl = coverUrl,
+        )
+
+    private fun LocalListItemEntity.toExport(): ListItemExport =
+        ListItemExport(
+            videoCode = videoCode,
+            title = title,
+            coverUrl = coverUrl,
+            duration = duration,
+            views = views,
+            uploadTime = uploadTime,
+            genre = genre,
+            reviews = reviews,
+            currentArtist = currentArtist,
+            itemType = itemType,
+            addedAt = addedAt,
+        )
+
+    private fun ListItemExport.toEntity(
+        listCode: String,
+        fallbackAddedAt: Long,
+    ): LocalListItemEntity =
+        LocalListItemEntity(
+            listCode = listCode,
+            videoCode = videoCode,
+            title = title,
+            coverUrl = coverUrl,
+            duration = duration,
+            views = views,
+            uploadTime = uploadTime,
+            genre = genre,
+            reviews = reviews,
+            currentArtist = currentArtist,
+            itemType = itemType,
+            addedAt = if (addedAt > 0) addedAt else fallbackAddedAt,
         )
 }

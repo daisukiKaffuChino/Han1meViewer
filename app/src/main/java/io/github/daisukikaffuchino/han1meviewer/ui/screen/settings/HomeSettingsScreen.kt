@@ -97,6 +97,10 @@ fun HomeSettingsScreen(
     onClearCache: () -> Unit,
     onExportBackup: () -> Unit,
     onImportBackup: () -> Unit,
+    onExportLocalLists: () -> Unit,
+    onImportLocalLists: () -> Unit,
+    onExportOnlineLists: () -> Unit,
+    onImportOnlineLists: () -> Unit,
     onSubmitBug: () -> Unit,
     onOpenForum: () -> Unit,
 ) {
@@ -466,11 +470,47 @@ fun HomeSettingsScreen(
                             iconRes = R.drawable.ic_download,
                             onClick = onImportBackup,
                         )
+                    }
+                }
+                item {
+                    SettingsSection(stringResource(R.string.cache_section)) {
                         SettingNavigationItem(
                             title = stringResource(R.string.clear_cache),
                             summary = state.cacheSummary,
                             iconRes = R.drawable.ic_clear_all,
                             onClick = onClearCache,
+                        )
+                    }
+                }
+                item {
+                    SettingsSection(stringResource(R.string.local_data_section)) {
+                        SettingNavigationItem(
+                            title = stringResource(R.string.local_data_export_title),
+                            summary = stringResource(R.string.local_data_export_summary),
+                            iconRes = R.drawable.ic_export,
+                            onClick = onExportLocalLists,
+                        )
+                        SettingNavigationItem(
+                            title = stringResource(R.string.local_data_import_title),
+                            summary = stringResource(R.string.local_data_import_summary),
+                            iconRes = R.drawable.ic_download,
+                            onClick = onImportLocalLists,
+                        )
+                    }
+                }
+                item {
+                    SettingsSection(stringResource(R.string.online_data_section)) {
+                        SettingNavigationItem(
+                            title = stringResource(R.string.online_data_export_title),
+                            summary = stringResource(R.string.online_data_export_summary),
+                            iconRes = R.drawable.ic_export,
+                            onClick = onExportOnlineLists,
+                        )
+                        SettingNavigationItem(
+                            title = stringResource(R.string.online_data_import_title),
+                            summary = stringResource(R.string.online_data_import_summary),
+                            iconRes = R.drawable.ic_download,
+                            onClick = onImportOnlineLists,
                         )
                     }
                 }
@@ -622,6 +662,10 @@ private fun HomeSettingsScreenPreview() {
             onClearCache = {},
             onExportBackup = {},
             onImportBackup = {},
+            onExportLocalLists = {},
+            onImportLocalLists = {},
+            onExportOnlineLists = {},
+            onImportOnlineLists = {},
             onSubmitBug = {},
             onOpenForum = {},
         )
