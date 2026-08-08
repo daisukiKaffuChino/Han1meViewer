@@ -208,7 +208,8 @@ object OnlineListsBackup {
             .first { it !is VideoLoadingState.Loading }
         return when (state) {
             is VideoLoadingState.Success -> state.info.csrfToken
-            is VideoLoadingState.Error -> throw state.throwable
+            // 失败时返回 null，让调用处的 elvis 兜底 fetchCsrfToken(userId) 生效
+            is VideoLoadingState.Error -> null
             is VideoLoadingState.Loading -> null
             is VideoLoadingState.NoContent -> null
         }
@@ -225,7 +226,8 @@ object OnlineListsBackup {
                 ?.firstOrNull { it.title == playlistTitle }
                 ?.code
 
-            is VideoLoadingState.Error -> throw state.throwable
+            // 失败时返回 null，让调用处的 elvis 链继续走到明确的 error(...) 提示
+            is VideoLoadingState.Error -> null
             is VideoLoadingState.Loading -> null
             is VideoLoadingState.NoContent -> null
         }
