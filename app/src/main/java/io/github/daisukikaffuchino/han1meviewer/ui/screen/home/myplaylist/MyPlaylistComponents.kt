@@ -1,6 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.myplaylist
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.combinedClickable
@@ -83,14 +84,23 @@ fun PlaylistItem(
             ),
         ) {
             Box(modifier = Modifier.height(100.dp)) {
-                RetryableImage(
-                    model = playlist.coverUrl ?: "",
-                    contentDescription = playlist.title,
-                    placeholder = painterResource(R.drawable.h_chan_loading),
-                    error = painterResource(R.drawable.h_chan_load_failed),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                )
+                if (playlist.coverUrl.isNullOrBlank()) {
+                    Image(
+                        painter = painterResource(R.drawable.playlist_placeholder),
+                        contentDescription = playlist.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    RetryableImage(
+                        model = playlist.coverUrl,
+                        contentDescription = playlist.title,
+                        placeholder = painterResource(R.drawable.h_chan_loading),
+                        error = painterResource(R.drawable.h_chan_load_failed),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
 
                 Box(
                     modifier = Modifier

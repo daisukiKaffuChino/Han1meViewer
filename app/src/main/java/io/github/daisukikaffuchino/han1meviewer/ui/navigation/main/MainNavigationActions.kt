@@ -4,9 +4,6 @@ import android.content.Intent
 import kotlinx.serialization.json.Json
 
 private val loginRequiredDrawerItems = setOf(
-    MainDrawerDestination.FavVideo,
-    MainDrawerDestination.WatchLater,
-    MainDrawerDestination.Playlist,
     MainDrawerDestination.Subscription,
 )
 

@@ -1,20 +1,24 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.navigation.main
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.VideoGridScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.MyListViewModel
+import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.mylist.FavVideoListController
+import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.mylist.WatchLaterListController
 
 @Composable
 fun FavVideoRouteScreen(
     onBack: () -> Unit,
     onNavigateToVideo: (String) -> Unit,
 ) {
+    val isLoggedIn by SettingsRepository.loginStateFlow.collectAsStateWithLifecycle()
     val viewModel: MyListViewModel = viewModel()
-    val fav = viewModel.fav
+    val fav: FavVideoListController = if (isLoggedIn) viewModel.fav else viewModel.localFav
     val items = fav.favVideoFlow.collectAsStateWithLifecycle().value
     val state = fav.favVideoStateFlow.collectAsStateWithLifecycle().value
     val loadedPageCount = fav.loadedPageCount.collectAsStateWithLifecycle().value
@@ -54,8 +58,10 @@ fun WatchLaterRouteScreen(
     onBack: () -> Unit,
     onNavigateToVideo: (String) -> Unit,
 ) {
+    val isLoggedIn by SettingsRepository.loginStateFlow.collectAsStateWithLifecycle()
     val viewModel: MyListViewModel = viewModel()
-    val wl = viewModel.watchLater
+    val wl: WatchLaterListController =
+        if (isLoggedIn) viewModel.watchLater else viewModel.localWatchLater
     val items = wl.watchLaterFlow.collectAsStateWithLifecycle().value
     val state = wl.watchLaterStateFlow.collectAsStateWithLifecycle().value
     val loadedPageCount = wl.loadedPageCount.collectAsStateWithLifecycle().value

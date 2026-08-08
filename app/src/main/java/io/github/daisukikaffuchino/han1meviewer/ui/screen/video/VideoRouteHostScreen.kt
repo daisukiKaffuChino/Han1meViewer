@@ -59,6 +59,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoLandscapeLayoutStyle
 import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.bridge.VideoPageHost
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
@@ -533,6 +534,29 @@ fun VideoRouteHostScreen(
             viewModel.observeKeyframe(route.videoCode).collect {
                 hKeyframes = it
                 viewModel.hKeyframes = it
+            }
+        }
+    }
+
+    LaunchedEffect(viewModel, lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
+            launch {
+                viewModel.localFavoriteActionFlow.collect { state ->
+                    when (state) {
+                        is WebsiteState.Error -> SonnerToast.error(R.string.add_failed)
+                        is WebsiteState.Success -> SonnerToast.success(R.string.add_success)
+                        WebsiteState.Loading -> Unit
+                    }
+                }
+            }
+            launch {
+                viewModel.localMyListActionFlow.collect { state ->
+                    when (state) {
+                        is WebsiteState.Error -> SonnerToast.error(R.string.modify_failed)
+                        is WebsiteState.Success -> SonnerToast.success(R.string.modify_success)
+                        WebsiteState.Loading -> Unit
+                    }
+                }
             }
         }
     }

@@ -35,14 +35,14 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PullRefreshOverlay
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
-import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.MyPlayListViewModel
+import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.PlaylistController
 import io.github.daisukikaffuchino.utils.SonnerToast
 import io.github.daisukikaffuchino.utils.VibrationUtil
 
 /**
  * 播放列表页面 Screen 层。
  *
- * 持有 [MyPlayListViewModel]，管理缓存、下拉刷新、底部弹窗等状态编排。
+ * 持有 [PlaylistController]，管理缓存、下拉刷新、底部弹窗等状态编排。
  * 渲染委托给 [PlaylistContent] 和 [PlaylistBottomSheet]。
  *
  * @param viewModel 播放列表 ViewModel
@@ -53,7 +53,7 @@ import io.github.daisukikaffuchino.utils.VibrationUtil
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PlaylistScreen(
-    viewModel: MyPlayListViewModel,
+    viewModel: PlaylistController,
     navigateBack: () -> Unit,
     onClickItem: (String) -> Unit,
     onLongClickItem: (String, String) -> Unit,

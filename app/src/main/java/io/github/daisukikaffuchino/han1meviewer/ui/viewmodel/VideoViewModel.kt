@@ -14,7 +14,9 @@ import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
 import io.github.daisukikaffuchino.han1meviewer.HanimeResolution
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.LocalListRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.WatchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeDownloadEntity
@@ -27,17 +29,23 @@ import io.github.daisukikaffuchino.han1meviewer.util.TagLocalizer
 import androidx.lifecycle.ViewModel
 import io.github.daisukikaffuchino.han1meviewer.logic.platform.AndroidVideoCacheStore
 import io.github.daisukikaffuchino.han1meviewer.logic.platform.VideoCacheStore
+import io.github.daisukikaffuchino.utils.application
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -79,9 +87,11 @@ class VideoViewModel(
         const val MIN_H_KEYFRAME_SAVE_INTERVAL = 5_000 // ms
     }
     private val videoIntroUiStateMap = mutableMapOf<String, VideoIntroUiState>()
+    private val _videoCodeFlow = MutableStateFlow(EMPTY_STRING)
     var videoCode: String = EMPTY_STRING
         set(value) {
             field = value
+            _videoCodeFlow.value = value
         }
 
     var fromDownload = false
@@ -97,6 +107,56 @@ class VideoViewModel(
 
     private val _hanimeVideoFlow = MutableStateFlow<HanimeVideo?>(null)
     val hanimeVideoFlow = _hanimeVideoFlow.asStateFlow()
+
+    /**
+     * 详情页展示用视频流：未登录时把本地喜欢/清单状态合成到视频上，
+     * 登录时与 [hanimeVideoFlow] 保持一致。
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val displayVideoFlow: StateFlow<HanimeVideo?> = combine(
+        _hanimeVideoFlow,
+        _videoCodeFlow,
+        SettingsRepository.loginStateFlow,
+    ) { video, code, isLoggedIn -> Triple(video, code, isLoggedIn) }
+        .flatMapLatest { (video, code, isLoggedIn) ->
+            if (video == null || isLoggedIn || code.isBlank()) {
+                flowOf(video)
+            } else {
+                combine(
+                    LocalListRepository.observeIsFavorite(code),
+                    LocalListRepository.observeIsWatchLater(code),
+                    LocalListRepository.observeListCodes(code),
+                    LocalListRepository.observePlaylists(),
+                ) { isFavorite, isWatchLater, listCodes, playlists ->
+                    video.copy(
+                        isFav = isFavorite,
+                        myList = HanimeVideo.MyList(
+                            isWatchLater = isWatchLater,
+                            myListInfo = buildList {
+                                add(
+                                    HanimeVideo.MyList.MyListInfo(
+                                        code = LocalListRepository.WATCH_LATER_CODE,
+                                        title = application.getString(R.string.watch_later),
+                                        isSelected = isWatchLater,
+                                    )
+                                )
+                                playlists.forEach { playlist ->
+                                    add(
+                                        HanimeVideo.MyList.MyListInfo(
+                                            code = playlist.listCode,
+                                            title = playlist.title,
+                                            isSelected = playlist.listCode in listCodes,
+                                        )
+                                    )
+                                }
+                            },
+                        ),
+                    )
+                }
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
     private val _videoHostUiStateFlow = MutableStateFlow(VideoHostUiState())
     val videoHostUiStateFlow = _videoHostUiStateFlow.asStateFlow()
 
@@ -336,6 +396,59 @@ class VideoViewModel(
                     myList[position] = myList[position].copy(isSelected = isChecked)
                     prev?.copy(myList = prev.myList?.copy(myListInfo = myList))
                 }
+            }
+        }
+    }
+
+    private val _localFavoriteActionFlow = MutableSharedFlow<WebsiteState<Boolean>>()
+    val localFavoriteActionFlow = _localFavoriteActionFlow.asSharedFlow()
+
+    private val _localMyListActionFlow = MutableSharedFlow<WebsiteState<Boolean>>()
+    val localMyListActionFlow = _localMyListActionFlow.asSharedFlow()
+
+    fun toggleLocalFavorite() {
+        val video = _hanimeVideoFlow.value ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                val isFavorite = LocalListRepository.isFavorite(videoCode)
+                if (isFavorite) {
+                    LocalListRepository.removeItem(LocalListRepository.FAVORITE_CODE, videoCode)
+                } else {
+                    LocalListRepository.setFavorite(videoCode, video, add = true)
+                }
+            }.onSuccess {
+                _localFavoriteActionFlow.emit(WebsiteState.Success(true))
+            }.onFailure {
+                _localFavoriteActionFlow.emit(WebsiteState.Error(it))
+            }
+        }
+    }
+
+    fun updateLocalMyListSelection(
+        myList: HanimeVideo.MyList,
+        selectedStates: List<Boolean>,
+    ) {
+        val video = _hanimeVideoFlow.value ?: return
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                myList.myListInfo.forEachIndexed { index, info ->
+                    val newChecked = selectedStates.getOrNull(index) ?: return@forEachIndexed
+                    if (info.isSelected == newChecked) return@forEachIndexed
+                    if (info.code == LocalListRepository.WATCH_LATER_CODE) {
+                        LocalListRepository.setWatchLater(videoCode, video, newChecked)
+                    } else {
+                        LocalListRepository.setPlaylistContains(
+                            info.code,
+                            videoCode,
+                            video,
+                            newChecked,
+                        )
+                    }
+                }
+            }.onSuccess {
+                _localMyListActionFlow.emit(WebsiteState.Success(true))
+            }.onFailure {
+                _localMyListActionFlow.emit(WebsiteState.Error(it))
             }
         }
     }
