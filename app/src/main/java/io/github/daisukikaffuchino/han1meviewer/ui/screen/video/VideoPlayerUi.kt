@@ -60,6 +60,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
+import androidx.compose.material3.rememberSliderState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -1563,9 +1564,10 @@ fun PlayerSlider(
     onValueChange: (Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-
+    val sliderState = rememberSliderState(value = value)
+    sliderState.value = value
     Slider(
-        value = value,
+        state = sliderState,
         onValueChange = onValueChange,
         modifier = modifier,
 
