@@ -15,6 +15,7 @@ interface WatchLaterListController {
     val watchLaterFlow: StateFlow<List<HanimeInfo>>
     val deleteMyWatchLaterFlow: SharedFlow<WebsiteState<Boolean>>
     val loadedPageCount: StateFlow<Int>
+    val totalPages: StateFlow<Int>
     val isLoadingMore: StateFlow<Boolean>
     var watchLaterPage: Int
 
@@ -31,6 +32,7 @@ interface FavVideoListController {
     val favVideoFlow: StateFlow<List<HanimeInfo>>
     val deleteMyFavVideoFlow: SharedFlow<WebsiteState<Boolean>>
     val loadedPageCount: StateFlow<Int>
+    val totalPages: StateFlow<Int>
     val isLoadingMore: StateFlow<Boolean>
     var favVideoPage: Int
 

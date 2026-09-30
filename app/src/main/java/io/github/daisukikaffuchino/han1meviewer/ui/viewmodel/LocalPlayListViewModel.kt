@@ -63,11 +63,13 @@ class LocalPlayListViewModel : ViewModel(), PlaylistController {
 
     private val _isLoadingMorePlaylists = MutableStateFlow(false)
     private val _noMorePlaylists = MutableStateFlow(true)
+    private val _playlistTotalPages = MutableStateFlow(1)
 
     override var currentPage = 1
     override var playlistPage = 1
     override var isLoadingMore = false
         private set
+    override val playlistTotalPages: StateFlow<Int> = _playlistTotalPages.asStateFlow()
 
     override val mainUiState: StateFlow<PlaylistUiState> = combine(
         _cachedMyPlayList,
@@ -84,6 +86,7 @@ class LocalPlayListViewModel : ViewModel(), PlaylistController {
             selectedListTitle = (array[2] as Pair<String, String>?)?.second ?: "",
             isLoadingMore = array[3] as Boolean,
             noMorePlaylists = array[4] as Boolean,
+            totalPages = 1,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PlaylistUiState())
 
@@ -113,6 +116,10 @@ class LocalPlayListViewModel : ViewModel(), PlaylistController {
         }
     }
 
+    override fun goToPlaylistListPage(page: Int) {
+        loadMyPlayList(page = 1, forceReload = true)
+    }
+
     override fun setShowSheet(value: Boolean) {
         _showSheet.value = value
     }
@@ -127,6 +134,7 @@ class LocalPlayListViewModel : ViewModel(), PlaylistController {
 
     override fun getPlaylistItems(page: Int, listCode: String, refresh: Boolean) {
         if (isLoadingMore) return
+        currentPage = page
         isLoadingMore = true
         viewModelScope.launch {
             try {
@@ -149,6 +157,10 @@ class LocalPlayListViewModel : ViewModel(), PlaylistController {
                 isLoadingMore = false
             }
         }
+    }
+
+    override fun goToPlaylistPage(page: Int, listCode: String) {
+        getPlaylistItems(page = 1, listCode = listCode, refresh = true)
     }
 
     override fun getPlaylistSheetScrollState(listCode: String): PlaylistSheetScrollState =

@@ -34,6 +34,9 @@ class OnlineWatchHistoryViewModel : ViewModel() {
     private val _loadedPageCount = MutableStateFlow(0)
     val loadedPageCount = _loadedPageCount.asStateFlow()
 
+    private val _totalPages = MutableStateFlow(1)
+    val totalPages = _totalPages.asStateFlow()
+
     private val _isLoadingMore = MutableStateFlow(false)
     val isLoadingMore = _isLoadingMore.asStateFlow()
 
@@ -75,6 +78,18 @@ class OnlineWatchHistoryViewModel : ViewModel() {
         loadPage(_loadedPageCount.value + 1)
     }
 
+    fun goToPage(page: Int) {
+        if (_isLoadingMore.value) return
+        isRefreshing = true
+        isManualRefreshing = true
+        _isLoadingMore.value = false
+        _loadedPageCount.value = 0
+        _totalPages.value = 1
+        _state.value = PageLoadingState.Loading
+        _items.value = emptyList()
+        loadPage(page)
+    }
+
     private fun loadPage(page: Int) {
         val userId = SettingsRepository.savedUserId
         if (!SettingsRepository.isAlreadyLogin || userId.isBlank()) {
@@ -90,6 +105,7 @@ class OnlineWatchHistoryViewModel : ViewModel() {
                     when (pageState) {
                         is PageLoadingState.Success -> {
                             val incoming = pageState.info.hanimeInfo
+                            _totalPages.value = pageState.info.maxPage
                             if (incoming.isEmpty()) {
                                 _state.value = PageLoadingState.NoMoreData
                             } else {
@@ -124,6 +140,7 @@ class OnlineWatchHistoryViewModel : ViewModel() {
         isManualRefreshing = false
         _items.value = emptyList()
         _loadedPageCount.value = 0
+        _totalPages.value = 1
         _isLoadingMore.value = false
         _state.value = PageLoadingState.Error(
             NotLoggedInException()

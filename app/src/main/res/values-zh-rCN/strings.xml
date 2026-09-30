@@ -33,6 +33,7 @@
     <string name="collapse">收起</string>
     <string name="expand">展开</string>
     <string name="series_video">系列影片</string>
+    <string name="auto_play_next">自动续播</string>
     <string name="related_video">相关影片</string>
     <string name="now_playing">现正播放</string>
     <string name="view_more_replies">查看 %1$d 条回复</string>
@@ -566,6 +567,8 @@
     <string name="show_played_indicator_summary">开启后将在搜索结果页视频封面右上角显示已播放标记</string>
     <string name="watched_progress_threshold">标记已观看的进度门槛</string>
     <string name="watched_progress_threshold_summary">播放进度达到该百分比后才标记为已观看（目前：%1$d%%）</string>
+    <string name="search_pagination">分页加载</string>
+    <string name="search_pagination_summary">开启后在线列表改用分页导航，关闭则自动滚动加载下一页</string>
     <string name="horizontal_card_count_title">横向列表可见卡片数</string>
     <string name="horizontal_card_count_summary">可调整首页与影片详情相关推荐等横向列表一次可见的卡片数量</string>
     <string name="horizontal_card_count_dialog_hint">按不同屏幕宽度设置横向列表一次可见的卡片数量</string>

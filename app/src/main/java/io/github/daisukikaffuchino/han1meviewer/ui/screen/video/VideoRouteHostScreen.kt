@@ -407,6 +407,18 @@ fun VideoRouteHostScreen(
         }
     }
 
+    fun autoPlayNextIfEnabled() {
+        if (viewModel.fromDownload || !SettingsRepository.autoPlayNext) return
+        val videos = video?.playlist?.video.orEmpty()
+        if (videos.isEmpty()) return
+        val currentIndex = videos.indexOfFirst { it.videoCode == route.videoCode }
+        if (currentIndex < 0) return
+        val next = videos.getOrNull(currentIndex + 1) ?: return
+        activity.mainBackStack.replaceLast(
+            VideoRoute(videoCode = next.videoCode, autoPlay = true)
+        )
+    }
+
     DisposableEffect(
         lifecycleOwner,
         activity,
@@ -518,7 +530,7 @@ fun VideoRouteHostScreen(
                                     preferredQuality = request.preferredQuality,
                                     artworkUri = request.artworkUri,
                                     startPositionMs = request.startPositionMs,
-                                    playWhenReady = SettingsRepository.autoPlay,
+                                    playWhenReady = route.autoPlay || SettingsRepository.autoPlay,
                                     looping = playbackState.isLooping,
                                 )
                             }
@@ -601,6 +613,16 @@ fun VideoRouteHostScreen(
         appSettings.watchedProgressThreshold,
     ) {
         markWatchedIfReachedThreshold()
+    }
+
+    LaunchedEffect(
+        playbackState.engine.phase,
+        route.videoCode,
+        appSettings.autoPlayNext,
+    ) {
+        if (playbackState.engine.phase == PlaybackPhase.Ended) {
+            autoPlayNextIfEnabled()
+        }
     }
 
     LaunchedEffect(isFullscreen) {
@@ -718,7 +740,7 @@ fun VideoRouteHostScreen(
                     qualities = qualities,
                     preferredQuality = SettingsRepository.videoQuality,
                     artworkUri = info.coverUrl,
-                    playWhenReady = SettingsRepository.autoPlay,
+                    playWhenReady = route.autoPlay || SettingsRepository.autoPlay,
                     looping = playbackState.isLooping,
                 )
             }
@@ -983,7 +1005,7 @@ fun VideoRouteHostScreen(
                     preferredQuality = it.preferredQuality,
                     artworkUri = it.artworkUri,
                     startPositionMs = it.startPositionMs,
-                    playWhenReady = SettingsRepository.autoPlay,
+                    playWhenReady = route.autoPlay || SettingsRepository.autoPlay,
                     looping = playbackState.isLooping,
                 )
             }

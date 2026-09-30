@@ -76,4 +76,5 @@ data class PreviewCommentRoute(
 data class VideoRoute(
     val videoCode: String,
     val localUri: String? = null,
+    val autoPlay: Boolean = false,
 ) : HanimeScreen

@@ -13,6 +13,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.exception.LoginStateExpire
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.ParseException
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimePreview
+import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeSearchResult
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HomePage
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
@@ -256,8 +257,9 @@ object Parser {
         )
     }
 
-    fun hanimeSearch(body: String): PageLoadingState<MutableList<HanimeInfo>> {
+    fun hanimeSearch(body: String): PageLoadingState<HanimeSearchResult> {
         val parseBody = Jsoup.parse(body).body()
+        val maxPage = parseSearchMaxPage(parseBody)
         val allContentsClass =
             parseBody.getElementsByClass("content-padding-new").firstOrNull()
         val allSimplifiedContentsClass =
@@ -265,11 +267,11 @@ object Parser {
 
         // emit!
         if (allContentsClass != null) {
-            return hanimeSearchNormalVer2(allContentsClass)
+            return hanimeSearchNormalVer2(allContentsClass, maxPage)
         } else if (allSimplifiedContentsClass != null) {
-            return hanimeSearchSimplified(allSimplifiedContentsClass)
+            return hanimeSearchSimplified(allSimplifiedContentsClass, maxPage)
         }
-        return PageLoadingState.Success(mutableListOf())
+        return PageLoadingState.Success(HanimeSearchResult(emptyList(), maxPage))
     }
 
     private fun hanimeNormalItemVer2(hanimeSearchItem: Element): HanimeInfo? {
@@ -323,7 +325,8 @@ object Parser {
     // 出来后是正常视频单元的页面用这个
     private fun hanimeSearchNormalVer2(
         allContentsClass: Element,
-    ): PageLoadingState<MutableList<HanimeInfo>> {
+        maxPage: Int,
+    ): PageLoadingState<HanimeSearchResult> {
         val hanimeSearchList = mutableListOf<HanimeInfo>()
         val hanimeSearchItems =
             allContentsClass.select("div[class^=horizontal-card]")
@@ -335,13 +338,14 @@ object Parser {
             }
         }
         LogUtil.d("search_result", "$hanimeSearchList")
-        return PageLoadingState.Success(hanimeSearchList)
+        return PageLoadingState.Success(HanimeSearchResult(hanimeSearchList, maxPage))
     }
 
     // 出来后是简化版视频单元的页面用这个
     private fun hanimeSearchSimplified(
         allSimplifiedContentsClass: Element,
-    ): PageLoadingState<MutableList<HanimeInfo>> {
+        maxPage: Int,
+    ): PageLoadingState<HanimeSearchResult> {
         val hanimeSearchList = mutableListOf<HanimeInfo>()
         val hanimeSearchItems = allSimplifiedContentsClass.children()
         if (hanimeSearchItems.isEmpty()) {
@@ -349,7 +353,7 @@ object Parser {
         } else hanimeSearchItems.forEach { hanimeSearchItem ->
             hanimeSimplifiedItem(hanimeSearchItem)?.let(hanimeSearchList::add)
         }
-        return PageLoadingState.Success(hanimeSearchList)
+        return PageLoadingState.Success(HanimeSearchResult(hanimeSearchList, maxPage))
     }
 
     /**
@@ -766,12 +770,14 @@ object Parser {
         val desc = parseBody.getElementById("playlist-show-description")?.ownText()
         val allHanimeClass = parseBody.getElementsByClass("horizontal-row").firstOrNull()
         val myListHanimeList = allHanimeClass.extractHanimeInfo("div[class^=user-tab-item-wrapper]")
+        val maxPage = parseListMaxPage(parseBody)
 
         return PageLoadingState.Success(
             MyListItems(
                 myListHanimeList,
                 desc = desc,
-                csrfToken = csrfToken
+                csrfToken = csrfToken,
+                maxPage = maxPage,
             )
         )
     }
@@ -782,12 +788,14 @@ object Parser {
         val desc = parseBody.select("p.playlist-description").first()?.text()
         val allHanimeClass = parseBody.getElementsByClass("playlist-video-list").firstOrNull()
         val myListHanimeList = allHanimeClass.extractHanimeInfo("div[class^=user-tab-item-wrapper]")
+        val maxPage = parseListMaxPage(parseBody)
 
         return PageLoadingState.Success(
             MyListItems(
                 myListHanimeList,
                 desc = desc,
-                csrfToken = csrfToken
+                csrfToken = csrfToken,
+                maxPage = maxPage,
             )
         )
     }
@@ -800,7 +808,13 @@ object Parser {
         return if (items.isEmpty()) {
             PageLoadingState.NoMoreData
         } else {
-            PageLoadingState.Success(MyListItems(items, csrfToken = csrfToken))
+            PageLoadingState.Success(
+                MyListItems(
+                    items,
+                    csrfToken = csrfToken,
+                    maxPage = parseListMaxPage(parseBody),
+                )
+            )
         }
     }
 
@@ -878,7 +892,13 @@ object Parser {
                 listCode = listCode, title = listTitle, total = formatedTotal, coverUrl = coverUrl
             )
         }
-        return WebsiteState.Success(Playlists(playlists = playlists, csrfToken = csrfToken))
+        return WebsiteState.Success(
+            Playlists(
+                playlists = playlists,
+                csrfToken = csrfToken,
+                maxPage = parseListMaxPage(parseBody),
+            )
+        )
     }
 
     @SuppressLint("BuildListAdds")
@@ -1138,9 +1158,29 @@ object Parser {
             .lastOrNull()
             ?.select("a.page-link[href]")
             ?.mapNotNull {
-                Regex("""\?page=(\d+)""").find(it.attr("href"))?.groupValues?.get(1)?.toIntOrNull()
+                Regex("""[?&]page=(\d+)""").find(it.attr("href"))?.groupValues?.get(1)?.toIntOrNull()
             }
             ?.maxOrNull() ?: 1
+    }
+
+    /**
+     * 搜索页的总页数藏在「跳到指定页」输入框中。
+     */
+    private fun parseSearchMaxPage(parseBody: Element): Int {
+        val input = parseBody.selectFirst("input#skip-page-input") ?: return 1
+        return Regex("""validateNumberInput\(this,\s*\d+,\s*(\d+)\)""")
+            .find(input.attr("oninput"))
+            ?.groupValues?.get(1)
+            ?.toIntOrNull()
+            ?: 1
+    }
+
+    /**
+     * 优先解析通用跳页输入框，失败后回退到订阅页的分页链接结构。
+     */
+    private fun parseListMaxPage(parseBody: Element): Int {
+        val searchMax = parseSearchMaxPage(parseBody)
+        return if (searchMax > 1) searchMax else parseMaxPage(parseBody)
     }
 
     /**

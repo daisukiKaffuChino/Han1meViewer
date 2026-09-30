@@ -22,6 +22,7 @@ fun FavVideoRouteScreen(
     val items = fav.favVideoFlow.collectAsStateWithLifecycle().value
     val state = fav.favVideoStateFlow.collectAsStateWithLifecycle().value
     val loadedPageCount = fav.loadedPageCount.collectAsStateWithLifecycle().value
+    val totalPages = fav.totalPages.collectAsStateWithLifecycle().value
     val isLoadingMore = fav.isLoadingMore.collectAsStateWithLifecycle().value
 
     VideoGridScreen(
@@ -29,6 +30,7 @@ fun FavVideoRouteScreen(
         state = state,
         deleteStateFlow = fav.deleteMyFavVideoFlow,
         loadedPageCount = loadedPageCount,
+        totalPages = totalPages,
         isLoadingMore = isLoadingMore,
         titleRes = R.string.fav_video,
         helpMessageRes = R.string.long_press_to_cancel_fav,
@@ -50,6 +52,11 @@ fun FavVideoRouteScreen(
             fav.getMyFavVideoItems(SettingsRepository.savedUserId, page)
             fav.favVideoPage = page + 1
         },
+        onGoToPage = { page ->
+            fav.clearMyListItems()
+            fav.getMyFavVideoItems(SettingsRepository.savedUserId, page)
+            fav.favVideoPage = page + 1
+        },
     )
 }
 
@@ -65,6 +72,7 @@ fun WatchLaterRouteScreen(
     val items = wl.watchLaterFlow.collectAsStateWithLifecycle().value
     val state = wl.watchLaterStateFlow.collectAsStateWithLifecycle().value
     val loadedPageCount = wl.loadedPageCount.collectAsStateWithLifecycle().value
+    val totalPages = wl.totalPages.collectAsStateWithLifecycle().value
     val isLoadingMore = wl.isLoadingMore.collectAsStateWithLifecycle().value
 
     VideoGridScreen(
@@ -72,6 +80,7 @@ fun WatchLaterRouteScreen(
         state = state,
         deleteStateFlow = wl.deleteMyWatchLaterFlow,
         loadedPageCount = loadedPageCount,
+        totalPages = totalPages,
         isLoadingMore = isLoadingMore,
         titleRes = R.string.watch_later,
         helpMessageRes = R.string.long_press_to_cancel_watch_later,
@@ -90,6 +99,11 @@ fun WatchLaterRouteScreen(
         },
         onLoadMore = {
             val page = wl.watchLaterPage
+            wl.getMyWatchLaterItems(page)
+            wl.watchLaterPage = page + 1
+        },
+        onGoToPage = { page ->
+            wl.clearMyListItems()
             wl.getMyWatchLaterItems(page)
             wl.watchLaterPage = page + 1
         },

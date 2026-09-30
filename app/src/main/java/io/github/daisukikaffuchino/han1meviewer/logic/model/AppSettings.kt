@@ -146,6 +146,8 @@ data class AppSettings(
     val watchedProgressThreshold: Int = 50,
     val allowResumePlayback: Boolean = true,
     val autoPlay: Boolean = true,
+    val autoPlayNext: Boolean = false,
+    val searchPagination: Boolean = false,
     val whenCountdownRemindSeconds: Int = 10,
     val showCommentWhenCountdown: Boolean = false,
     val hKeyframesEnable: Boolean = true,

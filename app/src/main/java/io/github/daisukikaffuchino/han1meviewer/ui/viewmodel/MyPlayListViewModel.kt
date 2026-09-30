@@ -55,13 +55,23 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
     override val refreshCompleted: SharedFlow<Unit> = _refreshCompleted
 
     private val _showSheet = MutableStateFlow(false)
-    override var currentPage = 1
+    private val _currentPageFlow = MutableStateFlow(1)
+    val currentPageFlow = _currentPageFlow.asStateFlow()
+    override var currentPage: Int
+        get() = _currentPageFlow.value
+        set(value) {
+            _currentPageFlow.value = value
+        }
     override var isLoadingMore = false
         private set
+
+    private val _playlistTotalPages = MutableStateFlow(1)
+    override val playlistTotalPages = _playlistTotalPages.asStateFlow()
 
     override var playlistPage = 1
     private val _isLoadingMorePlaylists = MutableStateFlow(false)
     private val _noMorePlaylists = MutableStateFlow(false)
+    private val _playlistsTotalPages = MutableStateFlow(1)
 
     /** 对外暴露的唯一主页面 UI 状态流。 */
     override val mainUiState: StateFlow<PlaylistUiState> = combine(
@@ -70,6 +80,7 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
         _currentListInfo,
         _isLoadingMorePlaylists,
         _noMorePlaylists,
+        _playlistsTotalPages,
     ) { array ->
         @Suppress("UNCHECKED_CAST")
         PlaylistUiState(
@@ -79,6 +90,7 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
             selectedListTitle = (array[2] as Pair<String, String>?)?.second ?: "",
             isLoadingMore = array[3] as Boolean,
             noMorePlaylists = array[4] as Boolean,
+            totalPages = array[5] as Int,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), PlaylistUiState())
 
@@ -113,8 +125,10 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
     override fun loadMyPlayList(page: Int, forceReload: Boolean) {
         LogUtil.i("current_page",page.toString())
         if (page > 1 && (_isLoadingMorePlaylists.value || _noMorePlaylists.value)) return
-        if (page == 1 || forceReload) {
+        if (page == 1) {
             playlistPage = 1
+        }
+        if (page == 1 || forceReload) {
             _noMorePlaylists.value = false
         }
         if (page > 1) {
@@ -135,13 +149,14 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
                     }
                     is WebsiteState.Success -> {
                         val newList = state.info.playlists
+                        _playlistsTotalPages.value = state.info.maxPage
                         if (page == 1 || forceReload) {
                             _cachedMyPlayList.value = newList
                         } else {
                             _cachedMyPlayList.value = (_cachedMyPlayList.value + newList)
                                 .distinctBy(Playlists.Playlist::listCode)
-                            playlistPage = page
                         }
+                        playlistPage = page
                         if (newList.isEmpty()) {
                             _noMorePlaylists.value = true
                         }
@@ -154,10 +169,17 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
         }
     }
 
+    override fun goToPlaylistListPage(page: Int) {
+        if (_isLoadingMorePlaylists.value) return
+        playlistPage = page
+        loadMyPlayList(page, forceReload = true)
+    }
+
     // 获取单个playlist内容
     override fun getPlaylistItems(page: Int, listCode: String, refresh: Boolean) {
         LogUtil.i("getPlaylistItems","isLoadingMore:$isLoadingMore,listCode:$listCode,")
         if (isLoadingMore) return
+        currentPage = page
         isLoadingMore = true
         viewModelScope.launch {
             if (listCode.isBlank()) return@launch
@@ -176,6 +198,7 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
                     is PageLoadingState.Success -> {
                         LogUtil.i("getPlaylistItems","list size:${state.info.hanimeInfo.size}")
                         _playlistDesc.value = state.info.desc
+                        _playlistTotalPages.value = state.info.maxPage
                         val newList = state.info.hanimeInfo
                         if (newList.isEmpty()) {
                             _playlistStateFlow.value = PageLoadingState.NoMoreData
@@ -205,6 +228,12 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
             }
             isLoadingMore = false
         }
+    }
+
+    override fun goToPlaylistPage(page: Int, listCode: String) {
+        if (isLoadingMore) return
+        currentPage = page
+        getPlaylistItems(page, listCode, refresh = true)
     }
 
     private val _deleteFromPlaylistFlow = MutableSharedFlow<WebsiteState<Int>>()

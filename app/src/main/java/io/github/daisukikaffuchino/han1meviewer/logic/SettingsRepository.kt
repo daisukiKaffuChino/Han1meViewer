@@ -91,6 +91,8 @@ object SettingsRepository : SettingsStore {
     val useDynamicColor get() = current.useDynamicColor
     val allowResumePlayback get() = current.allowResumePlayback
     val autoPlay get() = current.autoPlay
+    val autoPlayNext get() = current.autoPlayNext
+    val searchPagination get() = current.searchPagination
     val searchArtistIgnoreVideoType get() = current.searchArtistIgnoreVideoType
     val disableMobileDataWarning get() = current.disableMobileDataWarning
     val disablePredictiveBack get() = current.disablePredictiveBack

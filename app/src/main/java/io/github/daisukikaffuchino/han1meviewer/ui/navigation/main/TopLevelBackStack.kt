@@ -37,6 +37,13 @@ class TopLevelBackStack<T : Any>(startKey: T) {
         updateBackStack()
     }
 
+    fun replaceLast(key: T) {
+        val currentStack = topLevelStacks.getValue(topLevelKey)
+        if (currentStack.isEmpty()) return
+        currentStack[currentStack.lastIndex] = key
+        updateBackStack()
+    }
+
     fun removeLast(): Boolean {
         if (backStack.size <= 1) return false
 

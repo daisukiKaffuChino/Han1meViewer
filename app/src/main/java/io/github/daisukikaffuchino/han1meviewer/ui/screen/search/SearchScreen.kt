@@ -93,6 +93,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.PaginationPager
 import io.github.daisukikaffuchino.han1meviewer.ui.component.VideoCardItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyVerticalGrid
@@ -128,6 +129,8 @@ fun SearchScreen(
 ) {
     val searchState by viewModel.searchStateFlow.collectAsStateWithLifecycle()
     val searchResults by viewModel.searchFlow.collectAsStateWithLifecycle()
+    val totalPages by viewModel.totalPagesFlow.collectAsStateWithLifecycle()
+    val currentPage by viewModel.pageFlow.collectAsStateWithLifecycle()
 
     var searchQuery by rememberSaveable(initialQuery) { mutableStateOf(initialQuery ?: "") }
     var histories by remember { mutableStateOf<List<SearchHistoryEntity>>(emptyList()) }
@@ -148,6 +151,7 @@ fun SearchScreen(
     val kb = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
     val showPlayedIndicator = SettingsRepository.showPlayedIndicator
+    val searchPagination = SettingsRepository.searchPagination
 
     // 搜索执行
     fun executeSearch() {
@@ -189,7 +193,7 @@ fun SearchScreen(
     }
 
     val hasSearchResults = searchResults.isNotEmpty() ||
-            ((searchState as? PageLoadingState.Success)?.info?.isNotEmpty() == true)
+            ((searchState as? PageLoadingState.Success)?.info?.list?.isNotEmpty() == true)
     val filter = remember(
         viewModel.genre,
         viewModel.sort,
@@ -394,19 +398,34 @@ fun SearchScreen(
             if (hasSearched) {
                 // 已触发搜索，显示结果
                 val showResults = searchResults.ifEmpty {
-                    (searchState as? PageLoadingState.Success)?.info ?: emptyList()
+                    (searchState as? PageLoadingState.Success)?.info?.list ?: emptyList()
                 }
                 Box(Modifier.fillMaxSize()) {
                     if (!isRefreshing) SearchStateIndicator(searchState, showResults.size)
-                    if (showResults.isNotEmpty()) SearchResultsGrid(
-                        showResults,
-                        searchState,
-                        showPlayedIndicator,
-                        onOpenVideo,
-                        { viewModel.page++; executeSearch() },
-                        searchState !is PageLoadingState.NoMoreData,
-                        gridState
-                    )
+                    if (showResults.isNotEmpty()) {
+                        SearchResultsGrid(
+                            showResults,
+                            searchState,
+                            showPlayedIndicator,
+                            onOpenVideo,
+                            { viewModel.page++; executeSearch() },
+                            !searchPagination && searchState !is PageLoadingState.NoMoreData,
+                            gridState,
+                            pagination = if (searchPagination) {
+                                SearchPagination(
+                                    currentPage = currentPage,
+                                    totalPages = totalPages,
+                                    onPageSelected = { newPage ->
+                                        viewModel.page = newPage
+                                        executeSearch()
+                                        scope.launch { gridState.scrollToItem(0) }
+                                    },
+                                )
+                            } else {
+                                null
+                            },
+                        )
+                    }
                 }
             } else if (searchQuery.isBlank() && histories.isNotEmpty()) {
                 // 未搜索 + 搜索框为空 → 显示历史
@@ -604,12 +623,19 @@ fun SearchHistoryList(
 // 搜索结果网格
 // ─────────────────────────────────────────────
 
+data class SearchPagination(
+    val currentPage: Int,
+    val totalPages: Int,
+    val onPageSelected: (Int) -> Unit,
+)
+
 @Composable
 fun SearchResultsGrid(
     videos: List<HanimeInfo>, state: PageLoadingState<*>, showPlayedIndicator: Boolean,
     onVideoClick: (String) -> Unit,
     onLoadMore: () -> Unit,
-    canLoadMore: Boolean, gridState: LazyGridState, modifier: Modifier = Modifier
+    canLoadMore: Boolean, gridState: LazyGridState, modifier: Modifier = Modifier,
+    pagination: SearchPagination? = null,
 ) {
     var isLoadingMore by remember { mutableStateOf(false) }
     LaunchedEffect(gridState, videos.size) {
@@ -666,6 +692,16 @@ fun SearchResultsGrid(
                     ) {
                         CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
                     }
+                }
+            }
+            if (pagination != null) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    PaginationPager(
+                        currentPage = pagination.currentPage,
+                        totalPages = pagination.totalPages,
+                        onPageSelected = pagination.onPageSelected,
+                        modifier = Modifier.padding(vertical = 4.dp),
+                    )
                 }
             }
         }

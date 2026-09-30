@@ -33,6 +33,7 @@
     <string name="collapse">收合</string>
     <string name="expand">展開</string>
     <string name="series_video">系列影片</string>
+    <string name="auto_play_next">自動續播</string>
     <string name="related_video">相關影片</string>
     <string name="now_playing">正在播放</string>
     <string name="view_more_replies">查看 %1$d 則回覆</string>
@@ -553,6 +554,8 @@
     <string name="show_played_indicator_summary">開啟後，將在搜尋結果頁影片封面右上角顯示已播放標記</string>
     <string name="watched_progress_threshold">標記已觀看的進度門檻</string>
     <string name="watched_progress_threshold_summary">播放進度達到該百分比後才標記為已觀看（目前：%1$d%%）</string>
+    <string name="search_pagination">分頁載入</string>
+    <string name="search_pagination_summary">開啟後線上列表改用分頁導覽，關閉則自動捲動載入下一頁</string>
     <string name="horizontal_card_count_title">橫向列表可見卡片數量</string>
     <string name="horizontal_card_count_summary">可調整首頁與影片詳細資訊頁相關推薦等橫向列表一次可顯示的卡片數量</string>
     <string name="horizontal_card_count_dialog_hint">依照不同螢幕寬度設定橫向列表一次可顯示的卡片數量</string>

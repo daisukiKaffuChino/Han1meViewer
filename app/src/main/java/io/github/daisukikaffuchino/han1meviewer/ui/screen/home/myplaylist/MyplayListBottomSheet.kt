@@ -29,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberBottomSheetState
@@ -38,6 +39,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -50,10 +52,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.daisukikaffuchino.han1meviewer.R
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
+import io.github.daisukikaffuchino.han1meviewer.ui.component.PaginationPager
 import io.github.daisukikaffuchino.han1meviewer.ui.component.VideoCardItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeTopAppBar
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
@@ -64,6 +68,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.theme.SpacingNormal
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.VideoNormalCardMinWidth
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.PlaylistController
 import io.github.daisukikaffuchino.utils.SonnerToast
+import kotlinx.coroutines.launch
 
 /**
  * 播放列表详情底部弹窗。
@@ -217,6 +222,10 @@ private fun PlaylistSheetContent(
     var showDeleteItemConfirm by remember { mutableStateOf<Triple<String, String, Int>?>(null) }
     var showEditPlaylistDialog by remember { mutableStateOf(false) }
     val desc by playlistDesc.collectAsState()
+    val totalPages by viewModel.playlistTotalPages.collectAsState()
+    val searchPagination = SettingsRepository.searchPagination
+    val scope = rememberCoroutineScope()
+    var autoPlayNext by remember { mutableStateOf(SettingsRepository.autoPlayNext) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Box(Modifier
@@ -301,6 +310,29 @@ private fun PlaylistSheetContent(
             }
         }
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.auto_play_next),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+            Switch(
+                checked = autoPlayNext,
+                onCheckedChange = { checked ->
+                    autoPlayNext = checked
+                    scope.launch {
+                        SettingsRepository.update { it.copy(autoPlayNext = checked) }
+                    }
+                },
+            )
+        }
+
         if (showEditPlaylistDialog) {
             PlaylistEditDialog(
                 title = stringResource(R.string.modify_title_or_desc),
@@ -337,7 +369,10 @@ private fun PlaylistSheetContent(
                 }
 
                 item(span = { GridItemSpan(columns) }) {
-                    if (playlistState is PageLoadingState.Loading && viewModel.currentPage > 1) {
+                    if (playlistState is PageLoadingState.Loading &&
+                        viewModel.currentPage > 1 &&
+                        !searchPagination
+                    ) {
                         Box(
                             Modifier
                                 .fillMaxWidth()
@@ -349,31 +384,46 @@ private fun PlaylistSheetContent(
                     }
                 }
 
-                if (playlistState is PageLoadingState.NoMoreData && playlist.isNotEmpty()) {
+                if (playlist.isNotEmpty()) {
                     item(span = { GridItemSpan(columns) }) {
-                        Box(
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                stringResource(
-                                    R.string.load_complete_with_pages,
-                                    viewModel.currentPage - 1
-                                ),
-                                style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        if (searchPagination) {
+                            PaginationPager(
+                                currentPage = viewModel.currentPage.coerceAtLeast(1),
+                                totalPages = totalPages,
+                                onPageSelected = { page ->
+                                    viewModel.goToPlaylistPage(page, listCode)
+                                    scope.launch { gridState.scrollToItem(0) }
+                                },
+                                modifier = Modifier.padding(vertical = 4.dp),
                             )
+                        } else if (playlistState is PageLoadingState.NoMoreData) {
+                            Box(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    stringResource(
+                                        R.string.load_complete_with_pages,
+                                        viewModel.currentPage - 1
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                )
+                            }
                         }
                     }
                 }
             }
 
-            LaunchedEffect(gridState, playlistState) {
+            LaunchedEffect(gridState, playlistState, searchPagination) {
                 snapshotFlow { gridState.layoutInfo }.collect { layoutInfo ->
                     val totalItems = layoutInfo.totalItemsCount
                     val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-                    if (lastVisibleItem >= totalItems - 3 &&
+                    if (!searchPagination &&
+                        lastVisibleItem >= totalItems - 3 &&
                         playlistState !is PageLoadingState.Loading &&
                         playlistState !is PageLoadingState.NoMoreData &&
                         !viewModel.isLoadingMore

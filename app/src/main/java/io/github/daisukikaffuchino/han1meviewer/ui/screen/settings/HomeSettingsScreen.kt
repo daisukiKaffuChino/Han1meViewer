@@ -75,6 +75,7 @@ fun HomeSettingsScreen(
     onAutoPlayChange: (Boolean) -> Unit,
     onShowPlayedIndicatorChange: (Boolean) -> Unit,
     onWatchedProgressThresholdChange: (Int) -> Unit,
+    onSearchPaginationChange: (Boolean) -> Unit,
     onSearchArtistIgnoreVideoTypeChange: (Boolean) -> Unit,
     onDisableMobileDataWarningChange: (Boolean) -> Unit,
     onDisablePredictiveBackChange: (Boolean) -> Unit,
@@ -382,6 +383,13 @@ fun HomeSettingsScreen(
                             onClick = { showHorizontalCardCountDialog = true },
                         )
                         SettingSwitchItem(
+                            title = stringResource(R.string.search_pagination),
+                            summary = stringResource(R.string.search_pagination_summary),
+                            checked = state.searchPagination,
+                            iconRes = R.drawable.ic_paging,
+                            onCheckedChange = onSearchPaginationChange,
+                        )
+                        SettingSwitchItem(
                             title = stringResource(R.string.search_artist_ignore_video_type),
                             summary = stringResource(R.string.search_artist_ignore_video_type_summary),
                             checked = state.searchArtistIgnoreVideoType,
@@ -664,6 +672,7 @@ private fun HomeSettingsScreenPreview() {
             onAutoPlayChange = {},
             onShowPlayedIndicatorChange = {},
             onWatchedProgressThresholdChange = {},
+            onSearchPaginationChange = {},
             onSearchArtistIgnoreVideoTypeChange = {},
             onDisableMobileDataWarningChange = {},
             onDisablePredictiveBackChange = {},
@@ -712,6 +721,7 @@ private fun previewHomeSettingsState() = HomeSettingsUiState(
     autoPlay = true,
     showPlayedIndicator = true,
     watchedProgressThreshold = 50,
+    searchPagination = false,
     searchArtistIgnoreVideoType = false,
     disableMobileDataWarning = false,
     disablePredictiveBack = false,

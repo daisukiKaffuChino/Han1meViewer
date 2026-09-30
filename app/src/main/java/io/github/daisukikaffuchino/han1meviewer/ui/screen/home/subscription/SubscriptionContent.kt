@@ -32,8 +32,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -46,11 +46,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SubscriptionItem
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ArtistItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.LoadMoreFooter
+import io.github.daisukikaffuchino.han1meviewer.ui.component.PaginationPager
 import io.github.daisukikaffuchino.han1meviewer.ui.component.VideoCardItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyVerticalGrid
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeArtists
@@ -60,6 +62,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.theme.ArtistIconSize
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.SpacingNormal
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 /**
  * 订阅页面 Content 层。纯 UI，不持有 ViewModel。
@@ -89,20 +92,21 @@ fun SubscriptionContent(
         3,
         ((screenWidthDp + SpacingNormal) / (ArtistIconSize + SpacingNormal)).toInt()
     )
-    var currentPage by remember { mutableIntStateOf(1) }
     val pageSize = 60
+    val searchPagination = SettingsRepository.searchPagination
+    val scope = rememberCoroutineScope()
 
-    LaunchedEffect(gridState, uiState.videos.size) {
+    LaunchedEffect(gridState, uiState.videos.size, searchPagination) {
         snapshotFlow { gridState.layoutInfo.visibleItemsInfo }
             .map { it.lastOrNull()?.index }
             .distinctUntilChanged()
             .collect { lastVisibleIndex ->
-                if (lastVisibleIndex != null &&
+                if (!searchPagination &&
+                    lastVisibleIndex != null &&
                     lastVisibleIndex >= uiState.videos.size - 4 &&
-                    uiState.videos.size >= currentPage * pageSize &&
+                    uiState.videos.size >= uiState.currentPage * pageSize &&
                     uiState.canLoadMore
                 ) {
-                    currentPage += 1
                     onEvent(SubscriptionEvent.OnLoadMore)
                 }
             }
@@ -169,11 +173,23 @@ fun SubscriptionContent(
             }
             if (uiState.videos.isNotEmpty()) {
                 item(span = { GridItemSpan(videoColumns) }) {
-                    LoadMoreFooter(
-                        state = PageLoadingState.Success(emptyList<String>()),
-                        isLoadingMore = uiState.canLoadMore,
-                        loadedPage = currentPage
-                    )
+                    if (searchPagination) {
+                        PaginationPager(
+                            currentPage = uiState.currentPage,
+                            totalPages = uiState.maxPage,
+                            onPageSelected = { page ->
+                                onEvent(SubscriptionEvent.OnGoToPage(page))
+                                scope.launch { gridState.scrollToItem(0) }
+                            },
+                            modifier = Modifier.padding(vertical = 4.dp),
+                        )
+                    } else {
+                        LoadMoreFooter(
+                            state = PageLoadingState.Success(emptyList<String>()),
+                            isLoadingMore = uiState.canLoadMore,
+                            loadedPage = uiState.currentPage
+                        )
+                    }
                 }
             }
         }

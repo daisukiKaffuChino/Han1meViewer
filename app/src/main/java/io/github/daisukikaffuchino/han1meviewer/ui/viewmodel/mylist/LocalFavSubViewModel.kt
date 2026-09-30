@@ -28,6 +28,7 @@ class LocalFavSubViewModel(
     private val itemsFlow = MutableStateFlow(emptyList<HanimeInfo>())
     private val deleteFlow = MutableSharedFlow<WebsiteState<Boolean>>()
     private val loadedPageCountFlow = MutableStateFlow(0)
+    private val totalPagesFlow = MutableStateFlow(1)
     private val isLoadingMoreFlow = MutableStateFlow(false)
     private var loadJob: Job? = null
 
@@ -36,6 +37,7 @@ class LocalFavSubViewModel(
     override val favVideoFlow: StateFlow<List<HanimeInfo>> = itemsFlow.asStateFlow()
     override val deleteMyFavVideoFlow: SharedFlow<WebsiteState<Boolean>> = deleteFlow.asSharedFlow()
     override val loadedPageCount: StateFlow<Int> = loadedPageCountFlow.asStateFlow()
+    override val totalPages: StateFlow<Int> = totalPagesFlow.asStateFlow()
     override val isLoadingMore: StateFlow<Boolean> = isLoadingMoreFlow.asStateFlow()
     override var favVideoPage = 1
 
@@ -69,6 +71,7 @@ class LocalFavSubViewModel(
         itemsFlow.value = emptyList()
         itemsStateFlow.value = PageLoadingState.Loading
         loadedPageCountFlow.value = 0
+        totalPagesFlow.value = 1
         isLoadingMoreFlow.value = false
     }
 }

@@ -29,12 +29,15 @@ interface PlaylistController {
     var currentPage: Int
     var playlistPage: Int
     val isLoadingMore: Boolean
+    val playlistTotalPages: StateFlow<Int>
 
     fun loadMyPlayList(page: Int = 1, forceReload: Boolean = false)
+    fun goToPlaylistListPage(page: Int)
     fun setShowSheet(value: Boolean)
     fun setListInfo(code: String, title: String)
     fun clearCurrentList()
     fun getPlaylistItems(page: Int = 1, listCode: String, refresh: Boolean = false)
+    fun goToPlaylistPage(page: Int, listCode: String)
     fun getPlaylistSheetScrollState(listCode: String): PlaylistSheetScrollState
     fun updatePlaylistSheetScrollState(
         listCode: String,

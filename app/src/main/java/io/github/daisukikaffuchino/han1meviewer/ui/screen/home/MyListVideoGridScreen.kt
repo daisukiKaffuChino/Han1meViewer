@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.daisukikaffuchino.han1meviewer.R
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
@@ -69,6 +70,7 @@ fun VideoGridScreen(
     state: PageLoadingState<*>,
     deleteStateFlow: Flow<WebsiteState<Boolean>>,
     loadedPageCount: Int,
+    totalPages: Int,
     isLoadingMore: Boolean,
     titleRes: Int,
     helpMessageRes: Int,
@@ -78,6 +80,7 @@ fun VideoGridScreen(
     onDeleteItem: (HanimeInfo) -> Unit,
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
+    onGoToPage: (Int) -> Unit,
 ) {
     val gridState = rememberLazyGridState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -86,6 +89,7 @@ fun VideoGridScreen(
     var pendingRefresh by rememberSaveable { mutableStateOf(false) }
     val deleteFailedText = stringResource(R.string.delete_failed)
     val deleteSuccessText = stringResource(R.string.delete_success)
+    val searchPagination = SettingsRepository.searchPagination
 
     val refreshing = state is PageLoadingState.Loading && pendingRefresh
     val refreshingState = rememberPullToRefreshState()
@@ -94,7 +98,7 @@ fun VideoGridScreen(
     val shouldBootstrap = items.isEmpty() && state is PageLoadingState.Loading && loadedPageCount == 0
 
     LaunchedEffect(shouldBootstrap) {
-        if (shouldBootstrap) {
+        if (shouldBootstrap && !pendingRefresh) {
             pendingRefresh = true
             onRefresh()
         }
@@ -106,8 +110,8 @@ fun VideoGridScreen(
         }
     }
 
-    LaunchedEffect(gridState.canLoadMore(items, state), pendingRefresh, isLoadingMore) {
-        if (gridState.canLoadMore(items, state) && !pendingRefresh && !isLoadingMore) {
+    LaunchedEffect(gridState.canLoadMore(items, state), pendingRefresh, isLoadingMore, searchPagination) {
+        if (!searchPagination && gridState.canLoadMore(items, state) && !pendingRefresh && !isLoadingMore) {
             onLoadMore()
         }
     }
@@ -149,6 +153,7 @@ fun VideoGridScreen(
         items = items,
         state = state,
         loadedPageCount = loadedPageCount,
+        totalPages = totalPages,
         isLoadingMore = isLoadingMore,
         isRefreshing = refreshing,
         isError = isError,
@@ -220,6 +225,10 @@ fun VideoGridScreen(
                     gridState = gridState,
                     onOpenVideo = onOpenVideo,
                     onDeleteItem = { pendingDelete = it },
+                    onGoToPage = { page ->
+                        pendingRefresh = true
+                        onGoToPage(page)
+                    },
                 )
             }
         }
@@ -235,6 +244,7 @@ private fun VideoGridScreenPreview() {
             state = PageLoadingState.Success(Unit),
             deleteStateFlow = flowOf(WebsiteState.Success(true)),
             loadedPageCount = 2,
+            totalPages = 10,
             isLoadingMore = false,
             titleRes = R.string.fav_video,
             helpMessageRes = R.string.long_press_to_cancel_fav,
@@ -244,6 +254,7 @@ private fun VideoGridScreenPreview() {
             onDeleteItem = {},
             onRefresh = {},
             onLoadMore = {},
+            onGoToPage = {},
         )
     }
 }

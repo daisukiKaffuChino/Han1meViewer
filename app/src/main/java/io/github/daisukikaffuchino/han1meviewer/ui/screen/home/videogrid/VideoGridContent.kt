@@ -3,18 +3,24 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.videogrid
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.ui.component.LoadMoreFooter
+import io.github.daisukikaffuchino.han1meviewer.ui.component.PaginationPager
 import io.github.daisukikaffuchino.han1meviewer.ui.component.VideoCardItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyVerticalGrid
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberVideoGridColumns
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.SpacingNormal
+import kotlinx.coroutines.launch
 
 /**
  * 视频网格 Content 层。纯 UI，不持有 ViewModel。
@@ -33,9 +39,12 @@ fun VideoGridContent(
     gridState: LazyGridState,
     onOpenVideo: (HanimeInfo) -> Unit,
     onDeleteItem: (HanimeInfo) -> Unit,
+    onGoToPage: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val videoColumns = rememberVideoGridColumns()
+    val scope = rememberCoroutineScope()
+    val searchPagination = SettingsRepository.searchPagination
     LazyVerticalGrid(
         columns = GridCells.Fixed(videoColumns),
         state = gridState,
@@ -55,11 +64,23 @@ fun VideoGridContent(
         }
         if (uiState.items.isNotEmpty()) {
             item(span = { GridItemSpan(maxLineSpan) }) {
-                LoadMoreFooter(
-                    state = uiState.state,
-                    loadedPage = uiState.loadedPageCount,
-                    isLoadingMore = uiState.isLoadingMore
-                )
+                if (searchPagination) {
+                    PaginationPager(
+                        currentPage = uiState.loadedPageCount.coerceAtLeast(1),
+                        totalPages = uiState.totalPages,
+                        onPageSelected = { page ->
+                            onGoToPage(page)
+                            scope.launch { gridState.scrollToItem(0) }
+                        },
+                        modifier = Modifier.padding(vertical = 4.dp),
+                    )
+                } else {
+                    LoadMoreFooter(
+                        state = uiState.state,
+                        loadedPage = uiState.loadedPageCount,
+                        isLoadingMore = uiState.isLoadingMore
+                    )
+                }
             }
         }
     }
