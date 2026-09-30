@@ -46,6 +46,9 @@ object Parser {
     object Regex {
         val videoSource = Regex("""const source = '(.+)'""")
         val viewAndUploadTime = Regex("""(觀看次數|观看次数)：(.+次) *(\d{4}-\d{2}-\d{2})""")
+
+        // AV 站的 CDN 節點（t26 / t27 / t30 等）可能已失效，需要統一切換成可用的 t33
+        val avCdnHost = Regex("""^(\s*(?:https?:)?//)t\d+\.cdn2020\.com(?=[/:]|\z)""", RegexOption.IGNORE_CASE)
     }
 
     fun extractTokenFromLoginPage(body: String): String {
@@ -349,6 +352,14 @@ object Parser {
         return PageLoadingState.Success(hanimeSearchList)
     }
 
+    /**
+     * AV 站的 CDN 節點可能已失效，這裡統一修正成可用的節點；其餘站點原樣返回。
+     */
+    private fun fixAvCdnHost(url: String): String {
+        if (SettingsRepository.baseUrl != HANIME_URL[3]) return url
+        return Regex.avCdnHost.replace(url) { "${it.groupValues[1]}t33.cdn2020.com" }
+    }
+
     fun hanimeVideoVer2(body: String): VideoLoadingState<HanimeVideo> {
         val parseBody = Jsoup.parse(body).body()
         val csrfToken = parseBody.selectFirst("input[name=_token]")?.attr("value") // csrf token
@@ -572,7 +583,8 @@ object Parser {
         if (!videos.isNullOrEmpty()) {
             videos.forEach { source ->
                 val resolution = source.attr("size") + "P"
-                val sourceUrl = source.absUrl("src")
+                //val sourceUrl = source.absUrl("src")
+                val sourceUrl = fixAvCdnHost(source.absUrl("src"))
                 val videoType = source.attr("type")
                 hanimeResolution.parseResolution(resolution, sourceUrl, videoType)
             }
@@ -584,7 +596,8 @@ object Parser {
                     if (data.isBlank()) continue
                     val result =
                         Regex.videoSource.find(data)?.groups?.get(1)?.value ?: continue
-                    hanimeResolution.parseResolution(null, result)
+                    //hanimeResolution.parseResolution(null, result)
+                    hanimeResolution.parseResolution(null, fixAvCdnHost(result))
                     break
                 }
             }
@@ -1128,15 +1141,6 @@ object Parser {
                 Regex("""\?page=(\d+)""").find(it.attr("href"))?.groupValues?.get(1)?.toIntOrNull()
             }
             ?.maxOrNull() ?: 1
-    }
-
-    /**
-     * 這個網站的網頁結構真的很奇怪，所以我寫了一個 forEachStep2 來處理
-     */
-    private inline fun Elements.forEachStep2(action: (Element) -> Unit) {
-        for (i in indices step 2) {
-            action(get(i))
-        }
     }
 
     /**

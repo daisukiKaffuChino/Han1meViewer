@@ -768,4 +768,9 @@
         <item>搓手手期待到手指都冒烟啦……</item>
         <item>◝(⑅•ᴗ•⑅)◜..°♡ 正在把这份可爱传送给你，请签收~</item>
     </string-array>
+    <string name="search_downloaded_hint">搜索已下载视频…</string>
+    <string name="sort_by_date_ascending">时间正排序</string>
+    <string name="sort_by_date_descending">时间反排序</string>
+    <string name="sort_by_alphabet_ascending">字母正排序</string>
+    <string name="sort_by_alphabet_descending">字母反排序</string>
 </resources>

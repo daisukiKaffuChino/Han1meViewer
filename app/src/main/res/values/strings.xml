@@ -784,4 +784,9 @@ Recommendations are as follows:\n
         <item>Rubbing my hands in excitement till they\'re smoking…</item>
         <item>◝(⑅•ᴗ•⑅)◜..°♡ Transmitting a bundle of cuteness your way—please sign for it~</item>
     </string-array>
+    <string name="search_downloaded_hint">Search downloaded videos…</string>
+    <string name="sort_by_date_ascending">Sort by Date Ascending</string>
+    <string name="sort_by_date_descending">Sort by Date Descending</string>
+    <string name="sort_by_alphabet_ascending">Sort by Alphabet Ascending</string>
+    <string name="sort_by_alphabet_descending">Sort by Alphabet Descending</string>
 </resources>

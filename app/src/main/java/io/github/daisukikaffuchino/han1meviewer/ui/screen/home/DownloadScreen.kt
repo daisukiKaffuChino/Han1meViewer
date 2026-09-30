@@ -1,6 +1,9 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.home
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -9,6 +12,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,11 +20,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -34,6 +40,8 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,18 +53,24 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.DownloadGr
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeDownloadEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.VideoWithCategories
 import io.github.daisukikaffuchino.han1meviewer.logic.model.DownloadHeaderNode
+import io.github.daisukikaffuchino.han1meviewer.logic.model.DownloadItemNode
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
+import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
+import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.DownloadEvent
+import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.DownloadSort
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.DownloadUiState
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.DownloadedScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.DownloadingScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.MoveGroupDialog
+import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.downloadSortComparator
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.toDisplayGroups
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.toFlatNodeList
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.download.toNodeList
 import io.github.daisukikaffuchino.utils.VibrationUtil
+import io.github.daisukikaffuchino.utils.toSimplified
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -110,32 +124,80 @@ fun DownloadScreen(
             null
         )
     }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    var sort by rememberSaveable { mutableStateOf(DownloadSort.DATE_DESC) }
+    var showSearchBar by rememberSaveable { mutableStateOf(false) }
+    var showSortMenu by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val dismissSearch: () -> Unit = {
+        showSearchBar = false
+        focusManager.clearFocus()
+        keyboardController?.hide()
+    }
+
+    BackHandler(enabled = showSearchBar && pagerState.currentPage == 1) {
+        dismissSearch()
+    }
 
     val displayGroups = downloadedGroups.toDisplayGroups()
 
+    val filteredDownloadedItems =
+        remember(downloadedItems, searchQuery, sort) {
+            val filtered = if (searchQuery.isBlank()) {
+                downloadedItems
+            } else {
+                val normalizedQuery = searchQuery.toSimplified()
+                downloadedItems.filter {
+                    it.video.title.toSimplified().contains(normalizedQuery, ignoreCase = true) ||
+                            it.video.videoCode.contains(searchQuery, ignoreCase = true)
+                }
+            }
+            filtered.sortedWith(downloadSortComparator(sort))
+        }
+
     val downloadedNodes =
         remember(
-            downloadedItems,
+            filteredDownloadedItems,
             displayGroups,
             collapseDownloadedGroup,
             downloadedHeaderNodes,
-            downloadedGroupExpandedState
+            downloadedGroupExpandedState,
+            searchQuery
         ) {
             val groupIdToNameMap = displayGroups.associate { it.id to it.name }
-            if (downloadedItems.isEmpty()) {
-                downloadedHeaderNodes = emptyList()
-                emptyList()
-            } else {
-                val newHeaders =
-                    downloadedItems.toNodeList(groupIdToNameMap, collapseDownloadedGroup)
-                downloadedHeaderNodes = newHeaders.map { newHeader ->
-                    newHeader.copy(
-                        isExpanded = downloadedGroupExpandedState[newHeader.groupKey]
-                            ?: downloadedHeaderNodes.firstOrNull { it.groupKey == newHeader.groupKey }?.isExpanded
-                            ?: !collapseDownloadedGroup
-                    )
+            when {
+                filteredDownloadedItems.isEmpty() -> {
+                    downloadedHeaderNodes = emptyList()
+                    emptyList()
                 }
-                downloadedHeaderNodes.toFlatNodeList()
+
+                searchQuery.isNotBlank() -> {
+                    downloadedHeaderNodes = emptyList()
+                    filteredDownloadedItems.map {
+                        val groupId = it.video.groupId
+                        DownloadItemNode(
+                            data = it,
+                            parentKey = groupIdToNameMap[groupId] ?: "ID: $groupId",
+                        )
+                    }
+                }
+
+                else -> {
+                    val newHeaders =
+                        filteredDownloadedItems.toNodeList(
+                            groupIdToNameMap,
+                            collapseDownloadedGroup
+                        )
+                    downloadedHeaderNodes = newHeaders.map { newHeader ->
+                        newHeader.copy(
+                            isExpanded = downloadedGroupExpandedState[newHeader.groupKey]
+                                ?: downloadedHeaderNodes.firstOrNull { it.groupKey == newHeader.groupKey }?.isExpanded
+                                ?: !collapseDownloadedGroup
+                        )
+                    }
+                    downloadedHeaderNodes.toFlatNodeList()
+                }
             }
         }
 
@@ -185,7 +247,7 @@ fun DownloadScreen(
 
             is DownloadEvent.OnSelectAllCurrentGroup -> {
                 val groupVideos =
-                    downloadedNodes.filterIsInstance<io.github.daisukikaffuchino.han1meviewer.logic.model.DownloadItemNode>()
+                    downloadedNodes.filterIsInstance<DownloadItemNode>()
                         .filter { it.parentKey == event.groupKey }
                 selectedVideoIds = if (event.select) {
                     selectedVideoIds + groupVideos.map { it.data.video.id }.toSet()
@@ -210,6 +272,60 @@ fun DownloadScreen(
         title = stringResource(R.string.download),
         onBack = onBack,
         contentHorizontalPadding = 0.dp,
+        actions = {
+            AnimatedVisibility(
+                visible = uiState.currentPage == 1 && !uiState.multiSelectMode,
+                enter = fadeIn(animationSpec = spring(stiffness = Spring.StiffnessLow)),
+                exit = fadeOut(animationSpec = spring(stiffness = Spring.StiffnessLow))
+            ) {
+                Row {
+                    if (showSearchBar) {
+                        FilledIconButton(
+                            onClick = dismissSearch
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_search),
+                                contentDescription = stringResource(R.string.search),
+                            )
+                        }
+                    } else {
+                        IconButton(
+                            onClick = { showSearchBar = true }
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_search),
+                                contentDescription = stringResource(R.string.search),
+                            )
+                        }
+                    }
+                    Box {
+                        IconButton(
+                            onClick = { showSortMenu = true }
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_sort),
+                                contentDescription = stringResource(R.string.sort_option),
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showSortMenu,
+                            onDismissRequest = { showSortMenu = false },
+                        ) {
+                            DownloadSort.entries.forEach { option ->
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(option.labelRes)) },
+                                    onClick = {
+                                        sort = option
+                                        showSortMenu = false
+                                    },
+                                )
+                            }
+                        }
+                    }
+                }
+
+            }
+        },
         floatingActionButton = {
             DownloadFabMenu(
                 currentPage = uiState.currentPage,
@@ -241,6 +357,34 @@ fun DownloadScreen(
                 )
             }
 
+            AnimatedVisibility(visible = showSearchBar && uiState.currentPage == 1) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    placeholder = { Text(stringResource(R.string.search_downloaded_hint)) },
+                    singleLine = true,
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_search),
+                            contentDescription = null,
+                        )
+                    },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_close),
+                                    contentDescription = stringResource(R.string.close),
+                                )
+                            }
+                        }
+                    },
+                )
+            }
+
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier
@@ -265,7 +409,7 @@ fun DownloadScreen(
 
     if (pendingBatchMove) {
         val selectedVideos = downloadedNodes
-            .filterIsInstance<io.github.daisukikaffuchino.han1meviewer.logic.model.DownloadItemNode>()
+            .filterIsInstance<DownloadItemNode>()
             .filter { it.data.video.id in selectedVideoIds }
             .map { it.data }
         if (selectedVideos.isNotEmpty()) {
@@ -319,6 +463,9 @@ private fun DownloadFabMenu(
     val visible = !multiSelectMode && (currentPage != 0 || hasDownloadingItems)
 
     LaunchedEffect(currentPage, multiSelectMode, hasDownloadingItems) {
+        expanded = false
+    }
+    BackHandler(enabled = expanded) {
         expanded = false
     }
 
