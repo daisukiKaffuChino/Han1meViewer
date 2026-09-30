@@ -95,6 +95,11 @@ fun DownloadSettingsRouteScreen(embedded: Boolean = false) {
         onDownloadSpeedLimitChange = { value ->
             coroutineScope.launch { SettingsRepository.setDownloadSpeedLimitIndex(value) }
         },
+        onCollapseDownloadedGroupChange = { value ->
+            coroutineScope.launch {
+                SettingsRepository.update { it.copy(collapseDownloadedGroup = value) }
+            }
+        },
         embedded = embedded,
     )
 
@@ -267,6 +272,7 @@ private fun buildDownloadSettingsUiState(context: Context): DownloadSettingsUiSt
                 downloadSpeedLimitSummary = SpeedLimitInterceptor.SPEED_BYTES[
                     SettingsRepository.current.downloadSpeedLimitIndex
                 ].toDownloadSpeedPrettyString(context),
+                collapseDownloadedGroup = SettingsRepository.collapseDownloadedGroup,
             )
         )?.name ?: uri.toString()
     }
@@ -281,5 +287,6 @@ private fun buildDownloadSettingsUiState(context: Context): DownloadSettingsUiSt
         downloadSpeedLimitIndex = speedIndex,
         downloadSpeedLimitSummary = SpeedLimitInterceptor.SPEED_BYTES[speedIndex]
             .toDownloadSpeedPrettyString(context),
+        collapseDownloadedGroup = SettingsRepository.collapseDownloadedGroup,
     )
 }

@@ -319,9 +319,6 @@ fun HomeSettingsRouteScreen(
         onSearchArtistIgnoreVideoTypeChange = {
             coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(searchArtistIgnoreVideoType = it) } }
         },
-        onDisableMobileDataWarningChange = {
-            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(disableMobileDataWarning = it) } }
-        },
         onDisablePredictiveBackChange = {
             coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(disablePredictiveBack = it) } }
         },
@@ -343,9 +340,6 @@ fun HomeSettingsRouteScreen(
         },
         onDisableCommentsChange = {
             coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(disableComments = it) } }
-        },
-        onCollapseDownloadedGroupChange = {
-            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(collapseDownloadedGroup = it) } }
         },
         onSearchGridColumnsConfigChange = { config ->
             coroutineScope.launch { SettingsRepository.update { it.copy(searchGridColumnsCompact = config.compactColumns, searchGridColumnsMedium = config.mediumColumns, searchGridColumnsExpanded = config.expandedColumns, searchGridColumnsLarge = config.largeColumns) } }
@@ -389,19 +383,23 @@ fun HomeSettingsRouteScreen(
                 embedded = true,
             )
         },
-        networkSettingsContent = { NetworkSettingsRouteScreen(embedded = true) },
+        networkSettingsContent = {
+            NetworkSettingsRouteScreen(
+                embedded = true,
+                onOpenApplyDeepLinks = {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                        SonnerToast.warning(R.string.action_app_open_by_default_settings_not_support)
+                    } else {
+                        showApplyDeepLinksDialog = true
+                    }
+                },
+            )
+        },
         downloadSettingsContent = { DownloadSettingsRouteScreen(embedded = true) },
         onOpenAppLanguageSettings = { value ->
             val language = AppLanguage.fromPreference(value)
             if (AppLanguageManager.current(context) != language) {
                 coroutineScope.launch { AppLanguageManager.select(context, language) }
-            }
-        },
-        onOpenApplyDeepLinks = {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                SonnerToast.warning(R.string.action_app_open_by_default_settings_not_support)
-            } else {
-                showApplyDeepLinksDialog = true
             }
         },
         onOpenFakeLauncherIcon = { showLauncherPicker = true },
@@ -637,12 +635,10 @@ private fun buildHomeSettingsUiState(
         watchedProgressThreshold = SettingsRepository.watchedProgressThreshold,
         searchPagination = SettingsRepository.searchPagination,
         searchArtistIgnoreVideoType = SettingsRepository.searchArtistIgnoreVideoType,
-        disableMobileDataWarning = SettingsRepository.disableMobileDataWarning,
         disablePredictiveBack = SettingsRepository.disablePredictiveBack,
         tabletMode = SettingsRepository.tabletMode,
         videoLandscapeLayoutStyle = SettingsRepository.videoLandscapeLayoutStyle.value,
         disableComments = SettingsRepository.current.disableComments,
-        collapseDownloadedGroup = SettingsRepository.collapseDownloadedGroup,
         useDynamicColor = SettingsRepository.useDynamicColor,
         hapticFeedbackEnabled = SettingsRepository.hapticFeedbackEnabled,
         funLoadingHints = SettingsRepository.funLoadingHints,

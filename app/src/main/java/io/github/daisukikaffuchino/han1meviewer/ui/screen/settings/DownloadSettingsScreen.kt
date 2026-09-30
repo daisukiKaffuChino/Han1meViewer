@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingNavigationItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingSliderItem
+import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingSwitchItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingsSectionTitle
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingsSegmentedGroup
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
@@ -20,6 +21,7 @@ data class DownloadSettingsUiState(
     val downloadCountLimitSummary: String,
     val downloadSpeedLimitIndex: Int,
     val downloadSpeedLimitSummary: String,
+    val collapseDownloadedGroup: Boolean,
 )
 
 @Composable
@@ -32,6 +34,7 @@ fun DownloadSettingsScreen(
     onImportDownloadedFiles: () -> Unit,
     onDownloadCountLimitChange: (Int) -> Unit,
     onDownloadSpeedLimitChange: (Int) -> Unit,
+    onCollapseDownloadedGroupChange: (Boolean) -> Unit,
     embedded: Boolean = false,
 ) {
     val content: @Composable () -> Unit = {
@@ -68,6 +71,13 @@ fun DownloadSettingsScreen(
                     iconRes = R.drawable.ic_speed,
                     onValueChange = onDownloadSpeedLimitChange,
                 )
+                SettingSwitchItem(
+                    title = stringResource(R.string.collapse_downloaded_groups),
+                    summary = stringResource(R.string.collapse_downloaded_groups_summary),
+                    checked = state.collapseDownloadedGroup,
+                    iconRes = R.drawable.ic_fold,
+                    onCheckedChange = onCollapseDownloadedGroupChange,
+                )
             }
         }
     }
@@ -94,6 +104,7 @@ private fun DownloadSettingsScreenPreview() {
                 downloadCountLimitSummary = "2",
                 downloadSpeedLimitIndex = 0,
                 downloadSpeedLimitSummary = "无限制",
+                collapseDownloadedGroup = false,
             ),
             maxDownloadCountLimit = 10,
             maxDownloadSpeedLimitIndex = 5,
@@ -102,6 +113,7 @@ private fun DownloadSettingsScreenPreview() {
             onImportDownloadedFiles = {},
             onDownloadCountLimitChange = {},
             onDownloadSpeedLimitChange = {},
+            onCollapseDownloadedGroupChange = {},
         )
     }
 }

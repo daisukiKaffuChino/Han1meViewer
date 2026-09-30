@@ -69,6 +69,7 @@ object SettingsRepository : SettingsStore {
     val appendCustomMirrorPath get() = current.appendCustomMirrorPath
     val selectedBaseUrl get() = current.selectedBaseUrl
     val useBuiltInHosts get() = current.useBuiltInHosts
+    val useBackupMediaCdn get() = current.useBackupMediaCdn
     val customHostsData get() = current.customHostsData
     val useDoH get() = current.useDoH
     val dohPreset get() = current.dohPreset

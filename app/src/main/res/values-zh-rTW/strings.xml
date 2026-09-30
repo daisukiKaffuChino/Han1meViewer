@@ -179,6 +179,8 @@
     <string name="use_built_in_hosts">使用應用內建 Hosts</string>
     <string name="network_settings">網路設定</string>
     <string name="use_built_in_hosts_summary">應用提供的主機到 IP 位址的對應\n若已設定自訂 Hosts，則優先使用\nVPN？那是什麼？</string>
+    <string name="use_backup_media_cdn">使用備用媒體 CDN</string>
+    <string name="use_backup_media_cdn_summary">將圖片與影片的 CDN 主機替換為備用位址，解決部分網路下主要 CDN 不可用的問題。</string>
     <string name="custom_hosts">自訂 Hosts</string>
     <string name="custom_hosts_format">多個 IP 位址以逗號分隔，例如 1.2.3.4,5.6.7.8</string>
     <string name="custom_hosts_empty_summary">未設定（使用內建對應）</string>

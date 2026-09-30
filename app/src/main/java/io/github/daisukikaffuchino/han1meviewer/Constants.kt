@@ -65,6 +65,20 @@ object HanimeConstants {
 val HANIME_LOGIN_URL: String
     get() = HANIME_BASE_URL + "login"
 
+// 媒体 CDN
+
+const val HANIME_MEDIA_CDN_HOST = "vdownload.hembed.com"
+const val HANIME_BACKUP_MEDIA_CDN_HOST = "1497203185.rsc.cdn77.org"
+
+fun String.replaceBackupMediaCdnHost(): String {
+    if (!SettingsRepository.useBackupMediaCdn) return this
+    return replace(
+        HANIME_MEDIA_CDN_HOST,
+        HANIME_BACKUP_MEDIA_CDN_HOST,
+        ignoreCase = true,
+    )
+}
+
 // github url
 
 const val HA1_GITHUB_URL = "https://github.com/daisukiKaffuChino/Han1meViewer"

@@ -47,6 +47,8 @@ data class NetworkSettingsUiState(
     val domainDisplay: String,
     val proxySummary: String,
     val useBuiltInHosts: Boolean,
+    val useBackupMediaCdn: Boolean,
+    val disableMobileDataWarning: Boolean,
     val useCustomMirrorSite: Boolean,
     val customMirrorSite: String,
     val appendCustomMirrorPath: Boolean,
@@ -99,6 +101,9 @@ fun NetworkSettingsScreen(
     onDomainChange: (String) -> Unit,
     onSaveCustomMirrorSite: (Boolean, String, Boolean) -> Unit,
     onTestCustomMirrorSite: (String, Boolean) -> Unit,
+    onUseBackupMediaCdnChange: (Boolean) -> Unit,
+    onDisableMobileDataWarningChange: (Boolean) -> Unit,
+    onOpenApplyDeepLinks: () -> Unit,
     onUseBuiltInHostsChange: (Boolean) -> Unit,
     onSaveCustomHosts: (String) -> Unit,
     onSaveDohSettings: (Boolean, String, String, String, Int) -> Unit,
@@ -224,6 +229,20 @@ fun NetworkSettingsScreen(
                     iconRes = R.drawable.ic_vpn,
                     onClick = { showProxyDialog = true },
                 )
+                SettingSwitchItem(
+                    title = stringResource(R.string.use_backup_media_cdn),
+                    summary = stringResource(R.string.use_backup_media_cdn_summary),
+                    checked = state.useBackupMediaCdn,
+                    iconRes = R.drawable.ic_alt_route,
+                    onCheckedChange = onUseBackupMediaCdnChange,
+                )
+                SettingSwitchItem(
+                    title = stringResource(R.string.disable_mobile_data_warning),
+                    summary = stringResource(R.string.disable_mobile_data_warning_summary),
+                    checked = state.disableMobileDataWarning,
+                    iconRes = R.drawable.ic_mobile_data,
+                    onCheckedChange = onDisableMobileDataWarningChange,
+                )
             }
 
             SettingsSectionTitle(titleRes = R.string.builtin_dns)
@@ -262,6 +281,12 @@ fun NetworkSettingsScreen(
                     summary = stringResource(R.string.test_doh_summary),
                     iconRes = R.drawable.ic_router,
                     onClick = onOpenDohTest,
+                )
+                SettingNavigationItem(
+                    title = stringResource(R.string.apply_deep_links),
+                    summary = stringResource(R.string.apply_deep_links_summary),
+                    iconRes = R.drawable.ic_add_link,
+                    onClick = onOpenApplyDeepLinks,
                 )
             }
         }
@@ -768,6 +793,8 @@ private fun NetworkSettingsScreenPreview() {
                 domainDisplay = "hanime1.me (默认)",
                 proxySummary = "系统代理",
                 useBuiltInHosts = false,
+                useBackupMediaCdn = false,
+                disableMobileDataWarning = false,
                 useCustomMirrorSite = false,
                 customMirrorSite = "",
                 appendCustomMirrorPath = true,
@@ -806,6 +833,9 @@ private fun NetworkSettingsScreenPreview() {
             onDomainChange = {},
             onSaveCustomMirrorSite = { _, _, _ -> },
             onTestCustomMirrorSite = { _, _ -> },
+            onUseBackupMediaCdnChange = {},
+            onDisableMobileDataWarningChange = {},
+            onOpenApplyDeepLinks = {},
             onUseBuiltInHostsChange = {},
             onSaveCustomHosts = {},
             customHostsData = "",

@@ -118,6 +118,7 @@ data class AppSettings(
     val customMirrorSite: String = "",
     val appendCustomMirrorPath: Boolean = true,
     val useBuiltInHosts: Boolean = false,
+    val useBackupMediaCdn: Boolean = false,
     val customHostsData: String = "",
     val useDoH: Boolean = false,
     val dohPreset: String = "alidns",

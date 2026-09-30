@@ -40,8 +40,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.util.isNotEmpty
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -329,6 +331,12 @@ private fun AdvancedSearchDialogHost(
 }
 
 @Composable
+private fun rememberDialogContentMaxHeight(): Dp {
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    return (screenHeight * 0.6f).coerceIn(240.dp, 420.dp)
+}
+
+@Composable
 private fun AdvancedSearchSingleChoiceDialog(
     state: AdvancedSearchDialogState.SingleChoice,
     onDismiss: () -> Unit,
@@ -339,7 +347,7 @@ private fun AdvancedSearchSingleChoiceDialog(
         title = { Text(stringResource(state.titleRes)) },
         text = {
             LazyColumn(
-                modifier = Modifier.heightIn(max = 360.dp),
+                modifier = Modifier.heightIn(max = rememberDialogContentMaxHeight()),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 itemsIndexed(state.options) { index, option ->
@@ -384,7 +392,10 @@ private fun AdvancedSearchMultiChoiceDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(state.titleRes)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier.heightIn(max = rememberDialogContentMaxHeight()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -503,7 +514,10 @@ private fun AdvancedSearchReleaseDateDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.release_date)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier.heightIn(max = rememberDialogContentMaxHeight()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 Row(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)

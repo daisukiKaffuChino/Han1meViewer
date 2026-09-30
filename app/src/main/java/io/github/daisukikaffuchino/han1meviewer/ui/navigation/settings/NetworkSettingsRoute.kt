@@ -50,7 +50,10 @@ private enum class DohConflictTarget {
 }
 
 @Composable
-fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
+fun NetworkSettingsRouteScreen(
+    embedded: Boolean = false,
+    onOpenApplyDeepLinks: () -> Unit = {},
+) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val settings by SettingsRepository.settings.collectAsStateWithLifecycle()
@@ -250,6 +253,18 @@ fun NetworkSettingsRouteScreen(embedded: Boolean = false) {
                 showHostsRestartConfirm = true
             }
         },
+        onUseBackupMediaCdnChange = { value ->
+            coroutineScope.launch {
+                SettingsRepository.update { it.copy(useBackupMediaCdn = value) }
+                showHostsRestartConfirm = true
+            }
+        },
+        onDisableMobileDataWarningChange = { value ->
+            coroutineScope.launch {
+                SettingsRepository.update { it.copy(disableMobileDataWarning = value) }
+            }
+        },
+        onOpenApplyDeepLinks = onOpenApplyDeepLinks,
         onSaveCustomHosts = { data ->
             val errors = HDns.validateCustomHosts(data)
             if (errors.isNotEmpty()) {
@@ -467,6 +482,8 @@ private fun buildNetworkSettingsUiState(context: Context): NetworkSettingsUiStat
             else -> context.getString(R.string.direct)
         },
         useBuiltInHosts = SettingsRepository.useBuiltInHosts,
+        useBackupMediaCdn = SettingsRepository.useBackupMediaCdn,
+        disableMobileDataWarning = SettingsRepository.disableMobileDataWarning,
         useCustomMirrorSite = SettingsRepository.useCustomMirrorSite,
         customMirrorSite = SettingsRepository.customMirrorSite,
         appendCustomMirrorPath = SettingsRepository.appendCustomMirrorPath,

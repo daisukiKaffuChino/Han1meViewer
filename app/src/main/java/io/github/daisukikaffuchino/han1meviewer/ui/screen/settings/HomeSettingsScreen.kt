@@ -77,13 +77,11 @@ fun HomeSettingsScreen(
     onWatchedProgressThresholdChange: (Int) -> Unit,
     onSearchPaginationChange: (Boolean) -> Unit,
     onSearchArtistIgnoreVideoTypeChange: (Boolean) -> Unit,
-    onDisableMobileDataWarningChange: (Boolean) -> Unit,
     onDisablePredictiveBackChange: (Boolean) -> Unit,
     onTabletModeChange: (Boolean) -> Unit,
     onVideoLandscapeLayoutStyleChange: (String) -> Unit,
     onCheckInEnabledChange: (Boolean) -> Unit,
     onDisableCommentsChange: (Boolean) -> Unit,
-    onCollapseDownloadedGroupChange: (Boolean) -> Unit,
     onSearchGridColumnsConfigChange: (SearchGridColumnsConfig) -> Unit,
     onHorizontalCardCountConfigChange: (HorizontalCardCountConfig) -> Unit,
     onUseLockScreenChange: (Boolean) -> Unit,
@@ -96,7 +94,6 @@ fun HomeSettingsScreen(
     networkSettingsContent: @Composable () -> Unit,
     downloadSettingsContent: @Composable () -> Unit,
     onOpenAppLanguageSettings: (String) -> Unit,
-    onOpenApplyDeepLinks: () -> Unit,
     onOpenFakeLauncherIcon: () -> Unit,
     onOpenOpenSourceLicense: () -> Unit,
     onClearCache: () -> Unit,
@@ -280,35 +277,7 @@ fun HomeSettingsScreen(
                     networkSettingsContent()
                 }
                 item {
-                    SettingsSegmentedGroup {
-                        SettingSwitchItem(
-                            title = stringResource(R.string.disable_mobile_data_warning),
-                            summary = stringResource(R.string.disable_mobile_data_warning_summary),
-                            checked = state.disableMobileDataWarning,
-                            iconRes = R.drawable.ic_mobile_data,
-                            onCheckedChange = onDisableMobileDataWarningChange,
-                        )
-                        SettingNavigationItem(
-                            title = stringResource(R.string.apply_deep_links),
-                            summary = stringResource(R.string.apply_deep_links_summary),
-                            iconRes = R.drawable.ic_add_link,
-                            onClick = onOpenApplyDeepLinks,
-                        )
-                    }
-                }
-                item {
                     downloadSettingsContent()
-                }
-                item {
-                    SettingsSegmentedGroup {
-                        SettingSwitchItem(
-                            title = stringResource(R.string.collapse_downloaded_groups),
-                            summary = stringResource(R.string.collapse_downloaded_groups_summary),
-                            checked = state.collapseDownloadedGroup,
-                            iconRes = R.drawable.ic_fold,
-                            onCheckedChange = onCollapseDownloadedGroupChange,
-                        )
-                    }
                 }
             }
 
@@ -674,13 +643,11 @@ private fun HomeSettingsScreenPreview() {
             onWatchedProgressThresholdChange = {},
             onSearchPaginationChange = {},
             onSearchArtistIgnoreVideoTypeChange = {},
-            onDisableMobileDataWarningChange = {},
             onDisablePredictiveBackChange = {},
             onTabletModeChange = {},
             onVideoLandscapeLayoutStyleChange = {},
             onCheckInEnabledChange = {},
             onDisableCommentsChange = {},
-            onCollapseDownloadedGroupChange = {},
             onSearchGridColumnsConfigChange = {},
             onHorizontalCardCountConfigChange = {},
             onUseLockScreenChange = {},
@@ -693,7 +660,6 @@ private fun HomeSettingsScreenPreview() {
             networkSettingsContent = {},
             downloadSettingsContent = {},
             onOpenAppLanguageSettings = {},
-            onOpenApplyDeepLinks = {},
             onOpenFakeLauncherIcon = {},
             onOpenOpenSourceLicense = {},
             onClearCache = {},
@@ -723,12 +689,10 @@ private fun previewHomeSettingsState() = HomeSettingsUiState(
     watchedProgressThreshold = 50,
     searchPagination = false,
     searchArtistIgnoreVideoType = false,
-    disableMobileDataWarning = false,
     disablePredictiveBack = false,
     tabletMode = false,
     videoLandscapeLayoutStyle = "classic",
     disableComments = false,
-    collapseDownloadedGroup = false,
     useDynamicColor = false,
     hapticFeedbackEnabled = false,
     funLoadingHints = true,
