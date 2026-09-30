@@ -9,8 +9,8 @@ plugins {
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.com.google.devtools.ksp)
     alias(libs.plugins.compose.compiler)
-    id("com.mikepenz.aboutlibraries.plugin") version "15.0.4"
-    id("com.github.ben-manes.versions") version "0.59.0"
+    id("com.mikepenz.aboutlibraries.plugin") version "15.2.0"
+    id("com.github.ben-manes.versions") version "0.64.0"
 }
 
 android {
@@ -20,8 +20,8 @@ android {
         applicationId = "io.github.daisukikaffuchino.han1meviewer"
         minSdk = 29
         targetSdk = 37
-        versionCode = 260805
-        versionName = "26.3.2"
+        versionCode = 260930
+        versionName = "26.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

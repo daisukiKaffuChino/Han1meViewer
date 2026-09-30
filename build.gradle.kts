@@ -4,9 +4,10 @@ plugins {
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization) apply false
     alias(libs.plugins.org.jetbrains.kotlin.plugin.parcelize) apply false
     alias(libs.plugins.compose.compiler) apply false
-    id("com.mikepenz.aboutlibraries.plugin") version "15.0.4" apply false
+    id("com.mikepenz.aboutlibraries.plugin") version "15.2.0" apply false
 }
 
 tasks.register<Delete>("clean") {
+    description = ""
     delete(rootProject.layout.buildDirectory)
 }
