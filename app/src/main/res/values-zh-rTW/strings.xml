@@ -489,6 +489,8 @@
     <string name="permission_error">權限錯誤，請嘗試重新指定資料夾！</string>
     <string name="resume_playback_title">續播功能</string>
     <string name="resume_playback_summary">如有播放紀錄，將自動跳轉至上次退出時的位置</string>
+    <string name="auto_play_title">允許自動播放</string>
+    <string name="auto_play_summary">開啟影片後自動開始播放；關閉後需手動點擊播放按鈕</string>
     <string name="saved">已儲存</string>
     <string name="i_understand">我明白了</string>
     <string name="close">關閉</string>

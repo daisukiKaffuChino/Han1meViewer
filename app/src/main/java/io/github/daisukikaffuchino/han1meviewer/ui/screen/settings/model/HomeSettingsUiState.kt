@@ -13,6 +13,7 @@ data class HomeSettingsUiState(
     val appLanguageLabel: String,
     val allowPipMode: Boolean,
     val allowResumePlayback: Boolean,
+    val autoPlay: Boolean,
     val showPlayedIndicator: Boolean,
     val searchArtistIgnoreVideoType: Boolean,
     val disableMobileDataWarning: Boolean,

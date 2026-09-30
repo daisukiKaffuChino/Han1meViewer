@@ -71,6 +71,7 @@ fun HomeSettingsScreen(
     onAppPaletteStyleChange: (Int) -> Unit,
     onAllowPipModeChange: (Boolean) -> Unit,
     onAllowResumePlaybackChange: (Boolean) -> Unit,
+    onAutoPlayChange: (Boolean) -> Unit,
     onShowPlayedIndicatorChange: (Boolean) -> Unit,
     onSearchArtistIgnoreVideoTypeChange: (Boolean) -> Unit,
     onDisableMobileDataWarningChange: (Boolean) -> Unit,
@@ -237,6 +238,13 @@ fun HomeSettingsScreen(
                             checked = state.allowResumePlayback,
                             iconRes = R.drawable.ic_skip,
                             onCheckedChange = onAllowResumePlaybackChange,
+                        )
+                        SettingSwitchItem(
+                            title = stringResource(R.string.auto_play_title),
+                            summary = stringResource(R.string.auto_play_summary),
+                            checked = state.autoPlay,
+                            iconRes = R.drawable.ic_autoplay,
+                            onCheckedChange = onAutoPlayChange,
                         )
                         SettingSwitchItem(
                             title = stringResource(R.string.show_played_indicator),
@@ -639,6 +647,7 @@ private fun HomeSettingsScreenPreview() {
             onAppPaletteStyleChange = {},
             onAllowPipModeChange = {},
             onAllowResumePlaybackChange = {},
+            onAutoPlayChange = {},
             onShowPlayedIndicatorChange = {},
             onSearchArtistIgnoreVideoTypeChange = {},
             onDisableMobileDataWarningChange = {},
@@ -685,6 +694,7 @@ private fun previewHomeSettingsState() = HomeSettingsUiState(
     appLanguageLabel = "Follow system",
     allowPipMode = true,
     allowResumePlayback = true,
+    autoPlay = true,
     showPlayedIndicator = true,
     searchArtistIgnoreVideoType = false,
     disableMobileDataWarning = false,

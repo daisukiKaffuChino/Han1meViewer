@@ -144,6 +144,7 @@ data class AppSettings(
     val videoQuality: String = "1080P",
     val showPlayedIndicator: Boolean = true,
     val allowResumePlayback: Boolean = true,
+    val autoPlay: Boolean = true,
     val whenCountdownRemindSeconds: Int = 10,
     val showCommentWhenCountdown: Boolean = false,
     val hKeyframesEnable: Boolean = true,

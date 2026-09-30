@@ -501,7 +501,7 @@ fun VideoRouteHostScreen(
                                     preferredQuality = request.preferredQuality,
                                     artworkUri = request.artworkUri,
                                     startPositionMs = request.startPositionMs,
-                                    playWhenReady = true,
+                                    playWhenReady = SettingsRepository.autoPlay,
                                 )
                             }
                         }
@@ -682,6 +682,7 @@ fun VideoRouteHostScreen(
                     qualities = qualities,
                     preferredQuality = SettingsRepository.videoQuality,
                     artworkUri = info.coverUrl,
+                    playWhenReady = SettingsRepository.autoPlay,
                 )
             }
         },
@@ -945,7 +946,7 @@ fun VideoRouteHostScreen(
                     preferredQuality = it.preferredQuality,
                     artworkUri = it.artworkUri,
                     startPositionMs = it.startPositionMs,
-                    playWhenReady = true,
+                    playWhenReady = SettingsRepository.autoPlay,
                 )
             }
         },

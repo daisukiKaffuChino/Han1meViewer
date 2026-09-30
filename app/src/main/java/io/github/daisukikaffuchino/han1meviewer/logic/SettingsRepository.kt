@@ -89,6 +89,7 @@ object SettingsRepository : SettingsStore {
     val useDarkMode get() = current.themeMode.value
     val useDynamicColor get() = current.useDynamicColor
     val allowResumePlayback get() = current.allowResumePlayback
+    val autoPlay get() = current.autoPlay
     val searchArtistIgnoreVideoType get() = current.searchArtistIgnoreVideoType
     val disableMobileDataWarning get() = current.disableMobileDataWarning
     val disablePredictiveBack get() = current.disablePredictiveBack

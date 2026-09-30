@@ -304,6 +304,9 @@ fun HomeSettingsRouteScreen(
         onAllowResumePlaybackChange = {
             coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(allowResumePlayback = it) } }
         },
+        onAutoPlayChange = {
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(autoPlay = it) } }
+        },
         onShowPlayedIndicatorChange = {
             coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(showPlayedIndicator = it) } }
         },
@@ -623,6 +626,7 @@ private fun buildHomeSettingsUiState(
         appLanguageLabel = appLanguageLabel,
         allowPipMode = SettingsRepository.current.allowPipMode,
         allowResumePlayback = SettingsRepository.allowResumePlayback,
+        autoPlay = SettingsRepository.autoPlay,
         showPlayedIndicator = SettingsRepository.showPlayedIndicator,
         searchArtistIgnoreVideoType = SettingsRepository.searchArtistIgnoreVideoType,
         disableMobileDataWarning = SettingsRepository.disableMobileDataWarning,
