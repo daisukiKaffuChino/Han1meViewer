@@ -97,86 +97,85 @@ fun DownloadedScreen(
         },
     )
 
-    if (uiState.downloadedNodes.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            EmptyContent(
-                hint = stringResource(R.string.empty_content),
-                subHint = stringResource(R.string.downloaded),
-            )
-        }
-        return
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            state = listState,
-            contentPadding = PaddingValues(
-                start = 16.dp,
-                top = 16.dp,
-                end = 16.dp,
-                bottom = if (uiState.multiSelectMode) 72.dp else 8.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            items(uiState.downloadedNodes, key = {
-                when (it) {
-                    is DownloadHeaderNode -> "header-${it.groupKey}"
-                    is DownloadItemNode -> "item-${it.parentKey}-${it.data.video.id}"
-                }
-            }) { node ->
-                when (node) {
-                    is DownloadHeaderNode -> {
-                        DownloadGroupHeader(
-                            header = node,
-                            onToggle = { onEvent(DownloadEvent.OnToggleGroup(node.groupKey)) },
-                            onRename = {
-                                val group = uiState.displayGroups.find { it.name == node.groupKey }
-                                if (group?.id == DownloadGroupEntity.DEFAULT_GROUP_ID) {
-                                    // 默认分组不可重命名
-                                } else if (!uiState.multiSelectMode) {
-                                    pendingRename = node
-                                }
-                            },
-                        )
+        if (uiState.downloadedNodes.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                EmptyContent(
+                    hint = stringResource(R.string.empty_content),
+                    subHint = stringResource(R.string.downloaded),
+                )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = listState,
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    top = 16.dp,
+                    end = 16.dp,
+                    bottom = if (uiState.multiSelectMode) 72.dp else 8.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                items(uiState.downloadedNodes, key = {
+                    when (it) {
+                        is DownloadHeaderNode -> "header-${it.groupKey}"
+                        is DownloadItemNode -> "item-${it.parentKey}-${it.data.video.id}"
                     }
+                }) { node ->
+                    when (node) {
+                        is DownloadHeaderNode -> {
+                            DownloadGroupHeader(
+                                header = node,
+                                onToggle = { onEvent(DownloadEvent.OnToggleGroup(node.groupKey)) },
+                                onRename = {
+                                    val group = uiState.displayGroups.find { it.name == node.groupKey }
+                                    if (group?.id == DownloadGroupEntity.DEFAULT_GROUP_ID) {
+                                        // 默认分组不可重命名
+                                    } else if (!uiState.multiSelectMode) {
+                                        pendingRename = node
+                                    }
+                                },
+                            )
+                        }
 
-                    is DownloadItemNode -> {
-                        val videoId = node.data.video.id
-                        val isSelected = videoId in uiState.selectedVideoIds
-                        DownloadedVideoCard(
-                            item = node.data,
-                            onOpenVideo = {
-                                if (!uiState.multiSelectMode) {
-                                    onEvent(DownloadEvent.OnOpenDownloadedVideo(node.data))
-                                }
-                            },
-                            onLocalPlayback = {
-                                if (!uiState.multiSelectMode) {
-                                    onEvent(DownloadEvent.OnLocalPlayback(node.data))
-                                }
-                            },
-                            onExternalPlayback = {
-                                if (!uiState.multiSelectMode) {
-                                    onEvent(DownloadEvent.OnExternalPlayback(node.data))
-                                }
-                            },
-                            onDeleteVideo = {
-                                if (!uiState.multiSelectMode) {
-                                    onEvent(DownloadEvent.OnDeleteDownloadedVideo(node.data))
-                                }
-                            },
-                            onMoveGroup = {
-                                if (!uiState.multiSelectMode) {
-                                    pendingMoveVideo = node.data
-                                }
-                            },
-                            isMultiSelect = uiState.multiSelectMode,
-                            isSelected = isSelected,
-                            onToggleSelect = {
-                                onEvent(DownloadEvent.OnToggleVideoSelection(videoId))
-                            },
-                        )
+                        is DownloadItemNode -> {
+                            val videoId = node.data.video.id
+                            val isSelected = videoId in uiState.selectedVideoIds
+                            DownloadedVideoCard(
+                                item = node.data,
+                                onOpenVideo = {
+                                    if (!uiState.multiSelectMode) {
+                                        onEvent(DownloadEvent.OnOpenDownloadedVideo(node.data))
+                                    }
+                                },
+                                onLocalPlayback = {
+                                    if (!uiState.multiSelectMode) {
+                                        onEvent(DownloadEvent.OnLocalPlayback(node.data))
+                                    }
+                                },
+                                onExternalPlayback = {
+                                    if (!uiState.multiSelectMode) {
+                                        onEvent(DownloadEvent.OnExternalPlayback(node.data))
+                                    }
+                                },
+                                onDeleteVideo = {
+                                    if (!uiState.multiSelectMode) {
+                                        onEvent(DownloadEvent.OnDeleteDownloadedVideo(node.data))
+                                    }
+                                },
+                                onMoveGroup = {
+                                    if (!uiState.multiSelectMode) {
+                                        pendingMoveVideo = node.data
+                                    }
+                                },
+                                isMultiSelect = uiState.multiSelectMode,
+                                isSelected = isSelected,
+                                onToggleSelect = {
+                                    onEvent(DownloadEvent.OnToggleVideoSelection(videoId))
+                                },
+                            )
+                        }
                     }
                 }
             }

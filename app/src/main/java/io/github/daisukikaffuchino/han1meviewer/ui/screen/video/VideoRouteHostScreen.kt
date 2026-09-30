@@ -165,6 +165,7 @@ fun VideoRouteHostScreen(
     var previousScreenBrightness by remember { mutableStateOf<Float?>(null) }
     var speedBeforeLongPress by remember { mutableStateOf<Float?>(null) }
     var showResumeButton by remember { mutableStateOf(false) }
+    var watchedMarked by remember(route.videoCode, route.localUri) { mutableStateOf(false) }
     var pendingPlayback by remember { mutableStateOf<PendingPlayback?>(null) }
     var mobilePlaybackConfirmed by remember(route.videoCode, route.localUri) {
         mutableStateOf(false)
@@ -392,6 +393,20 @@ fun VideoRouteHostScreen(
         }
     }
 
+    fun markWatchedIfReachedThreshold() {
+        if (watchedMarked || viewModel.fromDownload || route.videoCode == "-1") return
+        val engine = playbackController.state.value.engine
+        val duration = engine.durationMs
+        if (duration <= 0L) return
+        val threshold = SettingsRepository.watchedProgressThreshold
+        if (engine.positionMs * 100L >= duration * threshold) {
+            watchedMarked = true
+            scope.launch {
+                DatabaseRepo.WatchHistory.markWatched(route.videoCode)
+            }
+        }
+    }
+
     DisposableEffect(
         lifecycleOwner,
         activity,
@@ -413,6 +428,7 @@ fun VideoRouteHostScreen(
                 Lifecycle.Event.ON_PAUSE -> {
                     if (route.videoCode != "-1") {
                         val progress = playbackController.state.value.engine.positionMs
+                        markWatchedIfReachedThreshold()
                         scope.launch {
                             DatabaseRepo.WatchHistory.updateProgress(
                                 route.videoCode,
@@ -479,6 +495,7 @@ fun VideoRouteHostScreen(
                             uriHandler.openUri(getHanimeVideoLink(route.videoCode))
                         } else {
                             val history = DatabaseRepo.WatchHistory.findBy(route.videoCode)
+                            watchedMarked = history?.watched == true
                             showResumeButton = SettingsRepository.allowResumePlayback &&
                                     (history?.progress ?: 0L) > 5_000L
                             val request = PendingPlayback(
@@ -502,6 +519,7 @@ fun VideoRouteHostScreen(
                                     artworkUri = request.artworkUri,
                                     startPositionMs = request.startPositionMs,
                                     playWhenReady = SettingsRepository.autoPlay,
+                                    looping = playbackState.isLooping,
                                 )
                             }
                         }
@@ -577,6 +595,14 @@ fun VideoRouteHostScreen(
         updatePipAction()
     }
 
+    LaunchedEffect(
+        playbackState.engine.positionMs,
+        playbackState.engine.durationMs,
+        appSettings.watchedProgressThreshold,
+    ) {
+        markWatchedIfReachedThreshold()
+    }
+
     LaunchedEffect(isFullscreen) {
         backCallback.isEnabled = isFullscreen
     }
@@ -646,6 +672,7 @@ fun VideoRouteHostScreen(
         currentVolume = volume,
         currentBrightness = brightness,
         isPlaying = playbackState.engine.isPlaying,
+        isLooping = playbackState.isLooping,
         isPlaybackEnded = playbackState.engine.phase == PlaybackPhase.Ended,
         showCastButton = playbackState.engine.isCastSupported,
         isCasting = playbackState.engine.isCasting,
@@ -658,6 +685,15 @@ fun VideoRouteHostScreen(
         showRetry = playbackState.engine.phase == PlaybackPhase.Error,
         showResumeButton = showResumeButton,
         onPlayClick = playbackController::togglePlayPause,
+        onLoopToggle = {
+            val enabled = !playbackState.isLooping
+            playbackController.setLooping(enabled)
+            if (enabled) {
+                SonnerToast.success(R.string.loop_play_on)
+            } else {
+                SonnerToast.info(R.string.loop_play_off)
+            }
+        },
         onReplay = playbackController::replay,
         onBackClick = { activity.onBackPressedDispatcher.onBackPressed() },
         onHomeClick = {
@@ -683,6 +719,7 @@ fun VideoRouteHostScreen(
                     preferredQuality = SettingsRepository.videoQuality,
                     artworkUri = info.coverUrl,
                     playWhenReady = SettingsRepository.autoPlay,
+                    looping = playbackState.isLooping,
                 )
             }
         },
@@ -947,6 +984,7 @@ fun VideoRouteHostScreen(
                     artworkUri = it.artworkUri,
                     startPositionMs = it.startPositionMs,
                     playWhenReady = SettingsRepository.autoPlay,
+                    looping = playbackState.isLooping,
                 )
             }
         },

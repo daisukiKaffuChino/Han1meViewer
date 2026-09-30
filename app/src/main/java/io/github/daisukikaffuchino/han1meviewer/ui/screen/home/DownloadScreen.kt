@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -233,8 +234,12 @@ fun DownloadScreen(
             }
             // 多选事件：Screen 自行处理
             is DownloadEvent.OnToggleMultiSelect -> {
-                multiSelectMode = !multiSelectMode
-                if (!multiSelectMode) selectedVideoIds = emptySet()
+                if (multiSelectMode) {
+                    multiSelectMode = false
+                    selectedVideoIds = emptySet()
+                } else if (filteredDownloadedItems.isNotEmpty()) {
+                    multiSelectMode = true
+                }
             }
 
             is DownloadEvent.OnToggleVideoSelection -> {
@@ -331,6 +336,7 @@ fun DownloadScreen(
                 currentPage = uiState.currentPage,
                 multiSelectMode = uiState.multiSelectMode,
                 hasDownloadingItems = uiState.downloadingItems.isNotEmpty(),
+                hasDownloadedItems = filteredDownloadedItems.isNotEmpty(),
                 onResumeAll = { handleEvent(DownloadEvent.OnResumeAll(uiState.downloadingItems)) },
                 onPauseAll = { handleEvent(DownloadEvent.OnPauseAll(uiState.downloadingItems)) },
                 onToggleMultiSelect = { handleEvent(DownloadEvent.OnToggleMultiSelect) },
@@ -366,6 +372,7 @@ fun DownloadScreen(
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     placeholder = { Text(stringResource(R.string.search_downloaded_hint)) },
                     singleLine = true,
+                    shape = CircleShape,
                     leadingIcon = {
                         Icon(
                             painter = painterResource(R.drawable.ic_search),
@@ -452,6 +459,7 @@ private fun DownloadFabMenu(
     currentPage: Int,
     multiSelectMode: Boolean,
     hasDownloadingItems: Boolean,
+    hasDownloadedItems: Boolean,
     onResumeAll: () -> Unit,
     onPauseAll: () -> Unit,
     onToggleMultiSelect: () -> Unit,
@@ -537,20 +545,22 @@ private fun DownloadFabMenu(
                     },
                 )
             } else {
-                FloatingActionButtonMenuItem(
-                    text = { Text(stringResource(R.string.edit)) },
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_format_list_bulleted),
-                            contentDescription = null,
-                        )
-                    },
-                    onClick = {
-                        VibrationUtil.performHapticFeedback(view)
-                        onToggleMultiSelect()
-                        expanded = false
-                    },
-                )
+                if (hasDownloadedItems) {
+                    FloatingActionButtonMenuItem(
+                        text = { Text(stringResource(R.string.edit)) },
+                        icon = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_format_list_bulleted),
+                                contentDescription = null,
+                            )
+                        },
+                        onClick = {
+                            VibrationUtil.performHapticFeedback(view)
+                            onToggleMultiSelect()
+                            expanded = false
+                        },
+                    )
+                }
                 FloatingActionButtonMenuItem(
                     text = { Text(stringResource(R.string.create_new_group)) },
                     icon = {

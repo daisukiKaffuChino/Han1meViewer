@@ -80,6 +80,10 @@ class SystemPlaybackEngine(
         publishPlaybackState()
     }
 
+    override fun setLooping(looping: Boolean) {
+        mediaPlayer?.isLooping = looping
+    }
+
     override fun seekTo(positionMs: Long) {
         mediaPlayer?.seekTo(positionMs.coerceIn(0L, Int.MAX_VALUE.toLong()).toInt())
         publishPlaybackState()
@@ -141,6 +145,15 @@ class SystemPlaybackEngine(
     }
 
     override fun onCompletion(player: MediaPlayer) {
+        if (player.isLooping) {
+            mutableState.value = mutableState.value.copy(
+                phase = PlaybackPhase.Ready,
+                isPlaying = true,
+                isBuffering = false,
+                positionMs = 0L,
+            )
+            return
+        }
         progressJob?.cancel()
         mutableState.value = mutableState.value.copy(
             phase = PlaybackPhase.Ended,

@@ -254,6 +254,9 @@
     <string name="popular">熱門</string>
     <string name="watch_history_online_help">下拉重新整理，滑到底部會自動載入更多。</string>
     <string name="speed">倍速</string>
+    <string name="loop_play">單片循環播放</string>
+    <string name="loop_play_on">已開啟單片循環播放</string>
+    <string name="loop_play_off">已關閉單片循環播放</string>
     <string name="cancel_thumb_up_success">取消按讚成功！</string>
     <string name="thumb_up_success">按讚成功！</string>
     <string name="cancel_thumb_down_success">取消倒讚成功！</string>
@@ -548,6 +551,8 @@
     <string name="search_artist_ignore_video_type_summary">開啟後，點擊詳細資訊頁頭像搜尋藝術家時，不再附帶影片類型。</string>
     <string name="show_played_indicator">顯示播放狀態標記</string>
     <string name="show_played_indicator_summary">開啟後，將在搜尋結果頁影片封面右上角顯示已播放標記</string>
+    <string name="watched_progress_threshold">標記已觀看的進度門檻</string>
+    <string name="watched_progress_threshold_summary">播放進度達到該百分比後才標記為已觀看（目前：%1$d%%）</string>
     <string name="horizontal_card_count_title">橫向列表可見卡片數量</string>
     <string name="horizontal_card_count_summary">可調整首頁與影片詳細資訊頁相關推薦等橫向列表一次可顯示的卡片數量</string>
     <string name="horizontal_card_count_dialog_hint">依照不同螢幕寬度設定橫向列表一次可顯示的卡片數量</string>

@@ -24,6 +24,7 @@ data class ComposePlaybackState(
     val artworkUri: String? = null,
     val qualities: List<PlaybackQuality> = emptyList(),
     val selectedQualityIndex: Int = -1,
+    val isLooping: Boolean = false,
     val engine: PlaybackEngineState = PlaybackEngineState(),
 )
 
@@ -42,6 +43,7 @@ class ComposePlaybackController(
         }
     }
     private var requestedPlaybackSpeed = PlayerDefaults.DEFAULT_SPEED
+    private var requestedLooping = false
 
     val state: StateFlow<ComposePlaybackState> = mutableState.asStateFlow()
 
@@ -52,7 +54,9 @@ class ComposePlaybackController(
         artworkUri: String? = null,
         startPositionMs: Long = 0L,
         playWhenReady: Boolean = true,
+        looping: Boolean = false,
     ) {
+        requestedLooping = looping
         val selectedIndex = qualities.indexOfFirst { it.label == preferredQuality }
             .takeIf { it >= 0 }
             ?: qualities.lastIndex
@@ -61,6 +65,7 @@ class ComposePlaybackController(
             artworkUri = artworkUri,
             qualities = qualities,
             selectedQualityIndex = selectedIndex,
+            isLooping = looping,
         )
         if (selectedIndex >= 0) {
             loadQuality(selectedIndex, startPositionMs, playWhenReady, artworkUri)
@@ -78,6 +83,12 @@ class ComposePlaybackController(
     fun play() = playbackEngine.play()
 
     fun pause() = playbackEngine.pause()
+
+    fun setLooping(looping: Boolean) {
+        requestedLooping = looping
+        mutableState.update { it.copy(isLooping = looping) }
+        playbackEngine.setLooping(looping)
+    }
 
     fun togglePlayPause() {
         if (mutableState.value.engine.isPlaying) pause() else play()
@@ -127,6 +138,7 @@ class ComposePlaybackController(
                 mimeType = quality.mimeType,
                 startPositionMs = positionMs,
                 playWhenReady = playWhenReady,
+                looping = requestedLooping,
             )
         )
         playbackEngine.setPlaybackSpeed(requestedPlaybackSpeed)

@@ -27,6 +27,7 @@ import io.github.daisukikaffuchino.han1meviewer.SearchGridColumnsConfig
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ChoiceDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingInfoItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingNavigationItem
+import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingSliderItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingSwitchItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingsAnimatedVisibility
 import io.github.daisukikaffuchino.han1meviewer.ui.component.SettingsSegmentedGroup
@@ -73,6 +74,7 @@ fun HomeSettingsScreen(
     onAllowResumePlaybackChange: (Boolean) -> Unit,
     onAutoPlayChange: (Boolean) -> Unit,
     onShowPlayedIndicatorChange: (Boolean) -> Unit,
+    onWatchedProgressThresholdChange: (Int) -> Unit,
     onSearchArtistIgnoreVideoTypeChange: (Boolean) -> Unit,
     onDisableMobileDataWarningChange: (Boolean) -> Unit,
     onDisablePredictiveBackChange: (Boolean) -> Unit,
@@ -252,6 +254,18 @@ fun HomeSettingsScreen(
                             checked = state.showPlayedIndicator,
                             iconRes = R.drawable.ic_history,
                             onCheckedChange = onShowPlayedIndicatorChange,
+                        )
+                        SettingSliderItem(
+                            title = stringResource(R.string.watched_progress_threshold),
+                            summary = stringResource(
+                                R.string.watched_progress_threshold_summary,
+                                state.watchedProgressThreshold,
+                            ),
+                            value = state.watchedProgressThreshold,
+                            valueRange = 0..100,
+                            step = 10,
+                            iconRes = R.drawable.ic_flag,
+                            onValueChange = onWatchedProgressThresholdChange,
                         )
                     }
                 }
@@ -649,6 +663,7 @@ private fun HomeSettingsScreenPreview() {
             onAllowResumePlaybackChange = {},
             onAutoPlayChange = {},
             onShowPlayedIndicatorChange = {},
+            onWatchedProgressThresholdChange = {},
             onSearchArtistIgnoreVideoTypeChange = {},
             onDisableMobileDataWarningChange = {},
             onDisablePredictiveBackChange = {},
@@ -696,6 +711,7 @@ private fun previewHomeSettingsState() = HomeSettingsUiState(
     allowResumePlayback = true,
     autoPlay = true,
     showPlayedIndicator = true,
+    watchedProgressThreshold = 50,
     searchArtistIgnoreVideoType = false,
     disableMobileDataWarning = false,
     disablePredictiveBack = false,

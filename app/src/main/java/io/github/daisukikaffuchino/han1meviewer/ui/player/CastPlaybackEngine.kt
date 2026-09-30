@@ -80,6 +80,16 @@ class CastPlaybackEngine private constructor(
         if (isCasting) castPlayer.pause() else localEngine.pause()
     }
 
+    override fun setLooping(looping: Boolean) {
+        val repeatMode = if (looping) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
+        latestRequest = latestRequest?.copy(looping = looping)
+        if (isCasting) {
+            castPlayer.repeatMode = repeatMode
+        } else {
+            localEngine.setLooping(looping)
+        }
+    }
+
     override fun seekTo(positionMs: Long) {
         if (isCasting) castPlayer.seekTo(positionMs.coerceAtLeast(0L)) else localEngine.seekTo(positionMs)
     }

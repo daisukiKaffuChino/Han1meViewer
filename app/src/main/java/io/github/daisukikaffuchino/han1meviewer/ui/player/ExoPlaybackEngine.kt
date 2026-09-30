@@ -78,6 +78,10 @@ class ExoPlaybackEngine(
         publishState()
     }
 
+    override fun setLooping(looping: Boolean) {
+        player.repeatMode = if (looping) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
+    }
+
     override fun seekTo(positionMs: Long) {
         val duration = player.duration.takeIf { it != C.TIME_UNSET && it > 0L }
         player.seekTo(positionMs.coerceIn(0L, duration ?: Long.MAX_VALUE))

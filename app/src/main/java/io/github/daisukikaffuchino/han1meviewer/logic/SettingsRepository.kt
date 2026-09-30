@@ -53,6 +53,7 @@ object SettingsRepository : SettingsStore {
     val videoLanguage get() = current.videoLanguage
     val videoQuality get() = current.videoQuality
     val showPlayedIndicator get() = current.showPlayedIndicator
+    val watchedProgressThreshold get() = current.watchedProgressThreshold
     val isCheckInEnabled get() = current.checkInEnabled
     val fakeLauncherIcon get() = current.fakeLauncherIcon
     val baseUrl: String get() {

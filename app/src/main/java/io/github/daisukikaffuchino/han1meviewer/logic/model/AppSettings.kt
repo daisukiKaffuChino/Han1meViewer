@@ -143,6 +143,7 @@ data class AppSettings(
     val videoLanguage: String = "zhs",
     val videoQuality: String = "1080P",
     val showPlayedIndicator: Boolean = true,
+    val watchedProgressThreshold: Int = 50,
     val allowResumePlayback: Boolean = true,
     val autoPlay: Boolean = true,
     val whenCountdownRemindSeconds: Int = 10,

@@ -41,6 +41,7 @@ class MpvPlaybackEngine(
     private var lastVideoHeight = 0
     private var hasRenderedFrame = false
     private var hasReachedEndOfFile = false
+    private var isLooping = false
     private var lastKnownPositionMs = 0L
     private var lastKnownDurationMs = 0L
     private val observer = object : MPVLib.EventObserver {
@@ -88,6 +89,7 @@ class MpvPlaybackEngine(
                     val endedNormally = hasReachedEndOfFile ||
                             MPVLib.getPropertyBoolean("eof-reached") == true ||
                             reachedRecordedDuration
+                    if (isLooping && endedNormally) return@event
                     mutableState.value = playbackState.copy(
                         phase = if (endedNormally) PlaybackPhase.Ended else PlaybackPhase.Error,
                         isPlaying = false,
@@ -110,6 +112,7 @@ class MpvPlaybackEngine(
         check(!released) { "Playback engine has already been released" }
         initializeIfNeeded()
         pendingRequest = request
+        isLooping = request.looping
         lastVideoWidth = 0
         lastVideoHeight = 0
         hasRenderedFrame = false
@@ -144,6 +147,11 @@ class MpvPlaybackEngine(
     override fun pause() {
         MPVLib.setPropertyBoolean("pause", true)
         publishState()
+    }
+
+    override fun setLooping(looping: Boolean) {
+        isLooping = looping
+        MPVLib.setPropertyString("loop-file", if (looping) "inf" else "no")
     }
 
     override fun seekTo(positionMs: Long) {

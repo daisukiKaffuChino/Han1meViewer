@@ -135,6 +135,7 @@ fun VideoPlayerUi(
     showControls: Boolean = true,
     isFullscreen: Boolean = false,
     isPlaying: Boolean = false,
+    isLooping: Boolean = false,
     isPlaybackEnded: Boolean = false,
     showCastButton: Boolean = false,
     isCasting: Boolean = false,
@@ -145,6 +146,7 @@ fun VideoPlayerUi(
     showLoading: Boolean = false,
     showRetry: Boolean = false,
     onPlayClick: () -> Unit = {},
+    onLoopToggle: () -> Unit = {},
     onReplay: () -> Unit = {},
     onBackClick: () -> Unit = {},
     onHomeClick: () -> Unit = {},
@@ -706,6 +708,20 @@ fun VideoPlayerUi(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                     }
+
+                    IconButton(
+                        onClick = onLoopToggle,
+                        modifier = Modifier.size(32.dp),
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_repeat),
+                            contentDescription = stringResource(R.string.loop_play),
+                            tint = if (isLooping) MaterialTheme.colorScheme.primary else Color.White,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
 
                     if (isFullscreen) {
                         PlayerMenuChip(

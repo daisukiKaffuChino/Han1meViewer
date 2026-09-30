@@ -310,6 +310,9 @@ fun HomeSettingsRouteScreen(
         onShowPlayedIndicatorChange = {
             coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(showPlayedIndicator = it) } }
         },
+        onWatchedProgressThresholdChange = {
+            coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(watchedProgressThreshold = it) } }
+        },
         onSearchArtistIgnoreVideoTypeChange = {
             coroutineScope.launch { SettingsRepository.update { settings -> settings.copy(searchArtistIgnoreVideoType = it) } }
         },
@@ -628,6 +631,7 @@ private fun buildHomeSettingsUiState(
         allowResumePlayback = SettingsRepository.allowResumePlayback,
         autoPlay = SettingsRepository.autoPlay,
         showPlayedIndicator = SettingsRepository.showPlayedIndicator,
+        watchedProgressThreshold = SettingsRepository.watchedProgressThreshold,
         searchArtistIgnoreVideoType = SettingsRepository.searchArtistIgnoreVideoType,
         disableMobileDataWarning = SettingsRepository.disableMobileDataWarning,
         disablePredictiveBack = SettingsRepository.disablePredictiveBack,

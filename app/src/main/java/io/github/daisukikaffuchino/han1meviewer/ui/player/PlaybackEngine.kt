@@ -72,6 +72,7 @@ interface PlaybackEngine {
     fun load(request: PlaybackRequest)
     fun play()
     fun pause()
+    fun setLooping(looping: Boolean)
     fun seekTo(positionMs: Long)
     fun setPlaybackSpeed(speed: Float)
     fun setVolume(volume: Float)
