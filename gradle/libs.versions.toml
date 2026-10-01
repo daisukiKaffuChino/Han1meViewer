@@ -1,7 +1,7 @@
 [versions]
 # Plugins
 aboutlibraries = "15.2.0"
-androidGradle = "9.2.1"
+androidGradle = "9.4.1"
 biometric = "1.1.0"
 coilCompose = "3.6.3"
 composeAvatarCropper = "1.0.0"
@@ -16,7 +16,6 @@ coreKtx = "1.19.1"
 appcompat = "1.8.0"
 coroutinesAndroid = "1.11.0"
 activity = "1.13.0"
-fragment = "1.9.1"
 lifecycleViewModelKtx = "2.11.0"
 lifecycleRuntimeKtx = "2.11.0"
 lifecycleLiveDataKtx = "2.11.0"
@@ -64,7 +63,6 @@ lifecycle-viewmodel-navigation3 = { group = "androidx.lifecycle", name = "lifecy
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 lifecycle-livedata-core = { group = "androidx.lifecycle", name = "lifecycle-livedata-core", version.ref = "lifecycleLiveDataKtx" }
 activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activity" }
-fragment = { group = "androidx.fragment", name = "fragment", version.ref = "fragment" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomRuntime" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomCompiler" }
 sonner = { module = "io.github.dokar3:sonner", version.ref = "sonner" }
@@ -117,7 +115,7 @@ android-base = [
 
 android-jetpack = [
     "lifecycle-viewmodel-ktx", "lifecycle-runtime-ktx", "lifecycle-livedata-core",
-    "activity-ktx", "fragment",
+    "activity-ktx",
     "room-runtime",
     "work-runtime-ktx", "guava"
 ]

@@ -20,11 +20,11 @@ Han1meViewer 是一个使用 Kotlin 开发的 Android 客户端，用于浏览�
 
 ### 手机端
 
-| 首页 | 播放页 | 播放设置 |
+| 首页 | 播放页 | Getchu |
 | --- | --- | --- |
-| <img src="image/screenshots/phone_home.jpg" alt="手机端首页" width="240"> | <img src="image/screenshots/phone_player_1.jpg" alt="手机端播放页" width="240"> | <img src="image/screenshots/phone_player_2.jpg" alt="手机端播放设置" width="240"> |
-| 设置 | Getchu | |
-| <img src="image/screenshots/phone_settings.jpg" alt="手机端设置" width="240"> | <img src="image/screenshots/phone_getchu.jpg" alt="手机端 Getchu" width="240"> | |
+| <img src="image/screenshots/phone_home.jpg" alt="手机端首页" width="240"> | <img src="image/screenshots/phone_player_1.jpg" alt="手机端播放页" width="240"> | <img src="image/screenshots/phone_getchu.jpg" alt="手机端 Getchu" width="240"> |
+| 设置 | 播放设置 | |
+| <img src="image/screenshots/phone_settings.jpg" alt="手机端设置" width="240"> | <img src="image/screenshots/phone_player_2.jpg" alt="手机端播放设置" width="240"> | |
 
 ### 横屏与平板端
 
@@ -54,6 +54,9 @@ Han1meViewer 是一个使用 Kotlin 开发的 Android 客户端，用于浏览�
 - “冲了么”小组件使用 Glance Compose 实现。
 - 播放页可选的平板模式现支持经典和分栏两种样式。
 - 支持使用 Google Cast 投屏到 Android TV 等支持的设备。
+- 新增无需登录的本地列表，稍后观看、喜欢的影片和播放清单与在线列表独立保存，并支持本地与在线数据的 JSON 导出和合并导入。
+- 在线列表与搜索结果支持分页导航；播放器新增允许自动播放、自动续播、单集循环播放，以及可调的“已观看”进度门槛。
+- 已下载页面新增搜索与排序（时间、首字母正反序），匹配时归一化简体、繁体与日文汉字。
 
 ### 近期修复和完善
 
@@ -62,6 +65,7 @@ Han1meViewer 是一个使用 Kotlin 开发的 Android 客户端，用于浏览�
 - 播放页推荐区和经典平板侧栏改用惰性列表，避免超大离屏图层导致 RenderThread 崩溃；搜索筛选标签改为连续折叠，减少滚动抖动。
 - 优化了超大字号下的标题显示和横屏挖孔区域安全边距，在所有设备上的体验更一致。
 - 强化 Cloudflare 验证后的 Cookie 主机隔离、并发等待、取消与超时处理；退出登录后及时清理相关状态。
+- 网络设置新增“使用备用媒体 CDN”，并修正 AV 站失效的 CDN 节点；Android 11 及以上关闭导航栏强制对比度处理；未登录使用本地列表前会提示与在线数据分别存储。
 
 ## 🤝 贡献说明
 
