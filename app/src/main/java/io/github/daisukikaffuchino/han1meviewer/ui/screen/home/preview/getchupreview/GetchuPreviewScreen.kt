@@ -100,7 +100,6 @@ fun GetchuPreviewScreen(
                 }
             },
             onBack = onBack,
-            contentHorizontalPadding = 0.dp,
             actions = {
                 IconButton(onClick = { dateCode = shiftGetchuMonthCode(dateCode, -1) }) {
                     Icon(painterResource(R.drawable.ic_chevron_left), null)

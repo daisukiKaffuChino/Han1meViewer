@@ -55,7 +55,7 @@ internal fun GetchuPreviewDetailContent(
     val uriHandler = LocalUriHandler.current
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item {

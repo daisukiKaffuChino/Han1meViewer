@@ -160,7 +160,6 @@ fun WatchHistoryTabScreen(
     HanimeScaffold(
         title = stringResource(R.string.watch_history),
         onBack = onBack,
-        contentHorizontalPadding = 0.dp,
         floatingActionButton = {
             WatchHistoryClearFab(
                 visible = pagerState.currentPage == 0 &&
@@ -257,7 +256,7 @@ private fun WatchHistoryListContent(
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             items(histories, key = { it.id }) { history ->
@@ -476,7 +475,7 @@ private fun OnlineWatchHistoryScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp),
+                        .padding(vertical = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     OnlineHistorySortChip(
@@ -522,9 +521,7 @@ private fun OnlineWatchHistoryGrid(
             state = gridState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
-                start = SpacingNormal,
                 top = 64.dp,
-                end = SpacingNormal,
                 bottom = SpacingNormal,
             ),
             horizontalArrangement = Arrangement.spacedBy(SpacingNormal),

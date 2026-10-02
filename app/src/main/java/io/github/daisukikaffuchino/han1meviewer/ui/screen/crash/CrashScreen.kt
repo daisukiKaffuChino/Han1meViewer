@@ -83,7 +83,6 @@ fun CrashScreen(
         title = stringResource(R.string.crash_page_title),
         onBack = null,
         modifier = modifier.fillMaxSize(),
-        contentHorizontalPadding = 0.dp,
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -95,7 +94,6 @@ fun CrashScreen(
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
                     .padding(
-                        horizontal = HanimeDefaults.Spacing.contentHorizontal,
                         vertical = HanimeDefaults.Spacing.small,
                     ),
             ) {

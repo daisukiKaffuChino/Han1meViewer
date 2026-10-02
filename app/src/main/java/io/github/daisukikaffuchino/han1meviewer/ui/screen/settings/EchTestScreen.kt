@@ -234,8 +234,7 @@ private fun EchDebugPanel(
                 onClick = onRunTest,
                 enabled = !isRunning,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = HanimeDefaults.Spacing.contentHorizontal),
+                    .fillMaxWidth(),
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_play_arrow),
@@ -268,8 +267,7 @@ private fun EchLogPanel(
         item {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = HanimeDefaults.Spacing.contentHorizontal),
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(modifier = Modifier.weight(1f)) {
@@ -298,7 +296,6 @@ private fun EchLogPanel(
                 Text(
                     text = stringResource(R.string.ech_logs_empty),
                     modifier = Modifier.padding(
-                        horizontal = HanimeDefaults.Spacing.contentHorizontal,
                         vertical = 16.dp,
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -330,7 +327,6 @@ private fun EchLogRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                horizontal = HanimeDefaults.Spacing.contentHorizontal,
                 vertical = 6.dp,
             ),
         verticalArrangement = Arrangement.spacedBy(2.dp),

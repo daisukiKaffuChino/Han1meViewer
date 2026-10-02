@@ -25,6 +25,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyRow
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeHomePageVideos
+import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import kotlinx.coroutines.launch
 
 /**
@@ -47,7 +48,10 @@ fun PreviewTourRow(
     val edgePadding = remember(windowInfo.containerSize) {
         with(density) {
             val containerWidthDp = windowInfo.containerSize.width.toDp()
-            ((containerWidthDp - 92.dp) / 2).coerceAtLeast(16.dp)
+            // 页面框架已经负责左右边距，居中所用的可用宽度需要扣掉这部分
+            val availableWidthDp =
+                containerWidthDp - HanimeDefaults.Spacing.contentHorizontal * 2
+            ((availableWidthDp - 92.dp) / 2).coerceAtLeast(0.dp)
         }
     }
 

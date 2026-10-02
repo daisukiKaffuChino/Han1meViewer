@@ -63,7 +63,7 @@ fun DownloadingScreen(
     } else {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             items(uiState.downloadingItems, key = { it.id }) { item ->

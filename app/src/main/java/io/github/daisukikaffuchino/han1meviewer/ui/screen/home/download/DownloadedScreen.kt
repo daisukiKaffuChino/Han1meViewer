@@ -110,9 +110,7 @@ fun DownloadedScreen(
                 modifier = Modifier.fillMaxSize(),
                 state = listState,
                 contentPadding = PaddingValues(
-                    start = 16.dp,
                     top = 16.dp,
-                    end = 16.dp,
                     bottom = if (uiState.multiSelectMode) 72.dp else 8.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(12.dp),

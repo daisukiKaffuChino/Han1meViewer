@@ -48,9 +48,7 @@ fun PreviewInfoCard(
     onOpenImage: (Int, List<String>) -> Unit,
 ) {
     ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
     ) {
         Column {

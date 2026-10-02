@@ -52,7 +52,7 @@ import io.github.daisukikaffuchino.han1meviewer.pienization
 import io.github.daisukikaffuchino.han1meviewer.ui.component.CardContainerSurface
 import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledTonalButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
-import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimePageSurface
+import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeTopAppBar
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.ErrorContent
@@ -72,8 +72,9 @@ fun PreviewContent(
     modifier: Modifier = Modifier,
 ) {
     val loadingHint = rememberRandomLoadingHint()
-    HanimePageSurface(modifier = modifier) {
-        Column(modifier = Modifier.fillMaxSize()) {
+    HanimeScaffold(
+        modifier = modifier,
+        topBar = {
             HanimeTopAppBar(
                 title = {
                     AnimatedContent(
@@ -136,6 +137,9 @@ fun PreviewContent(
                     }
                 },
             )
+        },
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
 
             LazyColumn(
                 modifier = Modifier
@@ -148,7 +152,7 @@ fun PreviewContent(
                     PreviewSourceNoticeCard(
                         onOpenWeb = { onEvent(PreviewEvent.OnOpenWebPreview) },
                         onOpenGetchu = { onEvent(PreviewEvent.OnOpenGetchuPreview) },
-                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                        modifier = Modifier.padding(top = 16.dp),
                     )
                 }
 
@@ -195,7 +199,6 @@ fun PreviewContent(
                 when (uiState.displayState) {
                     is WebsiteState.Loading -> item {
                         LoadingContent(
-                            modifier = Modifier.padding(horizontal = 16.dp),
                             message = loadingHint
                         )
                     }
@@ -213,7 +216,6 @@ fun PreviewContent(
                             onRetry = if (isPreviewEmpty) null else {
                                 { onEvent(PreviewEvent.OnRetryLoad) }
                             },
-                            modifier = Modifier.padding(horizontal = 16.dp),
                         )
                     }
 
@@ -268,7 +270,9 @@ private fun PreviewSourceNoticeCard(
     modifier: Modifier = Modifier,
 ) {
     CardContainerSurface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp),
         color = MaterialTheme.colorScheme.surfaceContainerLow
     ) {
         Column(

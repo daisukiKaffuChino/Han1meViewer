@@ -155,7 +155,7 @@ fun HKeyframesScreen(
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         enableItemAnimation = false,
-        contentPadding = PaddingValues(12.dp),
+        contentPadding = PaddingValues(vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(items, key = { it.videoCode }) { entity ->

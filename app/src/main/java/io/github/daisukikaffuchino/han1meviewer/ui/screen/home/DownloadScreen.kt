@@ -276,7 +276,6 @@ fun DownloadScreen(
     HanimeScaffold(
         title = stringResource(R.string.download),
         onBack = onBack,
-        contentHorizontalPadding = 0.dp,
         actions = {
             AnimatedVisibility(
                 visible = uiState.currentPage == 1 && !uiState.multiSelectMode,
@@ -369,7 +368,7 @@ fun DownloadScreen(
                     onValueChange = { searchQuery = it },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                        .padding(vertical = 8.dp),
                     placeholder = { Text(stringResource(R.string.search_downloaded_hint)) },
                     singleLine = true,
                     shape = CircleShape,
