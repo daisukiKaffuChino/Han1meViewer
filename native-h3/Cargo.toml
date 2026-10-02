@@ -1,0 +1,16 @@
+[package]
+name = "hn1_h3"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "hn1_h3"
+crate-type = ["staticlib"]
+
+[dependencies]
+quiche = { version = "0.22", features = ["boringssl-vendored", "ffi", "pkg-config-meta"] }
+rand = "0.8"
+jni = "0.21"
+
+[patch.crates-io]
+quiche = { path = "vendor/quiche" }

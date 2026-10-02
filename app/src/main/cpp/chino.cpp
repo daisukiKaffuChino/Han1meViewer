@@ -78,7 +78,7 @@ bool find_eocd(int fd, EOCD &eocd_out) {
     off_t current_pos = file_size;
 
     while (current_pos > (file_size - (off_t) search_range)) {
-        size_t to_read = (size_t)(current_pos - (file_size - (off_t) search_range));
+        size_t to_read = (size_t) (current_pos - (file_size - (off_t) search_range));
         if (to_read > sizeof(scan_buf)) to_read = sizeof(scan_buf);
 
         current_pos -= (off_t) to_read;
@@ -208,7 +208,7 @@ bool get_signing_block_hash(int fd, char *out_hash_str) {
             while (scan_pos < data_end) {
                 size_t want = (data_end - scan_pos > sizeof(buffer))
                               ? sizeof(buffer)
-                              : (size_t)(data_end - scan_pos);
+                              : (size_t) (data_end - scan_pos);
 
                 if (svc_lseek(fd, (off_t) scan_pos, SEEK_SET) < 0) return false;
                 long n = svc_read(fd, buffer, want);

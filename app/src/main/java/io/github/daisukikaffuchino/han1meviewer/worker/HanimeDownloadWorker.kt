@@ -33,6 +33,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.DownloadState
 import io.github.daisukikaffuchino.han1meviewer.util.HImageMeower
 import io.github.daisukikaffuchino.han1meviewer.util.SafFileManager
 import io.github.daisukikaffuchino.han1meviewer.util.await
+import coil3.asDrawable
 import io.github.daisukikaffuchino.utils.createFileIfNotExists
 import io.github.daisukikaffuchino.utils.saveTo
 import io.github.daisukikaffuchino.utils.SonnerToast
@@ -550,10 +551,11 @@ class HanimeDownloadWorker(
     private fun CoroutineScope.updateCoverImage(entity: HanimeDownloadEntity) {
         launch {
             val imgRes = HImageMeower.execute(entity.coverUrl)
+            val drawable = imgRes.image?.asDrawable(context.resources)
             val (os, uri) = SafFileManager.openOutputStreamForCover(
                 context, entity.videoCode, entity.title
             )
-            val isSuccess = os?.use { out -> imgRes.drawable?.saveTo(out) == true } ?: false
+            val isSuccess = os?.use { out -> drawable?.saveTo(out) == true } ?: false
             if (isSuccess && uri != null) {
                 val coverUriStr = uri.toString()
                 withContext(Dispatchers.IO) {

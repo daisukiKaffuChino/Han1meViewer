@@ -29,6 +29,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.network.HDns
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HProxySelector
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HanimeNetwork
 import io.github.daisukikaffuchino.han1meviewer.logic.network.ServiceCreator
+import io.github.daisukikaffuchino.han1meviewer.logic.network.ech.EchHttp
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.logout
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
@@ -290,6 +291,7 @@ fun NetworkSettingsRouteScreen(
             }
             coroutineScope.launch {
                 SettingsRepository.update { it.copy(useDoH = enabled, dohPreset = preset, dohCustomUrl = url, dohBootstrapIps = bootstrapIps, dohTimeoutSeconds = timeoutSeconds.coerceIn(1, 60)) }
+                EchHttp.onDohSettingsChanged()
                 currentHost = SettingsRepository.baseUrl
                 HanimeNetwork.rebuildNetwork()
             }
@@ -441,6 +443,7 @@ fun NetworkSettingsRouteScreen(
                         DohConflictTarget.EnableBuiltInHosts -> it.copy(useDoH = false, useBuiltInHosts = true)
                     }
                 }
+                EchHttp.onDohSettingsChanged()
                 showDohConflictConfirm = false
                 HanimeNetwork.rebuildNetwork()
             }

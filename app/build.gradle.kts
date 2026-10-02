@@ -2,6 +2,9 @@
 
 import com.android.build.api.variant.impl.VariantOutputImpl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.time.Clock
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 plugins {
     alias(libs.plugins.com.android.application)
@@ -15,6 +18,7 @@ plugins {
 
 android {
     compileSdk = 37
+    ndkVersion = EchH3.NDK_VERSION
 
     defaultConfig {
         applicationId = "io.github.daisukikaffuchino.han1meviewer"
@@ -25,14 +29,17 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        val thisYear: Int = LocalDateTime.now(Clock.system(ZoneId.of("UTC+8"))).year
+
         buildConfigField("String", "VERSION_NAME", "\"${versionName}\"")
         buildConfigField("int", "VERSION_CODE", "$versionCode")
-        buildConfigField("int", "SEARCH_YEAR_RANGE_END", "${Config.thisYear}")
+        buildConfigField("int", "SEARCH_YEAR_RANGE_END", "$thisYear")
 
         externalNativeBuild {
             cmake {
                 cppFlags("-std=c++17")
                 abiFilters += "arm64-v8a"
+                arguments += EchH3.cmakeArguments(project)
             }
         }
     }
@@ -101,6 +108,8 @@ android {
 
 }
 
+EchH3.configureBuild(project)
+
 kotlin {
     compilerOptions {
         jvmTarget.value(JvmTarget.JVM_21)
@@ -156,9 +165,8 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.serialization)
     implementation(libs.okhttp)
+    implementation(libs.conscrypt.android)
     implementation(libs.okhttp.dns.over.https)
-
-    implementation(libs.coil)
 
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.exoplayer.hls)
@@ -169,5 +177,6 @@ dependencies {
 
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
+    testImplementation(libs.junit4)
     androidTestImplementation(libs.test.junit)
 }

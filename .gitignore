@@ -70,3 +70,7 @@ Thumbs.db
 # 忽略参考代码
 参考/
 dev/
+
+# H3 native build inputs and generated archive
+/native-h3/target/
+/native-h3/vendor/

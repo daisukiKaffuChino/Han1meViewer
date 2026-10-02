@@ -10,27 +10,51 @@ import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.datastore.DataStoreManager
+import io.github.daisukikaffuchino.han1meviewer.logic.network.HDns
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HProxySelector
+import io.github.daisukikaffuchino.han1meviewer.logic.network.ech.ConscryptEch
+import io.github.daisukikaffuchino.han1meviewer.logic.network.ech.HyEchH3
+import io.github.daisukikaffuchino.han1meviewer.logic.network.ech.echTransport
 import io.github.daisukikaffuchino.han1meviewer.ui.crash.CrashHandler
 import io.github.daisukikaffuchino.han1meviewer.util.AnimeShaders
 import io.github.daisukikaffuchino.han1meviewer.util.AppLanguageManager
 import io.github.daisukikaffuchino.utils.ActivityManager
 import io.github.daisukikaffuchino.utils.LogUtil
 import io.github.daisukikaffuchino.utils.applicationContext as globalApplicationContext
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
+import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import `is`.xyz.mpv.MPVLib
+import okhttp3.OkHttpClient
 import java.lang.ref.WeakReference
 import java.net.ProxySelector
+import java.util.concurrent.TimeUnit
 
 /**
  * @project Hanime1
  * @author Yenaly Liew
  * @time 2022/06/08 008 17:32
  */
-class HanimeApplication : Application(), Application.ActivityLifecycleCallbacks {
+class HanimeApplication : Application(), Application.ActivityLifecycleCallbacks,
+    SingletonImageLoader.Factory {
 
     companion object {
         const val TAG = "HanimeApplication"
     }
+
+    private val imageClient: OkHttpClient by lazy {
+        OkHttpClient.Builder()
+            .echTransport(HDns())
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .build()
+    }
+
+    override fun newImageLoader(context: Context): ImageLoader = ImageLoader.Builder(context)
+        .components {
+            add(OkHttpNetworkFetcherFactory(callFactory = { imageClient }))
+        }
+        .build()
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
@@ -42,6 +66,8 @@ class HanimeApplication : Application(), Application.ActivityLifecycleCallbacks 
         Thread.setDefaultUncaughtExceptionHandler(CrashHandler(applicationContext))
         DataStoreManager.initialize(this)
         SettingsRepository.install(DataStoreManager)
+        ConscryptEch.install()
+        HyEchH3.attach(this)
         AppLanguageManager.applyStoredLanguage(this)
         registerActivityLifecycleCallbacks(this)
         ProxySelector.setDefault(HProxySelector())
@@ -75,6 +101,7 @@ class HanimeApplication : Application(), Application.ActivityLifecycleCallbacks 
         ).setName("App Update").build()
         nm.createNotificationChannel(appUpdateChannel)
     }
+
     fun switchLauncher(alias: String) {
         val pm = packageManager
 
