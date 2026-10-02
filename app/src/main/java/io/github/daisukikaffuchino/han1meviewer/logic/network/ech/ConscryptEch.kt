@@ -1,7 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.network.ech
 
 import android.annotation.SuppressLint
-import io.github.daisukikaffuchino.utils.LogUtil
 import okhttp3.Interceptor
 import okhttp3.Response
 import org.conscrypt.Conscrypt
@@ -63,10 +62,10 @@ object ConscryptEch {
             sslContext
             socketFactory
             ready = true
-            LogUtil.i(TAG, "Conscrypt ECH ready, version=${Conscrypt.version()}")
+            EchLog.i(TAG, "Conscrypt ECH ready, version=${Conscrypt.version()}")
             true
         }.getOrElse { throwable ->
-            LogUtil.e(TAG, "Conscrypt ECH initialization failed", throwable)
+            EchLog.e(TAG, "Conscrypt ECH initialization failed: ${throwable.message}")
             false
         }
     }
@@ -108,7 +107,7 @@ object ConscryptEch {
 
     fun markEchUnavailable(host: String) {
         if (echUnavailable.add(host.lowercase())) {
-            LogUtil.i(TAG, "ECH rejected; using plaintext for non-core host=$host")
+            EchLog.i(TAG, "ECH rejected; using plaintext for non-core host=$host")
         }
     }
 
@@ -144,13 +143,13 @@ object ConscryptEch {
 
             return try {
                 Conscrypt.setEchConfigList(socket, config)
-                LogUtil.d(TAG, "Injected ECH host=$host bytes=${config.size} core=$core")
+                EchLog.d(TAG, "Injected ECH host=$host bytes=${config.size} core=$core")
                 socket
             } catch (throwable: Throwable) {
                 if (core) {
                     throw IOException("Failed to inject ECHConfigList for $host", throwable)
                 }
-                LogUtil.w(TAG, "Failed to inject ECH for $host: ${throwable.message}")
+                EchLog.w(TAG, "Failed to inject ECH for $host: ${throwable.message}")
                 markEchUnavailable(host)
                 socket
             }
@@ -197,10 +196,10 @@ class EchRetryInterceptor : Interceptor {
             if (!isEchRejected(throwable)) throw throwable
 
             if (EchHosts.isCoreDomain(host)) {
-                LogUtil.i("HY-ECH", "ECH rejected for core host=$host; refreshing config")
+                EchLog.i("HY-ECH", "ECH rejected for core host=$host; refreshing config")
                 EchDoh.invalidateEch(host)
             } else {
-                LogUtil.i("HY-ECH", "ECH rejected for host=$host; retrying as plaintext")
+                EchLog.i("HY-ECH", "ECH rejected for host=$host; retrying as plaintext")
                 ConscryptEch.markEchUnavailable(host)
             }
             chain.proceed(request)

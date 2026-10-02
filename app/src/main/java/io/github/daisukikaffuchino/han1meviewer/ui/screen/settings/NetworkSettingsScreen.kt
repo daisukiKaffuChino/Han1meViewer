@@ -108,6 +108,7 @@ fun NetworkSettingsScreen(
     onSaveCustomHosts: (String) -> Unit,
     onSaveDohSettings: (Boolean, String, String, String, Int) -> Unit,
     onOpenDelayTest: () -> Unit,
+    onOpenEchTest: () -> Unit,
     customHostsData: String,
     onOpenDohTest: () -> Unit,
     onDismissDelayTest: () -> Unit,
@@ -281,6 +282,12 @@ fun NetworkSettingsScreen(
                     summary = stringResource(R.string.test_doh_summary),
                     iconRes = R.drawable.ic_router,
                     onClick = onOpenDohTest,
+                )
+                SettingNavigationItem(
+                    title = stringResource(R.string.ech_test),
+                    summary = stringResource(R.string.ech_test_summary),
+                    iconRes = R.drawable.ic_security_update,
+                    onClick = onOpenEchTest,
                 )
                 SettingNavigationItem(
                     title = stringResource(R.string.apply_deep_links),
@@ -842,6 +849,7 @@ private fun NetworkSettingsScreenPreview() {
             onSaveDohSettings = { _, _, _, _, _ -> },
             onOpenDelayTest = {},
             onOpenDohTest = {},
+            onOpenEchTest = {},
             onDismissDelayTest = {},
             onDismissDohTest = {},
             onApplyProxy = { _, _, _ -> },

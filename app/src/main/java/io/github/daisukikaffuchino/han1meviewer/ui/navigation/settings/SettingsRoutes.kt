@@ -41,6 +41,9 @@ object NetworkSettingsRoute : HanimeScreen
 object DownloadSettingsRoute : HanimeScreen
 
 @Serializable
+object EchTestSettingsRoute : HanimeScreen
+
+@Serializable
 object MpvPlayerSettingsRoute : HanimeScreen
 
 @Serializable
@@ -92,6 +95,9 @@ enum class SettingsDestinationSpec(
     Download(
         titleRes = R.string.download_settings,
     ),
+    EchTest(
+        titleRes = R.string.ech_test,
+    ),
     Mpv(
         titleRes = R.string.mpv_advanced_settings,
     ),
@@ -119,6 +125,7 @@ enum class SettingsDestinationSpec(
             Player -> PlayerSettingsRoute
             Network -> NetworkSettingsRoute
             Download -> DownloadSettingsRoute
+            EchTest -> EchTestSettingsRoute
             Mpv -> MpvPlayerSettingsRoute
             HKeyframes -> HKeyframesRoute
             SharedHKeyframes -> SharedHKeyframesRoute

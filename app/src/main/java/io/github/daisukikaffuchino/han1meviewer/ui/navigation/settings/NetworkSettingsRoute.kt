@@ -54,6 +54,7 @@ private enum class DohConflictTarget {
 fun NetworkSettingsRouteScreen(
     embedded: Boolean = false,
     onOpenApplyDeepLinks: () -> Unit = {},
+    onOpenEchTest: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -312,6 +313,7 @@ fun NetworkSettingsRouteScreen(
                 }
             }
         },
+        onOpenEchTest = onOpenEchTest,
         onOpenDohTest = { runDohTest() },
         onDismissDelayTest = { stopDelayTest() },
         onDismissDohTest = { stopDohTest() },

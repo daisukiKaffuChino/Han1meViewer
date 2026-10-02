@@ -31,6 +31,7 @@ class H3Interceptor : Interceptor {
         if (file == null || !file.exists() || file.length() == 0L) {
             return chain.proceed(request)
         }
+        EchLog.i("HY-ECH-H3", "H3 hit host=${url.host} bytes=${file.length()}")
 
         return Response.Builder()
             .request(request)

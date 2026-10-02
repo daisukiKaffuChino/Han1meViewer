@@ -85,6 +85,7 @@ fun HomeSettingsRouteScreen(
     onNavigateToHKeyframes: () -> Unit = {},
     onNavigateToSharedHKeyframes: () -> Unit = {},
     onNavigateToOpenSourceLicenses: () -> Unit = {},
+    onNavigateToEchTest: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -393,6 +394,7 @@ fun HomeSettingsRouteScreen(
                         showApplyDeepLinksDialog = true
                     }
                 },
+                onOpenEchTest = onNavigateToEchTest,
             )
         },
         downloadSettingsContent = { DownloadSettingsRouteScreen(embedded = true) },

@@ -5,7 +5,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_HOSTNAME
-import io.github.daisukikaffuchino.utils.LogUtil
 import okhttp3.OkHttpClient
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Request
@@ -38,7 +37,7 @@ object HyWebViewHelper {
         runCatching {
             webView.evaluateJavascript(EchWebBridgeJs.script(HANIME_HOSTNAME), null)
         }.onFailure {
-            LogUtil.w(TAG, "Unable to inject ECH bridge: ${it.message}")
+            EchLog.w(TAG, "Unable to inject ECH bridge: ${it.message}")
         }
     }
 
@@ -111,7 +110,7 @@ object HyWebViewHelper {
                 }
             } catch (throwable: Throwable) {
                 lastError = throwable.message ?: throwable.javaClass.simpleName
-                LogUtil.w(TAG, "WebView ECH request failed for $host: $lastError")
+                EchLog.w(TAG, "WebView ECH request failed for $host: $lastError")
                 if (attempt == 0) {
                     EchDoh.invalidateEch(host)
                     runCatching { Thread.sleep(300) }
@@ -153,7 +152,7 @@ object HyWebViewHelper {
     }
 
     private fun failClosed(host: String, reason: String): WebResourceResponse {
-        LogUtil.e(TAG, "fail-closed host=$host reason=$reason", null)
+        EchLog.e(TAG, "fail-closed host=$host reason=$reason")
         val safeReason = reason.replace("<", "&lt;")
         val page = """
             <!DOCTYPE html><html><head><meta charset="utf-8">

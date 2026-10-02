@@ -43,6 +43,8 @@ import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DataPriva
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DeveloperOptionsSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DownloadSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.DownloadSettingsRouteScreen
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.EchTestRouteScreen
+import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.EchTestSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframeSettingsRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframeSettingsRouteScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.settings.HKeyframesRoute
@@ -295,6 +297,7 @@ fun TopNavigation(
                 HomeSettingsRouteScreen(
                     activity = activity,
                     page = HomeSettingsPage.NetworkDownload,
+                    onNavigateToEchTest = { backStack.add(EchTestSettingsRoute) },
                 )
             }
         }
@@ -420,7 +423,9 @@ fun TopNavigation(
                 destination = SettingsDestinationSpec.Network,
                 fallbackDestination = NetworkDownloadSettingsRoute,
             ) {
-                NetworkSettingsRouteScreen()
+                NetworkSettingsRouteScreen(
+                    onOpenEchTest = { backStack.add(EchTestSettingsRoute) },
+                )
             }
         }
         entry<DownloadSettingsRoute>(metadata = pageTransition()) {
@@ -430,6 +435,15 @@ fun TopNavigation(
                 fallbackDestination = NetworkDownloadSettingsRoute,
             ) {
                 DownloadSettingsRouteScreen()
+            }
+        }
+        entry<EchTestSettingsRoute>(metadata = pageTransition()) {
+            SettingsScaffold(
+                backStack = backStack,
+                destination = SettingsDestinationSpec.EchTest,
+                fallbackDestination = NetworkDownloadSettingsRoute,
+            ) {
+                EchTestRouteScreen()
             }
         }
         entry<MpvPlayerSettingsRoute>(metadata = pageTransition()) {

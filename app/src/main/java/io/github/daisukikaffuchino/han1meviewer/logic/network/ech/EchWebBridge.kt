@@ -5,7 +5,6 @@ import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_HOSTNAME
-import io.github.daisukikaffuchino.utils.LogUtil
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -52,7 +51,7 @@ class EchWebBridge(
                         .put("bodyB64", Base64.encodeToString(body, Base64.NO_WRAP))
                 }
             }.getOrElse { throwable ->
-                LogUtil.w(TAG, "Bridge request failed: ${throwable.message}")
+                EchLog.w(TAG, "Bridge request failed: ${throwable.message}")
                 errorPayload(throwable.message ?: throwable.javaClass.simpleName)
             }
             resolve(id, payload)
@@ -93,7 +92,7 @@ class EchWebBridge(
 
     @JavascriptInterface
     fun log(message: String) {
-        LogUtil.i(TAG, "[js] ${message.take(300)}")
+        EchLog.i(TAG, "[js] ${message.take(300)}")
     }
 
     private fun buildRequest(

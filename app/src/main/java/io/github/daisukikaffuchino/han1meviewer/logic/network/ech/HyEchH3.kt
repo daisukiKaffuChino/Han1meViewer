@@ -3,7 +3,6 @@ package io.github.daisukikaffuchino.han1meviewer.logic.network.ech
 import android.content.Context
 import android.util.Base64
 import io.github.daisukikaffuchino.han1meviewer.USER_AGENT
-import io.github.daisukikaffuchino.utils.LogUtil
 import okhttp3.HttpUrl
 import org.json.JSONObject
 import java.io.File
@@ -39,6 +38,8 @@ object HyEchH3 {
         appContext = context.applicationContext
     }
 
+    fun isNativeLoaded(): Boolean = ensureLoaded()
+
     private fun ensureLoaded(): Boolean {
         if (loaded) return true
         return runCatching {
@@ -46,7 +47,7 @@ object HyEchH3 {
             loaded = true
             true
         }.getOrElse {
-            LogUtil.w(TAG, "H3 native library is unavailable: ${it.message}")
+            EchLog.w(TAG, "H3 native library is unavailable: ${it.message}")
             false
         }
     }
@@ -85,7 +86,7 @@ object HyEchH3 {
         return System.currentTimeMillis() >= retryAt
     }
 
-    fun fetchResourceToFile(url: String): File? {
+    fun fetchResourceToFile(url: String, rememberResult: Boolean = true): File? {
         val context = appContext ?: return null
         if (!shouldTryH3(java.net.URI(url).host ?: return null)) return null
 
@@ -93,13 +94,13 @@ object HyEchH3 {
         val host = uri.host ?: return null
         val ip = runCatching { EchDoh.resolve(host).firstOrNull()?.hostAddress }.getOrNull()
         if (ip.isNullOrBlank()) {
-            rememberH3(context, host, success = false)
+            if (rememberResult) rememberH3(context, host, success = false)
             return null
         }
 
         val ech = runCatching { EchDoh.echConfigList(host) }.getOrNull()
         if (EchHosts.isCoreDomain(host) && (ech == null || ech.isEmpty())) {
-            LogUtil.w(TAG, "Refusing plaintext QUIC for protected host=$host")
+            EchLog.w(TAG, "Refusing plaintext QUIC for protected host=$host")
             return null
         }
 
@@ -114,12 +115,12 @@ object HyEchH3 {
         val output = File(context.cacheDir, "h3-${System.nanoTime()}.$extension")
         val saved = fetchToFile(context, host, ip, ech, path, output)
         if (saved == null) {
-            rememberH3(context, host, success = false)
+            if (rememberResult) rememberH3(context, host, success = false)
             output.delete()
             return null
         }
 
-        rememberH3(context, host, success = true)
+        if (rememberResult) rememberH3(context, host, success = true)
         return saved
     }
 
@@ -147,7 +148,7 @@ object HyEchH3 {
                 USER_AGENT,
             )
         }.onFailure {
-            LogUtil.w(TAG, "H3 JNI call failed: ${it.message}")
+            EchLog.w(TAG, "H3 JNI call failed: ${it.message}")
         }.getOrNull() ?: return null
 
         lastJson = json
@@ -163,7 +164,7 @@ object HyEchH3 {
             .edit()
             .putLong("bad:$host", retryAt)
             .apply()
-        LogUtil.i(
+        EchLog.i(
             TAG,
             if (success) "H3 available for $host" else "H3 failed for $host; caching fallback"
         )
@@ -186,7 +187,7 @@ object HyEchH3 {
             output.writeText(pem.toString())
             output.absolutePath
         }.getOrElse {
-            LogUtil.w(TAG, "Unable to export Android CA bundle: ${it.message}")
+            EchLog.w(TAG, "Unable to export Android CA bundle: ${it.message}")
             ""
         }
     }

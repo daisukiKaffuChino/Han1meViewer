@@ -3,7 +3,6 @@ package io.github.daisukikaffuchino.han1meviewer.logic.network.ech
 import android.util.Base64
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.network.DohConfig
-import io.github.daisukikaffuchino.utils.LogUtil
 import okhttp3.Dns
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
@@ -103,7 +102,7 @@ object EchDoh {
         endpoints().forEach { endpoint ->
             val addresses = runCatching { resolver(endpoint).lookup(host) }
                 .getOrElse {
-                    LogUtil.w(
+                    EchLog.w(
                         TAG,
                         "DoH resolution failed for $host via ${endpoint.url}: ${it.message}"
                     )
@@ -111,7 +110,7 @@ object EchDoh {
                 }
             if (!addresses.isNullOrEmpty()) {
                 dnsCache[host] = DnsEntry(addresses, now + DNS_CACHE_TTL_MS)
-                LogUtil.d(
+                EchLog.d(
                     TAG,
                     "Resolved $host via ${endpoint.url}: ${addresses.joinToString { it.hostAddress ?: "?" }}"
                 )
@@ -143,7 +142,7 @@ object EchDoh {
         }
 
         if (hit == null) {
-            LogUtil.w(TAG, "No ECHConfigList available for $host")
+            EchLog.w(TAG, "No ECHConfigList available for $host")
             echFailed[host] = now
             return null
         }
@@ -159,7 +158,7 @@ object EchDoh {
             if (hit != null) {
                 val parsed = parseSvcbEch(hit) ?: continue
                 val ttl = parsed.second.coerceIn(ECH_CACHE_MIN_MS, ECH_CACHE_MAX_MS - 1) + 1
-                LogUtil.i(TAG, "Fetched live ECHConfigList via $ip (${parsed.first.size} bytes)")
+                EchLog.i(TAG, "Fetched live ECHConfigList via $ip (${parsed.first.size} bytes)")
                 return parsed.first to ttl
             }
         }
