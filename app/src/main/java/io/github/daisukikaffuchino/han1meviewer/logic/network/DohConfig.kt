@@ -1,6 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.network
 
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
+import java.security.SecureRandom
 
 data class DohPreset(
     val key: String,
@@ -10,6 +11,11 @@ data class DohPreset(
 )
 
 object DohConfig {
+    private val echGatewayBootstrapIps: List<String> by lazy {
+        val random = SecureRandom()
+        (4..250).shuffled(random).take(4).map { "172.64.229.$it" }
+    }
+
     val presets = listOf(
         DohPreset(
             key = "alidns",
@@ -28,6 +34,12 @@ object DohConfig {
             title = "Cloudflare",
             url = "https://cloudflare-dns.com/dns-query",
             bootstrapIps = listOf("1.1.1.1", "1.0.0.1", "2606:4700:4700::1111", "2606:4700:4700::1001"),
+        ),
+        DohPreset(
+            key = "ech_gateway",
+            title = "小雅DoH (ECH/H3)",
+            url = "https://tgxjjdszvu.cloudflare-gateway.com/dns-query",
+            bootstrapIps = echGatewayBootstrapIps,
         ),
     )
 

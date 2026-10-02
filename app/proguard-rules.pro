@@ -33,3 +33,18 @@
 -keepclasseswithmembernames class io.github.daisukikaffuchino.han1meviewer.ui.screen.video.VideoRouteHostScreenKt {
     native <methods>;
 }
+
+# Conscrypt reflects on this public method to enable ECH. R8 must not rename
+# members or remove the method, or ECH silently falls back to the disabled policy.
+-keep class io.github.daisukikaffuchino.han1meviewer.logic.network.ech.ConscryptEch$PolicyTrustManager { *; }
+
+# The WebView bridge is called by name from injected JavaScript.
+-keepclassmembers class io.github.daisukikaffuchino.han1meviewer.logic.network.ech.EchWebBridge {
+    @android.webkit.JavascriptInterface <methods>;
+}
+
+# Rust exports this JNI symbol from libchino.so.
+-keep class io.github.daisukikaffuchino.han1meviewer.logic.network.ech.HyEchH3 { *; }
+-keepclasseswithmembernames class io.github.daisukikaffuchino.han1meviewer.logic.network.ech.HyEchH3 {
+    native <methods>;
+}

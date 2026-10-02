@@ -1,54 +1,23 @@
 package io.github.daisukikaffuchino.han1meviewer.util
 
 import io.github.daisukikaffuchino.utils.LogUtil
-import android.widget.ImageView
-import coil.ImageLoader
-import coil.imageLoader
-import coil.request.ErrorResult
-import coil.request.ImageRequest
-import coil.request.ImageResult
 import io.github.daisukikaffuchino.utils.applicationContext
-import io.github.daisukikaffuchino.han1meviewer.logic.network.HDns
-import okhttp3.OkHttpClient
-import java.lang.ref.WeakReference
-import java.util.concurrent.TimeUnit
+import coil3.SingletonImageLoader
+import coil3.request.ImageRequest
+import coil3.request.ImageResult
 
 @Suppress("NOTHING_TO_INLINE")
 object HImageMeower {
 
     private const val TAG = "CoilImageNyanner"
 
-    private val okHttpClient = OkHttpClient.Builder()
-        .connectTimeout(5, TimeUnit.SECONDS)
-        .dns(HDns())
-        .build()
-
-    private val imageLoader = ImageLoader.Builder(applicationContext)
-        .okHttpClient(okHttpClient)
-        .build()
-
     suspend fun execute(data: Any): ImageResult {
         LogUtil.d(TAG, "execute: $data")
-        return imageLoader.execute(
+        return SingletonImageLoader.get(applicationContext).execute(
             ImageRequest.Builder(applicationContext).data(data).build()
         )
     }
 
     inline fun placeholder(height: Int, width: Int, blur: Int = 8) =
         "https://picsum.photos/$width/$height/?blur=$blur"
-
-    fun ImageView.loadUnhappily(data: Any?, fallbackData: Any?) {
-        LogUtil.d(TAG, "primary: $data, fallback: $fallbackData")
-        val primaryRequest = ImageRequest.Builder(context)
-            .data(data ?: fallbackData)
-            .crossfade(true)
-            .target(this)
-            .listener(object : ImageRequest.Listener {
-                private val ivRef = WeakReference(this@loadUnhappily)
-                override fun onError(request: ImageRequest, result: ErrorResult) {
-                    fallbackData?.let { ivRef.get()?.loadUnhappily(it, null) }
-                }
-            }).build()
-        context.imageLoader.enqueue(primaryRequest)
-    }
 }

@@ -1,6 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.network
 
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
+import io.github.daisukikaffuchino.han1meviewer.logic.network.ech.EchHosts
 import okhttp3.internal.proxy.NullProxySelector
 import java.io.IOException
 import java.net.InetAddress
@@ -18,7 +19,6 @@ import java.net.URI
  * @author Yenaly Liew
  * @time 2023/10/07 007 17:32
  */
-// #issue-15: 添加系统代理功能
 class HProxySelector : ProxySelector() {
 
     private var delegation: ProxySelector? = null
@@ -74,6 +74,11 @@ class HProxySelector : ProxySelector() {
     }
 
     override fun select(uri: URI?): MutableList<Proxy> {
+        val host = uri?.host
+        if (host != null && EchHosts.isCoreDomain(host)) {
+            return mutableListOf(Proxy.NO_PROXY)
+        }
+
         val type = SettingsRepository.proxyType
         if (type == TYPE_HTTP || type == TYPE_SOCKS) {
             val ip = SettingsRepository.proxyIp

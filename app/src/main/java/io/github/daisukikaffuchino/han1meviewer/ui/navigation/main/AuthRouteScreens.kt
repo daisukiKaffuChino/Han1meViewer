@@ -6,6 +6,7 @@ import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -26,6 +27,7 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.USER_AGENT
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.network.CloudflareVerificationCoordinator
+import io.github.daisukikaffuchino.han1meviewer.logic.network.ech.HyWebViewHelper
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.login
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
@@ -224,8 +226,22 @@ private fun createLoginWebView(
     settings.javaScriptEnabled = true
     settings.domStorageEnabled = true
     settings.userAgentString = USER_AGENT
+    HyWebViewHelper.installWebView(this, onLoginSucceeded)
     webViewClient = object : WebViewClient() {
+        override fun shouldInterceptRequest(
+            view: WebView,
+            request: WebResourceRequest,
+        ): WebResourceResponse? =
+            HyWebViewHelper.intercept(request)
+                ?: super.shouldInterceptRequest(view, request)
+
+        override fun onPageCommitVisible(view: WebView, url: String) {
+            HyWebViewHelper.injectBridge(view, url)
+            super.onPageCommitVisible(view, url)
+        }
+
         override fun onPageFinished(view: WebView, url: String) {
+            HyWebViewHelper.injectBridge(view, url)
             onPageStateChanged(view)
         }
 
@@ -275,7 +291,25 @@ private fun createCloudflareWebView(
         setAcceptCookie(true)
         setAcceptThirdPartyCookies(cloudflareWebView, true)
     }
+    HyWebViewHelper.installWebView(this)
     webViewClient = object : WebViewClient() {
+        override fun shouldInterceptRequest(
+            view: WebView,
+            request: WebResourceRequest,
+        ): WebResourceResponse? =
+            HyWebViewHelper.intercept(request)
+                ?: super.shouldInterceptRequest(view, request)
+
+        override fun onPageCommitVisible(view: WebView, url: String) {
+            HyWebViewHelper.injectBridge(view, url)
+            super.onPageCommitVisible(view, url)
+        }
+
+        override fun onPageFinished(view: WebView, url: String) {
+            HyWebViewHelper.injectBridge(view, url)
+            super.onPageFinished(view, url)
+        }
+
         override fun shouldOverrideUrlLoading(
             view: WebView?,
             request: WebResourceRequest?,

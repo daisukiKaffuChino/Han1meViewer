@@ -26,5 +26,28 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build
-        run: ./gradlew buildDebug -x lint
+      - name: Set up Rust for H3 ECH
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+
+      - name: Cache Rust H3 build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: native-h3
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk --locked
+
+      - name: Install Android NDK and CMake
+        run: |
+          SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null 2>&1 || true
+          "$SDK/cmdline-tools/latest/bin/sdkmanager" "ndk;28.2.13676358" "cmake;3.22.1"
+          echo "$SDK/cmake/3.22.1/bin" >> "$GITHUB_PATH"
+
+      - name: Verify ECH WebView bridge
+        run: python3 tools/verify_ech.py bridge
+
+      - name: Build and test
+        run: ./gradlew buildDebug :app:testDebugUnitTest :app:verifyEchApk -x lint
