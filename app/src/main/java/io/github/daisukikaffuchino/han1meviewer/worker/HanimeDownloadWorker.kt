@@ -30,7 +30,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.DownloadGr
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeDownloadEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.network.ServiceCreator
 import io.github.daisukikaffuchino.han1meviewer.logic.state.DownloadState
-import io.github.daisukikaffuchino.han1meviewer.util.HImageMeower
+import io.github.daisukikaffuchino.han1meviewer.util.HImageLoader
 import io.github.daisukikaffuchino.han1meviewer.util.SafFileManager
 import io.github.daisukikaffuchino.han1meviewer.util.await
 import coil3.asDrawable
@@ -550,7 +550,7 @@ class HanimeDownloadWorker(
 
     private fun CoroutineScope.updateCoverImage(entity: HanimeDownloadEntity) {
         launch {
-            val imgRes = HImageMeower.execute(entity.coverUrl)
+            val imgRes = HImageLoader.execute(entity.coverUrl)
             val drawable = imgRes.image?.asDrawable(context.resources)
             val (os, uri) = SafFileManager.openOutputStreamForCover(
                 context, entity.videoCode, entity.title

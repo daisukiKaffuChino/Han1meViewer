@@ -1,6 +1,5 @@
 package io.github.daisukikaffuchino.han1meviewer.util
 
-import com.google.common.util.concurrent.ListenableFuture
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.CloudflareBlockedException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.IPBlockedException
@@ -14,44 +13,9 @@ import java.net.ConnectException
 import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
-import java.util.concurrent.ExecutionException
-import java.util.concurrent.Executor
 import javax.net.ssl.SSLHandshakeException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-
-suspend fun <R> ListenableFuture<R>.await(): R {
-    // Fast path
-    if (isDone) {
-        try {
-            return get()
-        } catch (e: ExecutionException) {
-            throw e.cause ?: e
-        }
-    }
-    return suspendCancellableCoroutine { cancellableContinuation ->
-        addListener(
-            {
-                try {
-                    cancellableContinuation.resume(get())
-                } catch (throwable: Throwable) {
-                    val cause = throwable.cause ?: throwable
-                    when (throwable) {
-                        is java.util.concurrent.CancellationException ->
-                            cancellableContinuation.cancel(cause)
-
-                        else -> cancellableContinuation.resumeWithException(cause)
-                    }
-                }
-            },
-            DirectExecutor
-        )
-
-        cancellableContinuation.invokeOnCancellation {
-            cancel(false)
-        }
-    }
-}
 
 /**
  * Suspend extension that allows to suspend [Call] inside coroutine.
@@ -84,13 +48,6 @@ inline fun <R> runSuspendCatching(block: () -> R): Result<R> {
         throw c
     } catch (e: Throwable) {
         Result.failure(e)
-    }
-}
-
-private data object DirectExecutor : Executor {
-
-    override fun execute(command: Runnable) {
-        command.run()
     }
 }
 

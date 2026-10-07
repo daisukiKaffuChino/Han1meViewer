@@ -7,9 +7,9 @@ import coil3.request.ImageRequest
 import coil3.request.ImageResult
 
 @Suppress("NOTHING_TO_INLINE")
-object HImageMeower {
+object HImageLoader {
 
-    private const val TAG = "CoilImageNyanner"
+    private const val TAG = "CoilImageLoader"
 
     suspend fun execute(data: Any): ImageResult {
         LogUtil.d(TAG, "execute: $data")
@@ -17,7 +17,4 @@ object HImageMeower {
             ImageRequest.Builder(applicationContext).data(data).build()
         )
     }
-
-    inline fun placeholder(height: Int, width: Int, blur: Int = 8) =
-        "https://picsum.photos/$width/$height/?blur=$blur"
 }
