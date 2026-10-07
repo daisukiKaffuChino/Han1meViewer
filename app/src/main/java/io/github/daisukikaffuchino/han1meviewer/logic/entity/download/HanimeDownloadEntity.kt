@@ -77,10 +77,6 @@ data class HanimeDownloadEntity(
      * 影片已下载长度
      */
     val downloadedLength: Long,
-//    /**
-//     * 是否正在下载
-//     */
-//    val isDownloading: Boolean = false,
     /**
      * 当前状态
      */

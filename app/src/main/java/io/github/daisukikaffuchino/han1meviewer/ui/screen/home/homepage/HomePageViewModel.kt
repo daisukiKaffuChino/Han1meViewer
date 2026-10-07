@@ -157,7 +157,7 @@ class HomePageViewModel: ViewModel() {
 
     fun loadAllWatchHistories() =
         DatabaseRepo.WatchHistory.loadAll()
-            .catch { e -> e.printStackTrace() }
+            .catch { e -> LogUtil.e("HomePageViewModel", "加载观看历史失败", e) }
             .flowOn(Dispatchers.IO)
     private val _modifyHKeyframeFlow = MutableSharedFlow<Boolean>()
     fun removeHKeyframe(videoCode: String, hKeyframe: HKeyframeEntity.Keyframe) {

@@ -1,6 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.util
 
 import android.content.Context
+import io.github.daisukikaffuchino.utils.LogUtil
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -49,7 +50,7 @@ object AnimeShaders {
             }
             copiedCount
         } catch (e: IOException) {
-            e.printStackTrace()
+            LogUtil.e("AnimeShaders", "复制 shader 资源失败", e)
             -1
         }
     }
@@ -91,7 +92,7 @@ object AnimeShaders {
             }
             1
         } catch (e: IOException) {
-            e.printStackTrace()
+            LogUtil.e("AnimeShaders", "复制证书资源失败", e)
             -1
         }
     }

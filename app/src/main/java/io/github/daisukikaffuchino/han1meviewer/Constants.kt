@@ -86,15 +86,6 @@ const val HA1_GITHUB_URL = "https://github.com/daisukiKaffuChino/Han1meViewer"
 const val HA1_GITHUB_ISSUE_URL = "$HA1_GITHUB_URL/issues"
 
 const val HA1_GITHUB_FORUM_URL = "$HA1_GITHUB_URL/discussions"
-// for Shared Preference
-
-const val LOGIN_COOKIE = "cookie"
-const val SAVED_USER_ID = "saved_user_id"
-
-const val CLOUDFLARE_COOKIE = "cf_cookie"
-const val CLOUDFLARE_COOKIE_HOST = "cf_cookie_host"
-
-const val ALREADY_LOGIN = "already_login"
 
 // Notification
 

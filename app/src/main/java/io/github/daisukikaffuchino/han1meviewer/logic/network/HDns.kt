@@ -186,7 +186,7 @@ class HDns : Dns {
         return runCatching {
             Dns.SYSTEM.lookup(host).map { it.hostAddress }.distinct()
         }.getOrElse {
-            it.printStackTrace()
+            LogUtil.e("DOH", "lookup failed for $host", it)
             emptyList()
         }
     }

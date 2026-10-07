@@ -72,7 +72,7 @@ class OrientationManager(
             )
             if (isRotateEnabled == 0) return
         } catch (e: Settings.SettingNotFoundException) {
-            e.printStackTrace()
+            LogUtil.e("OrientationManager", "读取系统自动旋转设置失败", e)
         }
         orientationChangeListener?.onOrientationChanged(screenOrientation)
     }

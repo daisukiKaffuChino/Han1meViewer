@@ -43,7 +43,7 @@ fun Drawable.saveTo(
                 compress(format, quality, stream)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            LogUtil.e("FileUtil", "保存图片失败", e)
             false
         }
     } == true

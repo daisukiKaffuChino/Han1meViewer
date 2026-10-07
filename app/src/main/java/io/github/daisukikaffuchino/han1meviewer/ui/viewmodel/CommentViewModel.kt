@@ -217,10 +217,6 @@ class CommentViewModel : ViewModel() {
                                     item
                                 }
                             }
-//                            prevList.toMutableList().apply {
-//                                this[commentPosition] =
-//                                    this[commentPosition].handleCommentLike(argState.info)
-//                            }
                         }
 
                         CommentPlace.CHILD_COMMENT -> _videoReplyFlow.update { prevList ->
@@ -230,10 +226,6 @@ class CommentViewModel : ViewModel() {
                                 } else {
                                     item
                                 }
-//                            prevList.toMutableList().apply {
-//                                this[commentPosition] =
-//                                    this[commentPosition].handleCommentLike(argState.info)
-//                            }
                             }
                         }
                     }

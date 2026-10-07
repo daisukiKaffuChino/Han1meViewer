@@ -228,7 +228,7 @@ class HanimeDownloadWorker(
                 if (e is CancellationException || e.isStoppedCancellation() || e.isRetryableNetworkError()) {
                     throw e
                 }
-                e.printStackTrace()
+                LogUtil.e(TAG, "下载失败，准备清理残留文件：$videoCode", e)
                 if (file.exists() && file.length() == 0L) {
                     dbScope.launch {
                         HFileManager.getDownloadVideoFolder(context, videoCode).deleteRecursively()
@@ -460,7 +460,7 @@ class HanimeDownloadWorker(
                 } else {
                     val reason = e.toDownloadErrorMessage()
                     showFailureNotification(reason)
-                    e.printStackTrace()
+                    LogUtil.e(TAG, "下载任务失败：${entity.videoCode}", e)
                     mainScope.launch {
                         SonnerToast.error(context.getString(R.string.download_task_failed_s_reason_s, hanimeName, reason))
                     }

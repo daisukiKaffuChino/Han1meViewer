@@ -36,6 +36,7 @@ import cn.mucute.compose.avatar.cropper.CropShape
 import cn.mucute.compose.avatar.cropper.rememberCropState
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
+import io.github.daisukikaffuchino.utils.LogUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -64,7 +65,7 @@ fun AvatarCropScreen(
                 val bitmap = ImageDecoder.decodeBitmap(source)
                 originalImageBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true).asImageBitmap()
             } catch (e: Exception) {
-                e.printStackTrace()
+                LogUtil.e("AvatarCropScreen", "解码头像图片失败", e)
                 withContext(Dispatchers.Main) { onBack() }
             }
         }
@@ -162,7 +163,7 @@ private fun saveImageBitmapToFile(
         }
         avatarFile
     } catch (e: Exception) {
-        e.printStackTrace()
+        LogUtil.e("AvatarCropScreen", "保存裁剪后的头像失败", e)
         null
     }
 }

@@ -587,7 +587,6 @@ object Parser {
         if (!videos.isNullOrEmpty()) {
             videos.forEach { source ->
                 val resolution = source.attr("size") + "P"
-                //val sourceUrl = source.absUrl("src")
                 val sourceUrl = fixAvCdnHost(source.absUrl("src"))
                 val videoType = source.attr("type")
                 hanimeResolution.parseResolution(resolution, sourceUrl, videoType)
@@ -1072,17 +1071,6 @@ object Parser {
     fun reportCommentResponse(body: String): WebsiteState<String> {
         // 暂时无法判断是否举报成功
         return WebsiteState.Success("已成功檢舉該則評論，我們會儘快處理您的檢舉。")
-//        return if (body.contains("已成功檢舉該則評論")) {
-//            WebsiteState.Success("已成功檢舉該則評論，我們會儘快處理您的檢舉。")
-//        } else {
-//            val doc = Jsoup.parse(body)
-//            val msg = doc.select("#error").text()
-//            if (msg.contains("已成功檢舉")) {
-//                WebsiteState.Success(msg)
-//            } else {
-//                WebsiteState.Error(Throwable("举报失败或未检测到成功提示"))
-//            }
-//        }
     }
 
     fun getMySubscriptions(body: String): WebsiteState<MySubscriptions> {

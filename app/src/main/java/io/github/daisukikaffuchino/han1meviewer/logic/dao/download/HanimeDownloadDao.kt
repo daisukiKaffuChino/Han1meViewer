@@ -33,14 +33,12 @@ abstract class HanimeDownloadDao {
     /**
      * 获取所有正在下载的任务，单次
      */
-    //@Query("SELECT * FROM HanimeDownloadEntity WHERE isDownloading = 1 ORDER BY id DESC")
     @Query("SELECT * FROM HanimeDownloadEntity WHERE state != ${DownloadState.Mask.FINISHED} ORDER BY id DESC")
     abstract suspend fun loadAllDownloadingHanimeOnce(): MutableList<HanimeDownloadEntity>
 
     /**
      * 获取部分正在下载的任务，单次
      */
-    //@Query("SELECT * FROM HanimeDownloadEntity WHERE isDownloading = 1 ORDER BY id DESC LIMIT :limit")
     @Query("SELECT * FROM HanimeDownloadEntity WHERE state != ${DownloadState.Mask.FINISHED} ORDER BY id DESC LIMIT :limit")
     abstract suspend fun loadDownloadingHanimeOnce(limit: Int): MutableList<HanimeDownloadEntity>
 
@@ -59,13 +57,11 @@ abstract class HanimeDownloadDao {
     abstract fun loadAllDownloadedHanimeById(ascending: Boolean): Flow<MutableList<VideoWithCategories>>
 
     @Query("DELETE FROM HanimeDownloadEntity WHERE (`videoCode` = :videoCode AND `quality` = :quality)")
-//    @Deprecated("查屁")
     abstract suspend fun delete(videoCode: String, quality: String)
 
     @Query("DELETE FROM HanimeDownloadEntity WHERE (`videoCode` = :videoCode)")
     abstract suspend fun delete(videoCode: String)
 
-    //@Query("UPDATE HanimeDownloadEntity SET `isDownloading` = 0")
     @Query("UPDATE HanimeDownloadEntity SET `state` = ${DownloadState.Mask.PAUSED}")
     abstract suspend fun pauseAll()
 
@@ -91,7 +87,6 @@ abstract class HanimeDownloadDao {
     abstract suspend fun find(videoCode: String): HanimeDownloadEntity?
 
     @Query("SELECT COUNT(*) FROM HanimeDownloadEntity WHERE (`videoCode` = :videoCode)")
-//    @Deprecated("查屁")
     abstract suspend fun countBy(videoCode: String): Int
     // 更新已下载的某视频的分组
     @Query("UPDATE HanimeDownloadEntity SET groupId = :newGroupId WHERE videoCode = :videoCode")

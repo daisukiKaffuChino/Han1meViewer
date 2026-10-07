@@ -49,7 +49,7 @@ object DatabaseRepo {
                                 Json.decodeFromStream<HKeyframeEntity>(inputStream)
                             }
                         } catch (e: Exception) {
-                            e.printStackTrace()
+                            LogUtil.e("HKeyframe", "读取共享关键帧文件失败: $fileName", e)
                             null
                         }
                     }
@@ -95,7 +95,7 @@ object DatabaseRepo {
                         }
                     }
                 }.catch t@{ e ->
-                    e.printStackTrace()
+                    LogUtil.e("HKeyframe", "观察关键帧失败: $videoCode", e)
                     hKeyframeDao.observe(videoCode).collect {
                         this@t.emit(it)
                     }

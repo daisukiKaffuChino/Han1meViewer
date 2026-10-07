@@ -2,6 +2,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.daisukikaffuchino.utils.LogUtil
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.DownloadGroupEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeDownloadEntity
@@ -40,7 +41,7 @@ class DownloadViewModel : ViewModel() {
         DatabaseRepo.HanimeDownload.getAllGroups()
             .flowOn(Dispatchers.IO)
             .catch { e ->
-                e.printStackTrace()
+                LogUtil.e("DownloadViewModel", "观察下载分组失败", e)
             }
             .stateIn(
                 scope = viewModelScope,
@@ -50,7 +51,7 @@ class DownloadViewModel : ViewModel() {
 
     fun loadAllDownloadingHanime() =
         DatabaseRepo.HanimeDownload.loadAllDownloadingHanime()
-            .catch { e -> e.printStackTrace() }
+            .catch { e -> LogUtil.e("DownloadViewModel", "加载下载中任务失败", e) }
             .flowOn(Dispatchers.IO)
 
     fun loadAllDownloadedHanime(
@@ -59,7 +60,7 @@ class DownloadViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             DatabaseRepo.HanimeDownload.loadAllDownloadedHanime(sortedBy, ascending)
-                .catch { e -> e.printStackTrace() }
+                .catch { e -> LogUtil.e("DownloadViewModel", "加载已下载任务失败", e) }
                 .flowOn(Dispatchers.IO)
                 .collect {
                     _downloaded.value = it
@@ -115,7 +116,7 @@ class DownloadViewModel : ViewModel() {
                     DatabaseRepo.HanimeDownload.updateGroup(updatedGroup)
                 }
             }catch (e: Exception){
-                e.printStackTrace()
+                LogUtil.e("DownloadViewModel", "重命名下载分组失败: $groupId", e)
             }
         }
     }

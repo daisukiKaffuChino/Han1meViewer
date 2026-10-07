@@ -306,7 +306,7 @@ object HanimeDownloadManager {
             markPaused(args)
             LogUtil.d(TAG, "stopWork (cancelUniqueWork): ${args.videoCode}")
         }.onFailure { t -> // 上述方法可能无法取消任务
-            t.printStackTrace()
+            LogUtil.e(TAG, "停止下载任务失败：${args.videoCode}", t)
             markPaused(args)
         }
     }

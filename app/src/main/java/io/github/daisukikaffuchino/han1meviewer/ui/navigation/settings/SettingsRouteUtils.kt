@@ -18,6 +18,7 @@ import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_HOSTNAME
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.ui.player.PlayerDefaults
+import io.github.daisukikaffuchino.utils.LogUtil
 import io.github.daisukikaffuchino.utils.formatBytesPerSecond
 import io.github.daisukikaffuchino.utils.formatFileSize
 import io.github.daisukikaffuchino.utils.SonnerToast
@@ -110,6 +111,6 @@ internal fun openApplyDeepLinksSettings(context: Context, activity: Activity) {
         activity.startActivity(intent)
     } catch (e: Exception) {
         SonnerToast.warning(R.string.action_app_open_by_default_settings_not_support)
-        e.printStackTrace()
+        LogUtil.e("SettingsRouteUtils", "打开系统默认应用设置失败", e)
     }
 }

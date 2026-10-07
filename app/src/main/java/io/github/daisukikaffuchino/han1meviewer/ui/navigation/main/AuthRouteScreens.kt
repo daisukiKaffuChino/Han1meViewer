@@ -84,7 +84,7 @@ fun LoginRouteScreen(
                             WebsiteState.Loading -> Unit
                             is WebsiteState.Error -> {
                                 isLoggingIn = false
-                                state.throwable.printStackTrace()
+                                LogUtil.e("Login", "登录失败", state.throwable)
                                 if (state.throwable is IllegalStateException) {
                                     SonnerToast.error(R.string.account_or_password_wrong)
                                 } else {

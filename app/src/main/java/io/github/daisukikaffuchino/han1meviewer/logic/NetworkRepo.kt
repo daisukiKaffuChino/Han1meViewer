@@ -611,17 +611,17 @@ object NetworkRepo {
         return when (e) {
             is CancellationException -> throw e
             is ParseException -> {
-                e.printStackTrace()
+                LogUtil.e("NetworkRepo", "解析失败", e)
                 ParseException(getString(R.string.parse_error_msg))
             }
 
             is SSLHandshakeException -> {
-                e.printStackTrace()
+                LogUtil.e("NetworkRepo", "TLS 握手失败", e)
                 SSLHandshakeException(getString(R.string.ssl_handshake_error))
             }
 
             else -> {
-                e.printStackTrace()
+                LogUtil.e("NetworkRepo", "请求失败", e)
                 e
             }
         }

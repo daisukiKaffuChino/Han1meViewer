@@ -22,8 +22,6 @@ interface HanimeBaseService {
         @Query("genre") genre: String? = null,
         @Query("sort") sort: String? = null,
         @Query("broad") broad: String? = null,
-//        @Query("year") year: Int? = null,
-//        @Query("month") month: Int? = null,
         @Query("date") date: String? = null,
         @Query("duration") duration: String? = null,
         @Query("tags[]") tags: Set<String> = emptySet(),
