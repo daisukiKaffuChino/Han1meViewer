@@ -86,8 +86,13 @@ object HyEchH3 {
         return System.currentTimeMillis() >= retryAt
     }
 
-    fun fetchResourceToFile(url: String, rememberResult: Boolean = true): File? {
+    fun fetchResourceToFile(
+        url: String,
+        rememberResult: Boolean = true,
+        respectTransportPolicy: Boolean = true,
+    ): File? {
         val context = appContext ?: return null
+        if (respectTransportPolicy && !EchTransportPolicy.shouldUseH3()) return null
         if (!shouldTryH3(java.net.URI(url).host ?: return null)) return null
 
         val uri = runCatching { java.net.URI(url) }.getOrNull() ?: return null

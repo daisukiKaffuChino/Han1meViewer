@@ -64,8 +64,12 @@ object ServiceCreator {
      */
     fun rebuildOkHttpClient() {
         hClient = buildHClient()
+        downloadClient = buildDownloadClient()
         getchuClient = buildGetchuClient()
     }
+
+    private fun OkHttpClient.Builder.applyHTransport(): OkHttpClient.Builder =
+        if (SettingsRepository.useEch) echTransport(dns) else dns(dns)
 
     private fun buildGetchuClient(): OkHttpClient {
         return OkHttpClient.Builder()
@@ -84,7 +88,7 @@ object ServiceCreator {
             .protocols(listOf(Protocol.HTTP_1_1))
             .addInterceptor(UserAgentInterceptor)
             .addInterceptor(downloadSpeedLimitInterceptor)
-            .echTransport(dns)
+            .applyHTransport()
             .build()
     }
 
@@ -100,7 +104,7 @@ object ServiceCreator {
             .cache(cache)
             .cookieJar(HCookieJar())
             .proxySelector(HProxySelector())
-            .echTransport(dns)
+            .applyHTransport()
             .build()
     }
 

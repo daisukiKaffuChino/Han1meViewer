@@ -4,8 +4,8 @@ import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_HOSTNAME
 
 /**
  * ECH only encrypts a connection when the peer supports it. Attempt it for
- * every host, but never allow the explicitly blocked site domains to fall back
- * to plaintext.
+ * every host; fail-closed behavior for site domains is decided by
+ * [EchTransportPolicy] so proxy routes can still fall back safely.
  */
 object EchHosts {
 

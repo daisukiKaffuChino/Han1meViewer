@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.SingletonImageLoader
 import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
@@ -183,6 +184,7 @@ fun NetworkSettingsRouteScreen(
         dohTestResults = dohTestResults,
         isDelayTesting = isDelayTesting,
         isDohTesting = isDohTesting,
+        echEnabled = SettingsRepository.useEch,
         proxyType = SettingsRepository.proxyType,
         proxyIp = SettingsRepository.proxyIp,
         proxyPort = SettingsRepository.proxyPort,
@@ -295,6 +297,15 @@ fun NetworkSettingsRouteScreen(
                 EchHttp.onDohSettingsChanged()
                 currentHost = SettingsRepository.baseUrl
                 HanimeNetwork.rebuildNetwork()
+                SingletonImageLoader.reset()
+            }
+        },
+        onEchEnabledChange = { enabled ->
+            coroutineScope.launch {
+                SettingsRepository.update { it.copy(useEch = enabled) }
+                EchHttp.onDohSettingsChanged()
+                HanimeNetwork.rebuildNetwork()
+                SingletonImageLoader.reset()
             }
         },
         onOpenDelayTest = {
@@ -337,6 +348,7 @@ fun NetworkSettingsRouteScreen(
                 SettingsRepository.update { it.copy(proxyType = io.github.daisukikaffuchino.han1meviewer.logic.model.ProxyType.fromId(type), proxyIp = ip, proxyPort = port) }
                 HProxySelector.rebuildNetwork()
                 HanimeNetwork.rebuildNetwork()
+                SingletonImageLoader.reset()
             }
         },
         embedded = embedded,
@@ -448,6 +460,7 @@ fun NetworkSettingsRouteScreen(
                 EchHttp.onDohSettingsChanged()
                 showDohConflictConfirm = false
                 HanimeNetwork.rebuildNetwork()
+                SingletonImageLoader.reset()
             }
         },
         onDismiss = { showDohConflictConfirm = false },

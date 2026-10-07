@@ -20,6 +20,9 @@ class H3Interceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
         val url = request.url
+        if (!EchTransportPolicy.shouldUseH3()) {
+            return chain.proceed(request)
+        }
         if (request.method != "GET" || !HyEchH3.isStaticAsset(url)) {
             return chain.proceed(request)
         }

@@ -449,6 +449,13 @@ Recommendations are as follows:\n
     <string name="builtin_dns">Built-in DNS mapping</string>
     <string name="test_doh">Test DoH</string>
     <string name="test_doh_summary">Check whether current DoH settings can resolve the domain</string>
+    <string name="doh_ech">DoH / ECH</string>
+    <string name="ech">ECH</string>
+    <string name="use_ech">ECH</string>
+    <string name="use_ech_summary">Encrypted Client Hello; enable only when the current network supports it</string>
+    <string name="ech_help">How to use DoH and ECH</string>
+    <string name="ech_help_summary">Direct connection and recommended preset steps</string>
+    <string name="ech_help_message">1. On this page, tap Proxy in the Network section, set the proxy type to Direct, and tap Confirm.\n2. Return to DoH / ECH, tap Use DoH, and we recommend selecting 小雅DoH.\n3. Tap Test DoH. Only enable ECH after DoH resolves successfully.\n\nDoH or ECH may be unavailable in some regions. If your network blocks them, disable them and use a proxy instead.</string>
     <string name="ech_test">ECH Test</string>
     <string name="ech_test_summary">Run DoH, ECHConfigList, TCP ECH and H3 diagnostics with live logs</string>
     <string name="ech_test_configuration">Test target</string>

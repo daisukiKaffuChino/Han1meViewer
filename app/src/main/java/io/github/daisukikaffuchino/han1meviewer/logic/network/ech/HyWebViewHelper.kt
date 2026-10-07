@@ -5,6 +5,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_HOSTNAME
+import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import okhttp3.OkHttpClient
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Request
@@ -27,11 +28,13 @@ object HyWebViewHelper {
         onFormLoginSuccess: ((String) -> Unit)? = null,
     ): EchWebBridge {
         val bridge = EchWebBridge(webView, onFormLoginSuccess)
+        if (!shouldUseEchWebView()) return bridge
         webView.addJavascriptInterface(bridge, EchWebBridge.NAME)
         return bridge
     }
 
     fun injectBridge(webView: WebView, url: String?) {
+        if (!shouldUseEchWebView()) return
         val host = url?.let { runCatching { URI(it).host }.getOrNull() } ?: return
         if (!EchHosts.isCoreDomain(host)) return
         runCatching {
@@ -42,6 +45,7 @@ object HyWebViewHelper {
     }
 
     fun intercept(request: WebResourceRequest): WebResourceResponse? {
+        if (!shouldUseEchWebView()) return null
         val uri = request.url ?: return null
         val url = uri.toString()
         val host = uri.host ?: return null
@@ -67,7 +71,11 @@ object HyWebViewHelper {
         }
 
         if (!ConscryptEch.ready && !ConscryptEch.install()) {
-            return failClosed(host, "ECH transport is not ready")
+            return if (EchTransportPolicy.shouldFailClosed(host)) {
+                failClosed(host, "ECH transport is not ready")
+            } else {
+                null
+            }
         }
 
         var lastError = "unknown error"
@@ -118,8 +126,15 @@ object HyWebViewHelper {
             }
         }
 
-        return failClosed(host, lastError)
+        return if (EchTransportPolicy.shouldFailClosed(host)) {
+            failClosed(host, lastError)
+        } else {
+            null
+        }
     }
+
+    private fun shouldUseEchWebView(): Boolean =
+        SettingsRepository.useEch && !EchTransportPolicy.isProxyRoute()
 
     private fun syncCookies(url: String, response: okhttp3.Response) {
         val manager = CookieManager.getInstance()

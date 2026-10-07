@@ -441,6 +441,13 @@
     <string name="builtin_dns">內建 DNS 對應</string>
     <string name="test_doh">測試 DoH</string>
     <string name="test_doh_summary">檢查目前 DoH 設定是否可以解析網域</string>
+    <string name="doh_ech">DoH / ECH</string>
+    <string name="ech">ECH</string>
+    <string name="use_ech">ECH</string>
+    <string name="use_ech_summary">加密客戶端問候；僅在目前網路支援時啟用</string>
+    <string name="ech_help">如何開啟 DoH 和 ECH</string>
+    <string name="ech_help_summary">查看直連和推薦預設的設定步驟</string>
+    <string name="ech_help_message">1. 在目前頁面的「網路」分類中點擊「代理」，將代理類型選擇為「直連」並確認。\n2. 返回「DoH / ECH」，點擊「使用 DoH」，推薦選擇「小雅DoH」。\n3. 點擊「測試 DoH」，確認可以解析網域後再開啟 ECH。\n\nDoH 或 ECH 在部分地區可能無法使用；如果目前網路阻斷，請關閉它們並改用代理。</string>
     <string name="ech_test">ECH 測試</string>
     <string name="ech_test_summary">檢測 DoH、ECHConfigList、TCP ECH 與 H3，並查看即時日誌</string>
     <string name="ech_test_configuration">測試目標</string>

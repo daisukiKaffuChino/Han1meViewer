@@ -138,9 +138,11 @@ object EchH3 {
     ) {
         if (!isWindows()) return
 
+        val rustupHome = rustupHome()
+        val cargoHome = cargoHome()
         val hostToolchain = File(
-            System.getProperty("user.home"),
-            ".rustup/toolchains/stable-x86_64-pc-windows-gnu",
+            rustupHome,
+            "toolchains/stable-x86_64-pc-windows-gnu",
         )
         check(hostToolchain.isDirectory) {
             "Rust GNU host toolchain is required on Windows: " +
@@ -162,12 +164,14 @@ object EchH3 {
             )
         }
         task.environment("RUSTUP_TOOLCHAIN", "stable-x86_64-pc-windows-gnu")
+        task.environment("RUSTUP_HOME", rustupHome.absolutePath)
+        task.environment("CARGO_HOME", cargoHome.absolutePath)
         task.environment(
             "PATH",
             listOf(
                 hostTools.absolutePath,
                 cmakeBin.absolutePath,
-                File(System.getProperty("user.home"), ".cargo/bin").absolutePath,
+                File(cargoHome, "bin").absolutePath,
                 System.getenv("PATH").orEmpty(),
             ).joinToString(File.pathSeparator),
         )
@@ -193,13 +197,20 @@ object EchH3 {
     }
 
     private fun Project.cargoExecutable(): String {
-        val cargoHome = System.getenv("CARGO_HOME")
-            ?.takeIf { it.isNotBlank() }
-            ?: File(System.getProperty("user.home"), ".cargo").absolutePath
-        return File(cargoHome, "bin/cargo${exeSuffix()}")
+        return File(cargoHome(), "bin/cargo${exeSuffix()}")
             .takeIf(File::isFile)
             ?.absolutePath
             ?: "cargo"
+    }
+
+    private fun rustupHome(): File {
+        val configured = System.getenv("RUSTUP_HOME")?.takeIf { it.isNotBlank() }
+        return File(configured ?: File(System.getProperty("user.home"), ".rustup").absolutePath)
+    }
+
+    private fun cargoHome(): File {
+        val configured = System.getenv("CARGO_HOME")?.takeIf { it.isNotBlank() }
+        return File(configured ?: File(System.getProperty("user.home"), ".cargo").absolutePath)
     }
 
     private fun isWindows(): Boolean =

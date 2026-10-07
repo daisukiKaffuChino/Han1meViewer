@@ -101,6 +101,7 @@ object EchDiagnostics {
                 val file = HyEchH3.fetchResourceToFile(
                     url = "https://$host/favicon.ico",
                     rememberResult = false,
+                    respectTransportPolicy = false,
                 )
                 val elapsedMillis = System.currentTimeMillis() - startedAt
                 if (file == null) {

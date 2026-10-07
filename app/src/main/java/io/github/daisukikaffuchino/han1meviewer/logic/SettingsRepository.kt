@@ -72,6 +72,7 @@ object SettingsRepository : SettingsStore {
     val useBackupMediaCdn get() = current.useBackupMediaCdn
     val customHostsData get() = current.customHostsData
     val useDoH get() = current.useDoH
+    val useEch get() = current.useEch
     val dohPreset get() = current.dohPreset
     val dohCustomUrl get() = current.dohCustomUrl
     val dohBootstrapIps get() = current.dohBootstrapIps

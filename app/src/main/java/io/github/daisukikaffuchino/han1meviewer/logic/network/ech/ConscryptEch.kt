@@ -107,7 +107,7 @@ object ConscryptEch {
 
     fun markEchUnavailable(host: String) {
         if (echUnavailable.add(host.lowercase())) {
-            EchLog.i(TAG, "ECH rejected; using plaintext for non-core host=$host")
+            EchLog.i(TAG, "ECH rejected; allowing plaintext fallback for host=$host")
         }
     }
 
@@ -125,8 +125,9 @@ object ConscryptEch {
             }
 
             val core = EchHosts.isCoreDomain(host)
+            val failClosed = EchTransportPolicy.shouldFailClosed(host)
             if (echUnavailable.contains(host.lowercase())) {
-                if (core) {
+                if (failClosed) {
                     throw IOException("ECH is unavailable for protected host $host")
                 }
                 return socket
@@ -134,7 +135,7 @@ object ConscryptEch {
 
             val config = EchDoh.echConfigList(host)
             if (config == null) {
-                if (core) {
+                if (failClosed) {
                     throw IOException("Unable to obtain an ECHConfigList for protected host $host")
                 }
                 markEchUnavailable(host)
@@ -146,7 +147,7 @@ object ConscryptEch {
                 EchLog.d(TAG, "Injected ECH host=$host bytes=${config.size} core=$core")
                 socket
             } catch (throwable: Throwable) {
-                if (core) {
+                if (failClosed) {
                     throw IOException("Failed to inject ECHConfigList for $host", throwable)
                 }
                 EchLog.w(TAG, "Failed to inject ECH for $host: ${throwable.message}")
@@ -195,7 +196,7 @@ class EchRetryInterceptor : Interceptor {
         } catch (throwable: Throwable) {
             if (!isEchRejected(throwable)) throw throwable
 
-            if (EchHosts.isCoreDomain(host)) {
+            if (EchTransportPolicy.shouldFailClosed(host)) {
                 EchLog.i("HY-ECH", "ECH rejected for core host=$host; refreshing config")
                 EchDoh.invalidateEch(host)
             } else {

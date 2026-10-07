@@ -93,6 +93,7 @@ fun NetworkSettingsScreen(
     dohTimeoutSeconds: Int,
     dohTestResults: List<DohTestResultUi>,
     isDohTesting: Boolean,
+    echEnabled: Boolean,
     useCustomMirrorSite: Boolean,
     customMirrorSite: String,
     appendCustomMirrorPath: Boolean,
@@ -107,6 +108,7 @@ fun NetworkSettingsScreen(
     onUseBuiltInHostsChange: (Boolean) -> Unit,
     onSaveCustomHosts: (String) -> Unit,
     onSaveDohSettings: (Boolean, String, String, String, Int) -> Unit,
+    onEchEnabledChange: (Boolean) -> Unit,
     onOpenDelayTest: () -> Unit,
     onOpenEchTest: () -> Unit,
     customHostsData: String,
@@ -119,6 +121,7 @@ fun NetworkSettingsScreen(
     var showDomainDialog by rememberSaveable { mutableStateOf(false) }
     var showProxyDialog by rememberSaveable { mutableStateOf(false) }
     var showDohDialog by rememberSaveable { mutableStateOf(false) }
+    var showEchHelpDialog by rememberSaveable { mutableStateOf(false) }
     var showCustomHostsDialog by rememberSaveable { mutableStateOf(false) }
     var showCustomMirrorSiteDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -160,6 +163,28 @@ fun NetworkSettingsScreen(
                 showDohDialog = false
                 onSaveDohSettings(enabled, preset, url, bootstrapIps, timeout)
             },
+        )
+    }
+
+    if (showEchHelpDialog) {
+        AlertDialog(
+            onDismissRequest = { showEchHelpDialog = false },
+            title = { Text(stringResource(R.string.ech_help)) },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .heightIn(max = 480.dp)
+                        .verticalScroll(rememberScrollState()),
+                ) {
+                    Text(stringResource(R.string.ech_help_message))
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showEchHelpDialog = false }) {
+                    Text(stringResource(R.string.ok))
+                }
+            },
+            dismissButton = {},
         )
     }
 
@@ -261,11 +286,28 @@ fun NetworkSettingsScreen(
                     iconRes = R.drawable.ic_edit_square,
                     onClick = { showCustomHostsDialog = true },
                 )
+            }
+
+            SettingsSectionTitle(titleRes = R.string.doh_ech)
+            SettingsSegmentedGroup {
                 SettingNavigationItem(
                     title = stringResource(R.string.use_doh),
                     summary = state.dohSummary,
                     iconRes = R.drawable.ic_dns,
                     onClick = { showDohDialog = true },
+                )
+                SettingSwitchItem(
+                    title = stringResource(R.string.use_ech),
+                    summary = stringResource(R.string.use_ech_summary),
+                    checked = echEnabled,
+                    iconRes = R.drawable.ic_vpn_lock,
+                    onCheckedChange = onEchEnabledChange,
+                )
+                SettingNavigationItem(
+                    title = stringResource(R.string.ech_help),
+                    summary = stringResource(R.string.ech_help_summary),
+                    iconRes = R.drawable.ic_help,
+                    onClick = { showEchHelpDialog = true },
                 )
             }
 
@@ -837,6 +879,7 @@ private fun NetworkSettingsScreenPreview() {
             dohCustomUrl = "",
             dohBootstrapIps = "1.1.1.1, 8.8.8.8",
             dohTimeoutSeconds = 10,
+            echEnabled = false,
             onDomainChange = {},
             onSaveCustomMirrorSite = { _, _, _ -> },
             onTestCustomMirrorSite = { _, _ -> },
@@ -847,6 +890,7 @@ private fun NetworkSettingsScreenPreview() {
             onSaveCustomHosts = {},
             customHostsData = "",
             onSaveDohSettings = { _, _, _, _, _ -> },
+            onEchEnabledChange = {},
             onOpenDelayTest = {},
             onOpenDohTest = {},
             onOpenEchTest = {},

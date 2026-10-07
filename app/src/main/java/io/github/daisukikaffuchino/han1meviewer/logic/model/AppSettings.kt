@@ -121,6 +121,7 @@ data class AppSettings(
     val useBackupMediaCdn: Boolean = false,
     val customHostsData: String = "",
     val useDoH: Boolean = false,
+    val useEch: Boolean = false,
     val dohPreset: String = "alidns",
     val dohCustomUrl: String = "",
     val dohBootstrapIps: String = "",

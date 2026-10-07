@@ -42,19 +42,27 @@ class HanimeApplication : Application(), Application.ActivityLifecycleCallbacks,
         const val TAG = "HanimeApplication"
     }
 
-    private val imageClient: OkHttpClient by lazy {
+    private fun buildImageClient(): OkHttpClient =
         OkHttpClient.Builder()
-            .echTransport(HDns())
+            .apply {
+                if (SettingsRepository.useEch) {
+                    echTransport(HDns())
+                } else {
+                    dns(HDns())
+                }
+            }
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .build()
-    }
 
-    override fun newImageLoader(context: Context): ImageLoader = ImageLoader.Builder(context)
-        .components {
-            add(OkHttpNetworkFetcherFactory(callFactory = { imageClient }))
-        }
-        .build()
+    override fun newImageLoader(context: Context): ImageLoader {
+        val client = buildImageClient()
+        return ImageLoader.Builder(context)
+            .components {
+                add(OkHttpNetworkFetcherFactory(callFactory = { client }))
+            }
+            .build()
+    }
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
@@ -66,7 +74,9 @@ class HanimeApplication : Application(), Application.ActivityLifecycleCallbacks,
         Thread.setDefaultUncaughtExceptionHandler(CrashHandler(applicationContext))
         DataStoreManager.initialize(this)
         SettingsRepository.install(DataStoreManager)
-        ConscryptEch.install()
+        if (SettingsRepository.useEch) {
+            ConscryptEch.install()
+        }
         HyEchH3.attach(this)
         AppLanguageManager.applyStoredLanguage(this)
         registerActivityLifecycleCallbacks(this)

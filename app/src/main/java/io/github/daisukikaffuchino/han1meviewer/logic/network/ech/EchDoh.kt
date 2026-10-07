@@ -377,8 +377,8 @@ object EchDoh {
 }
 
 /**
- * All hosts use the ECH resolver first. Non-core hosts may fall back to their
- * previous resolver; core hosts never do.
+ * All hosts use the ECH resolver first. Core hosts fail closed on a direct
+ * route; proxy routes may fall back to their previous resolver.
  */
 class EchDns(private val fallback: Dns = Dns.SYSTEM) : Dns {
 
@@ -386,7 +386,7 @@ class EchDns(private val fallback: Dns = Dns.SYSTEM) : Dns {
         val addresses = runCatching { EchDoh.resolve(hostname) }.getOrNull()
         if (!addresses.isNullOrEmpty()) return addresses
 
-        if (EchHosts.isCoreDomain(hostname)) {
+        if (EchTransportPolicy.shouldFailClosed(hostname)) {
             throw UnknownHostException("DoH resolution failed for protected host $hostname")
         }
         return fallback.lookup(hostname)
