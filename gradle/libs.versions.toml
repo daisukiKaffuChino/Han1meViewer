@@ -90,6 +90,7 @@ okhttp-dns-over-https = { group = "com.squareup.okhttp3", name = "okhttp-dnsover
 # Test
 test-junit = { group = "androidx.test.ext", name = "junit", version.ref = "testJunit" } # androidTestImplementation
 junit4 = { group = "junit", name = "junit", version.ref = "junit4" }
+kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
 
 # video
 media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "exoplayer" }

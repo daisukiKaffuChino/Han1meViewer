@@ -16,6 +16,8 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.OnlineWatchHistorySo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoCommentArgs
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoComments
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HanimeNetwork
+import io.github.daisukikaffuchino.han1meviewer.logic.network.NetworkFailure
+import io.github.daisukikaffuchino.han1meviewer.logic.network.NetworkFailureClassifier
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
@@ -581,29 +583,23 @@ object NetworkRepo {
 
     internal fun Response<ResponseBody>.throwRequestException(): Nothing {
         val body = errorBody()?.string()
-        when (val code = code()) {
-            403 -> if (!body.isNullOrBlank()) {
-                when {
-                    "you have been blocked" in body ->
-                        throw IPBlockedException(getString(R.string.cloudflare_ip_block_warning))
+        when (NetworkFailureClassifier.classify(code(), body, isAlreadyLogin)) {
+            // 主要出現在影片界面，當你 v 數不大時會報 403
+            NetworkFailure.IpBlocked ->
+                throw IPBlockedException(getString(R.string.cloudflare_ip_block_warning))
 
-                    "Just a moment" in body ->
-                        throw CloudflareBlockedException(getString(R.string.cloudflare_network_mismatch))
+            NetworkFailure.CloudflareChallenge ->
+                throw CloudflareBlockedException(getString(R.string.cloudflare_network_mismatch))
 
-                    else ->
-                        throw HanimeNotFoundException(getString(R.string.video_might_not_exist)) // 主要出現在影片界面，當你v數不大時會報403
-                }
-            } else throw IllegalStateException("$code ${message()}")
+            // 主要出現在影片界面，當你 v 數不大 / 很大時會報 403 / 500
+            NetworkFailure.NotFound ->
+                throw HanimeNotFoundException(getString(R.string.video_might_not_exist))
 
-            500 -> throw HanimeNotFoundException(getString(R.string.video_might_not_exist)) // 主要出現在影片界面，當你v數很大時會報500
-
-            404 -> if (!isAlreadyLogin) {
+            NetworkFailure.NotLoggedIn ->
                 throw IllegalStateException(getString(R.string.not_logged_in_currently))
-            } else {
-                throw IllegalStateException("$code ${message()}")
-            }
 
-            else -> throw IllegalStateException("$code ${message()}")
+            NetworkFailure.Unknown ->
+                throw IllegalStateException("${code()} ${message()}")
         }
     }
 

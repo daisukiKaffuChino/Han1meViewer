@@ -179,5 +179,6 @@ dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     testImplementation(libs.junit4)
+    testImplementation(libs.kotlin.test.junit)
     androidTestImplementation(libs.test.junit)
 }
