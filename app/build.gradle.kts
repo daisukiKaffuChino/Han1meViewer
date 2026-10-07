@@ -13,7 +13,7 @@ plugins {
     alias(libs.plugins.com.google.devtools.ksp)
     alias(libs.plugins.compose.compiler)
     id("com.mikepenz.aboutlibraries.plugin") version "15.2.0"
-    id("com.github.ben-manes.versions") version "0.64.0"
+    id("com.github.ben-manes.versions") version "0.65.0"
 }
 
 android {
@@ -24,8 +24,8 @@ android {
         applicationId = "io.github.daisukikaffuchino.han1meviewer"
         minSdk = 29
         targetSdk = 37
-        versionCode = 261002
-        versionName = "26.4.1"
+        versionCode = 261007
+        versionName = "26.4.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -55,6 +55,7 @@ android {
         abi {
             isEnable = gradle.startParameter.taskRequests.toString().contains("Release")
             reset()
+            //noinspection ChromeOsAbiSupport
             include("arm64-v8a")
             isUniversalApk = false
         }
