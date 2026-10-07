@@ -12,14 +12,14 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.daisukikaffuchino.han1meviewer.R
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.dataOrNull
+import io.github.daisukikaffuchino.han1meviewer.logic.state.isFirstPageEmpty
+import io.github.daisukikaffuchino.han1meviewer.logic.state.isFirstPageError
+import io.github.daisukikaffuchino.han1meviewer.logic.state.isFirstPageLoading
 import io.github.daisukikaffuchino.han1meviewer.pienization
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
-import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageEmpty
-import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageError
-import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageLoading
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.preview.PreviewImageViewerDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.preview.PreviewImageViewerState
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberRandomLoadingHint
@@ -50,7 +50,7 @@ fun GetchuPreviewDetailScreen(
             isLoading = state.isFirstPageLoading,
             isError = state.isFirstPageError,
             isEmpty = state.isFirstPageEmpty,
-            errorMessage = (state as? PageState.Error)?.throwable?.pienization.toString(),
+            errorMessage = (state as? PagedUiState.Error)?.throwable?.pienization.toString(),
             onRetry = { if (!isInspectionMode) viewModel.getDetail(id) },
             modifier = Modifier.fillMaxSize(),
             loadingMessage = loadingHint

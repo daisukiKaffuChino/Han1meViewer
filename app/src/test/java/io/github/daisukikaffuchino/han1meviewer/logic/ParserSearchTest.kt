@@ -9,11 +9,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Parser 纯逻辑护栏。
+ * Parser 解析护栏。
  *
- * 这些测试**只依赖纯 Kotlin + Jsoup**，不触碰 Android Framework：
- * `Parser` 内部通过 [LogUtil] 调用 `android.util.Log`，因此测试里把 [LogUtil.enabled]
- * 置为 false，即可在普通 JVM（未来是 KMP commonTest）上离线运行。
+ * `Parser` 内部通过 [LogUtil] 调用 `android.util.Log`，测试里把 [LogUtil.enabled]
+ * 置为 false 即可短路日志调用。
  */
 class ParserSearchTest {
 

@@ -39,15 +39,15 @@ import io.github.daisukikaffuchino.han1meviewer.BuildConfig
 import io.github.daisukikaffuchino.han1meviewer.HA1_GITHUB_URL
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.AppUpdateState
 import io.github.daisukikaffuchino.han1meviewer.logic.AppUpdateInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.state.dataOrNull
+import io.github.daisukikaffuchino.han1meviewer.logic.state.isFirstPageEmpty
+import io.github.daisukikaffuchino.han1meviewer.logic.state.isFirstPageError
+import io.github.daisukikaffuchino.han1meviewer.logic.state.isFirstPageLoading
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PullRefreshOverlay
-import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageEmpty
-import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageError
-import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageLoading
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.component.HomePageTopBar
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.component.AppUpdateCard
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage.component.AnnouncementCard
@@ -108,7 +108,7 @@ fun HomePageScreen(
         onEvent(HomeUiEvent.ShowExitDialog)
     }
 
-    val isCurrentlyRefreshing = (pageState as? PageState.Success)?.isRefreshing == true
+    val isCurrentlyRefreshing = (pageState as? PagedUiState.Success)?.isRefreshing == true
     val simulatedUpdateDescription = stringResource(R.string.simulated_update_description)
     val simulatedUpdate = remember(simulatedUpdateDescription) {
         AppUpdateInfo(
@@ -128,8 +128,8 @@ fun HomePageScreen(
     val forcedUpdate = availableUpdate?.takeIf { it.forceUpdate }
 
     LaunchedEffect(pageState) {
-        val errorState = pageState as? PageState.Error
-        if (wasRefreshing && errorState?.cachedInfo != null) {
+        val errorState = pageState as? PagedUiState.Error
+        if (wasRefreshing && errorState?.cached != null) {
             SonnerToast.error(errorState.throwable.toNetworkErrorMessageRes())
         }
         wasRefreshing = isCurrentlyRefreshing
@@ -190,7 +190,7 @@ fun HomePageScreen(
                             pageState.isFirstPageLoading,
                         isError = pageState.isFirstPageError,
                         isEmpty = pageState.isFirstPageError || pageState.isFirstPageEmpty,
-                        errorMessage = (pageState as? PageState.Error)?.throwable
+                        errorMessage = (pageState as? PagedUiState.Error)?.throwable
                             ?.toNetworkErrorMessageRes()
                             ?.let { stringResource(it) }
                             ?: "",

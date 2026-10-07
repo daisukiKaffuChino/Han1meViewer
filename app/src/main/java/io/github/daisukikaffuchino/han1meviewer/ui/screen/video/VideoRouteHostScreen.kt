@@ -54,12 +54,13 @@ import io.github.daisukikaffuchino.han1meviewer.getHanimeVideoLink
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.WatchHistoryEntity
-import io.github.daisukikaffuchino.han1meviewer.logic.exception.ParseException
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoLandscapeLayoutStyle
 import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.HanimeErrorKind
+import io.github.daisukikaffuchino.han1meviewer.logic.state.toHanimeError
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.bridge.VideoPageHost
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
@@ -485,7 +486,7 @@ fun VideoRouteHostScreen(
                 when (state) {
                     is VideoLoadingState.Error -> {
                         state.throwable.localizedMessage?.let(SonnerToast::error)
-                        if (state.throwable is ParseException) {
+                        if (state.throwable.toHanimeError().kind == HanimeErrorKind.Parse) {
                             uriHandler.openUri(getHanimeVideoLink(route.videoCode))
                         }
                     }

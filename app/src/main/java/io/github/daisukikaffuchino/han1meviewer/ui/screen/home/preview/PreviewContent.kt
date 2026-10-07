@@ -45,7 +45,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import io.github.daisukikaffuchino.han1meviewer.R
-import io.github.daisukikaffuchino.han1meviewer.logic.exception.HanimeNotFoundException
+import io.github.daisukikaffuchino.han1meviewer.logic.state.HanimeErrorKind
+import io.github.daisukikaffuchino.han1meviewer.logic.state.toHanimeError
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimePreview
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.pienization
@@ -205,7 +206,7 @@ fun PreviewContent(
 
                     is WebsiteState.Error -> item {
                         val isPreviewEmpty =
-                            uiState.displayState.throwable is HanimeNotFoundException
+                            uiState.displayState.throwable.toHanimeError().kind == HanimeErrorKind.NotFound
                         ErrorContent(
                             title = stringResource(R.string.hanime_list),
                             message = if (isPreviewEmpty) {

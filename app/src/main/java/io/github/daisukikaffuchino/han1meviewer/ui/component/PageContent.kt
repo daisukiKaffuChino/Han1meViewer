@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.ErrorContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.LoadingContent
@@ -45,12 +44,3 @@ fun PageContent(
         }
     }
 }
-
-val <T> PageState<T>.isFirstPageLoading: Boolean
-    get() = this is PageState.Loading
-
-val <T> PageState<T>.isFirstPageError: Boolean
-    get() = this is PageState.Error && cachedInfo == null
-
-val <T> PageState<T>.isFirstPageEmpty: Boolean
-    get() = this is PageState.Empty

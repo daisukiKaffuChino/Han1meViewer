@@ -12,10 +12,11 @@ import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.WatchHistoryEntity
-import io.github.daisukikaffuchino.han1meviewer.logic.exception.LoginStateExpiredException
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Announcement
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.HanimeErrorKind
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.toHanimeError
 import io.github.daisukikaffuchino.han1meviewer.logout
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HanimeScreen
@@ -38,7 +39,7 @@ class HomePageViewModel: ViewModel() {
         @param:StringRes val fallbackResId: Int,
     )
 
-    private val _homePageFlow = MutableStateFlow<PageState<HomeData>>(PageState.Loading)
+    private val _homePageFlow = MutableStateFlow<PagedUiState<HomeData>>(PagedUiState.Loading)
     val homePageFlow = _homePageFlow.asStateFlow()
 
     private val _sessionExpiredMessage = MutableSharedFlow<SessionExpiredMessage>()
@@ -98,17 +99,17 @@ class HomePageViewModel: ViewModel() {
         homePageJob?.cancel()
         homePageJob = viewModelScope.launch {
             val current = _homePageFlow.value
-            if (isRefresh && current is PageState.Success) {
+            if (isRefresh && current is PagedUiState.Success) {
                 _homePageFlow.value = current.copy(isRefreshing = true)
-            } else if (isRefresh && current is PageState.Error && current.cachedInfo != null) {
-                _homePageFlow.value = PageState.Success(info = current.cachedInfo, isRefreshing = true)
-            } else if (!isRefresh && current !is PageState.Success){
-                _homePageFlow.value = PageState.Loading
+            } else if (isRefresh && current is PagedUiState.Error && current.cached != null) {
+                _homePageFlow.value = PagedUiState.Success(data = current.cached, isRefreshing = true)
+            } else if (!isRefresh && current !is PagedUiState.Success) {
+                _homePageFlow.value = PagedUiState.Loading
             }
             NetworkRepo.getHomePage().collect { networkState ->
                 when (networkState){
                     is WebsiteState.Error -> {
-                        if (networkState.throwable is LoginStateExpiredException) {
+                        if (networkState.throwable.toHanimeError().kind == HanimeErrorKind.SessionExpired) {
                             logout()
                             _sessionExpiredMessage.emit(
                                 SessionExpiredMessage(
@@ -117,8 +118,9 @@ class HomePageViewModel: ViewModel() {
                                 )
                             )
                         }
-                        val previousData = (_homePageFlow.value as? PageState.Success)?.info
-                        _homePageFlow.value = PageState.Error(networkState.throwable, cachedInfo = previousData)
+                        val previousData = (_homePageFlow.value as? PagedUiState.Success)?.data
+                        _homePageFlow.value =
+                            PagedUiState.Error(networkState.throwable, cached = previousData)
                     }
                     is WebsiteState.Success -> {
                         AppViewModel.csrfToken = networkState.info.csrfToken
@@ -126,7 +128,8 @@ class HomePageViewModel: ViewModel() {
                             SettingsRepository.setSavedUserId(userId)
                         }
                         val homeData = HomeData(page = networkState.info)
-                        _homePageFlow.value = PageState.Success(info = homeData, isRefreshing = false)
+                        _homePageFlow.value =
+                            PagedUiState.Success(data = homeData, isRefreshing = false)
                     }
                     is WebsiteState.Loading -> { }
                 }
@@ -136,8 +139,8 @@ class HomePageViewModel: ViewModel() {
 
     fun dismissAnnouncements(){
         val current = _homePageFlow.value
-        if (current is PageState.Success) {
-            _homePageFlow.value = current.copy(info = current.info.copy(announcements = emptyList()))
+        if (current is PagedUiState.Success) {
+            _homePageFlow.value = current.copy(data = current.data.copy(announcements = emptyList()))
         }
     }
 

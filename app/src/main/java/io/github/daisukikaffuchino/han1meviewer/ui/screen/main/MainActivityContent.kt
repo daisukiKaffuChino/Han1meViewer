@@ -39,8 +39,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.HCacheManager
-import io.github.daisukikaffuchino.han1meviewer.logic.exception.CloudflareBlockedException
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.HanimeErrorKind
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.component.UsageNoticeDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.HapticTextButton as TextButton
@@ -107,16 +107,16 @@ fun MainActivityContent(
     val isLoggedIn by SettingsRepository.loginStateFlow.collectAsStateWithLifecycle()
     val checkInEnabled by SettingsRepository.checkInEnabledFlow.collectAsStateWithLifecycle()
     val headerAvatarUrl = if (isLoggedIn) {
-        (homeState as? PageState.Success)?.info?.page?.avatarUrl
+        (homeState as? PagedUiState.Success)?.data?.page?.avatarUrl
     } else {
         null
     }
     val headerUsername = if (isLoggedIn) {
-        (homeState as? PageState.Success)?.info?.page?.username
+        (homeState as? PagedUiState.Success)?.data?.page?.username
     } else {
         null
     }
-    val headerIsLoading = isLoggedIn && homeState is PageState.Loading
+    val headerIsLoading = isLoggedIn && homeState is PagedUiState.Loading
     val currentRoute = backStack.currentKey
     val previousRoute = backStack.backStack.getOrNull(backStack.backStack.lastIndex - 1)
     val selectedDrawerDestination = MainDrawerDestination.fromRoute(backStack.topLevelKey)
@@ -155,9 +155,8 @@ fun MainActivityContent(
         }
     }
     LaunchedEffect(homeState) {
-        if (homeState is PageState.Error) {
-            val throwable = (homeState as PageState.Error).throwable
-            if (throwable is CloudflareBlockedException) {
+        (homeState as? PagedUiState.Error)?.let { errorState ->
+            if (errorState.error.kind == HanimeErrorKind.CloudflareChallenge) {
                 LogUtil.e("error", "被屏蔽时的处理")
             }
         }

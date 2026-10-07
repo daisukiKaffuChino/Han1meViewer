@@ -3,12 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.logic.network
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/**
- * 网络错误映射护栏。
- *
- * [NetworkFailureClassifier] 是纯 Kotlin（零 Android 依赖），因此这些用例
- * 可以直接在 JVM / 将来的 KMP commonTest 上运行，无需 Robolectric。
- */
+/** 网络错误映射护栏。 */
 class NetworkFailureClassifierTest {
 
     private fun classify(statusCode: Int, body: String?, isLoggedIn: Boolean = true) =

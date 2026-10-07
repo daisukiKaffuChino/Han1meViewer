@@ -7,7 +7,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.GetchuNetworkRepo.getGetch
 import io.github.daisukikaffuchino.han1meviewer.logic.GetchuNetworkRepo.getGetchuPreviewDetail
 import io.github.daisukikaffuchino.han1meviewer.logic.model.GetchuPreview
 import io.github.daisukikaffuchino.han1meviewer.logic.model.GetchuPreviewDetail
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,18 +18,18 @@ import kotlinx.coroutines.launch
 
 class GetchuPreviewViewModel : ViewModel() {
 
-    private val previewCache = linkedMapOf<String, PageState<GetchuPreview>>()
-    private val detailCache = linkedMapOf<String, PageState<GetchuPreviewDetail>>()
+    private val previewCache = linkedMapOf<String, PagedUiState<GetchuPreview>>()
+    private val detailCache = linkedMapOf<String, PagedUiState<GetchuPreviewDetail>>()
 
-    private val _previewFlow = MutableStateFlow<PageState<GetchuPreview>>(PageState.Loading)
+    private val _previewFlow = MutableStateFlow<PagedUiState<GetchuPreview>>(PagedUiState.Loading)
     val previewFlow = _previewFlow.asStateFlow()
 
     private val _detailStates =
-        MutableStateFlow<Map<String, PageState<GetchuPreviewDetail>>>(emptyMap())
+        MutableStateFlow<Map<String, PagedUiState<GetchuPreviewDetail>>>(emptyMap())
 
     fun detailState(id: String) = _detailStates
-        .map { states -> states[id] ?: PageState.Loading }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), detailCache[id] ?: PageState.Loading)
+        .map { states -> states[id] ?: PagedUiState.Loading }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), detailCache[id] ?: PagedUiState.Loading)
 
     fun getPreview(date: String) {
         viewModelScope.launch {
@@ -39,12 +39,12 @@ class GetchuPreviewViewModel : ViewModel() {
                 LogUtil.d("GetchuPreviewVM", "emit cached list date=$date state=${it.logSummary()}")
                 return@launch
             }
-            _previewFlow.value = PageState.Loading
+            _previewFlow.value = PagedUiState.Loading
             getGetchuPreview(date).collect { state ->
                 val pageState = state.toPageState()
                 LogUtil.d("GetchuPreviewVM", "emit list date=$date state=${pageState.logSummary()}")
                 _previewFlow.value = pageState
-                if (pageState is PageState.Success || pageState is PageState.NoMoreData) {
+                if (pageState is PagedUiState.Success || pageState is PagedUiState.NoMoreData) {
                     previewCache[date] = pageState
                 }
             }
@@ -59,37 +59,37 @@ class GetchuPreviewViewModel : ViewModel() {
                 LogUtil.d("GetchuPreviewVM", "emit cached detail id=$id state=${cachedState.logSummary()}")
                 return@launch
             }
-            setDetailState(id, PageState.Loading)
+            setDetailState(id, PagedUiState.Loading)
             getGetchuPreviewDetail(id).collect { state ->
                 val pageState = state.toPageState()
                 LogUtil.d("GetchuPreviewVM", "emit detail id=$id state=${pageState.logSummary()}")
                 setDetailState(id, pageState)
-                if (pageState is PageState.Success || pageState is PageState.NoMoreData) {
+                if (pageState is PagedUiState.Success || pageState is PagedUiState.NoMoreData) {
                     detailCache[id] = pageState
                 }
             }
         }
     }
 
-    private fun setDetailState(id: String, state: PageState<GetchuPreviewDetail>) {
+    private fun setDetailState(id: String, state: PagedUiState<GetchuPreviewDetail>) {
         _detailStates.value += (id to state)
     }
 
-    private fun <T> WebsiteState<T>.toPageState(): PageState<T> {
+    private fun <T> WebsiteState<T>.toPageState(): PagedUiState<T> {
         return when (this) {
-            is WebsiteState.Loading -> PageState.Loading
-            is WebsiteState.Error -> PageState.Error(throwable)
-            is WebsiteState.Success -> PageState.Success(info)
+            is WebsiteState.Loading -> PagedUiState.Loading
+            is WebsiteState.Error -> PagedUiState.Error(throwable)
+            is WebsiteState.Success -> PagedUiState.Success(info)
         }
     }
 
-    private fun PageState<*>.logSummary(): String {
+    private fun PagedUiState<*>.logSummary(): String {
         return when (this) {
-            is PageState.Loading -> "Loading"
-            is PageState.Empty -> "Empty"
-            is PageState.Error -> "Error(${throwable::class.simpleName}: ${throwable.message})"
-            is PageState.NoMoreData<*> -> "NoMoreData"
-            is PageState.Success<*> -> when (val value = info) {
+            is PagedUiState.Loading -> "Loading"
+            is PagedUiState.Empty -> "Empty"
+            is PagedUiState.Error -> "Error(${throwable::class.simpleName}: ${throwable.message})"
+            is PagedUiState.NoMoreData<*> -> "NoMoreData"
+            is PagedUiState.Success<*> -> when (val value = data) {
                 is GetchuPreview -> "Success(GetchuPreview groups=${value.groups.size} totalItems=${value.groups.sumOf { it.items.size }})"
                 is GetchuPreviewDetail -> "Success(GetchuPreviewDetail title=${value.title.take(60)} samples=${value.sampleImages.size})"
                 else -> "Success(${value?.let { it::class.simpleName }})"

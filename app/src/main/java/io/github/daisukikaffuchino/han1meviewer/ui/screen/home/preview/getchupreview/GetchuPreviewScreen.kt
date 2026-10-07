@@ -30,14 +30,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.daisukikaffuchino.han1meviewer.R
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.dataOrNull
+import io.github.daisukikaffuchino.han1meviewer.logic.state.isFirstPageEmpty
+import io.github.daisukikaffuchino.han1meviewer.logic.state.isFirstPageError
+import io.github.daisukikaffuchino.han1meviewer.logic.state.isFirstPageLoading
 import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
-import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageEmpty
-import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageError
-import io.github.daisukikaffuchino.han1meviewer.ui.component.isFirstPageLoading
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberRandomLoadingHint
 import io.github.daisukikaffuchino.han1meviewer.util.toNetworkErrorMessageRes
@@ -113,7 +113,7 @@ fun GetchuPreviewScreen(
             isLoading = state.isFirstPageLoading,
             isError = state.isFirstPageError,
             isEmpty = state.isFirstPageEmpty || state.dataOrNull?.groups?.isEmpty() == true,
-            errorMessage = (state as? PageState.Error)?.throwable?.toNetworkErrorMessageRes()?.let {
+            errorMessage = (state as? PagedUiState.Error)?.throwable?.toNetworkErrorMessageRes()?.let {
                 stringResource(it)
             } ?: "",
             onRetry = { if (!isInspectionMode) viewModel.getPreview(dateCode) },
