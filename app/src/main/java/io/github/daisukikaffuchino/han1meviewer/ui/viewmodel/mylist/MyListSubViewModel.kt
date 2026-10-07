@@ -4,7 +4,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListType
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,8 +17,8 @@ abstract class MyListSubViewModel(
     private val scope: CoroutineScope,
 ) {
 
-    protected val itemsStateFlow: MutableStateFlow<PageLoadingState<MyListItems<HanimeInfo>>> =
-        MutableStateFlow(PageLoadingState.Loading)
+    protected val itemsStateFlow: MutableStateFlow<PagedUiState<MyListItems<HanimeInfo>>> =
+        MutableStateFlow(PagedUiState.Loading)
 
     protected val itemsFlow = MutableStateFlow(emptyList<HanimeInfo>())
 
@@ -45,21 +45,21 @@ abstract class MyListSubViewModel(
                 itemsStateFlow.value = state
                 itemsFlow.update { prevList ->
                     when (state) {
-                        is PageLoadingState.Success -> {
-                            onSuccess(state.info)
-                            mutableTotalPages.value = state.info.maxPage
-                            if (state.info.hanimeInfo.isEmpty()) {
-                                itemsStateFlow.update { PageLoadingState.NoMoreData }
+                        is PagedUiState.Success -> {
+                            onSuccess(state.data)
+                            mutableTotalPages.value = state.data.maxPage
+                            if (state.data.hanimeInfo.isEmpty()) {
+                                itemsStateFlow.update { PagedUiState.NoMoreData }
                             } else {
                                 mutableLoadedPageCount.value = page
                             }
                             val baseList = if (isRefreshing) emptyList() else prevList
                             isRefreshing = false
                             mutableIsLoadingMore.value = false
-                            (baseList + state.info.hanimeInfo).distinctBy(HanimeInfo::videoCode)
+                            (baseList + state.data.hanimeInfo).distinctBy(HanimeInfo::videoCode)
                         }
 
-                        is PageLoadingState.Loading -> prevList
+                        is PagedUiState.Loading -> prevList
                         else -> {
                             mutableIsLoadingMore.value = false
                             prevList
@@ -95,6 +95,6 @@ abstract class MyListSubViewModel(
         mutableLoadedPageCount.value = 0
         mutableTotalPages.value = 1
         itemsFlow.value = emptyList()
-        itemsStateFlow.value = PageLoadingState.Loading
+        itemsStateFlow.value = PagedUiState.Loading
     }
 }

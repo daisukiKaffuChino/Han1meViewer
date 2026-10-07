@@ -8,7 +8,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.exception.NotLoggedInExcep
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.OnlineWatchHistorySort
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel.csrfToken
 import kotlinx.coroutines.Job
@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 
 class OnlineWatchHistoryViewModel : ViewModel() {
 
-    private val _state = MutableStateFlow<PageLoadingState<MyListItems<HanimeInfo>>>(PageLoadingState.Loading)
+    private val _state = MutableStateFlow<PagedUiState<MyListItems<HanimeInfo>>>(PagedUiState.Loading)
     val state = _state.asStateFlow()
 
     private val _items = MutableStateFlow(emptyList<HanimeInfo>())
@@ -67,12 +67,12 @@ class OnlineWatchHistoryViewModel : ViewModel() {
         if (sortChanged) {
             _items.value = emptyList()
         }
-        _state.value = PageLoadingState.Loading
+        _state.value = PagedUiState.Loading
         loadPage(1)
     }
 
     fun loadNextPage() {
-        if (_state.value is PageLoadingState.Loading || _state.value is PageLoadingState.NoMoreData || _isLoadingMore.value) {
+        if (_state.value is PagedUiState.Loading || _state.value is PagedUiState.NoMoreData || _isLoadingMore.value) {
             return
         }
         loadPage(_loadedPageCount.value + 1)
@@ -85,7 +85,7 @@ class OnlineWatchHistoryViewModel : ViewModel() {
         _isLoadingMore.value = false
         _loadedPageCount.value = 0
         _totalPages.value = 1
-        _state.value = PageLoadingState.Loading
+        _state.value = PagedUiState.Loading
         _items.value = emptyList()
         loadPage(page)
     }
@@ -103,11 +103,11 @@ class OnlineWatchHistoryViewModel : ViewModel() {
                 _state.value = pageState
                 _items.update { previousItems ->
                     when (pageState) {
-                        is PageLoadingState.Success -> {
-                            val incoming = pageState.info.hanimeInfo
-                            _totalPages.value = pageState.info.maxPage
+                        is PagedUiState.Success -> {
+                            val incoming = pageState.data.hanimeInfo
+                            _totalPages.value = pageState.data.maxPage
                             if (incoming.isEmpty()) {
-                                _state.value = PageLoadingState.NoMoreData
+                                _state.value = PagedUiState.NoMoreData
                             } else {
                                 _loadedPageCount.value = page
                             }
@@ -118,7 +118,7 @@ class OnlineWatchHistoryViewModel : ViewModel() {
                             (baseItems + incoming).distinctBy(HanimeInfo::videoCode)
                         }
 
-                        is PageLoadingState.Loading -> previousItems
+                        is PagedUiState.Loading -> previousItems
 
                         else -> {
                             isManualRefreshing = false
@@ -142,7 +142,7 @@ class OnlineWatchHistoryViewModel : ViewModel() {
         _loadedPageCount.value = 0
         _totalPages.value = 1
         _isLoadingMore.value = false
-        _state.value = PageLoadingState.Error(
+        _state.value = PagedUiState.Error(
             NotLoggedInException()
         )
     }

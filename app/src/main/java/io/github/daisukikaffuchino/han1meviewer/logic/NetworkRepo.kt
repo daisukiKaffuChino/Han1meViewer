@@ -18,7 +18,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoComments
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HanimeNetwork
 import io.github.daisukikaffuchino.han1meviewer.logic.network.NetworkFailure
 import io.github.daisukikaffuchino.han1meviewer.logic.network.NetworkFailureClassifier
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.replaceBackupMediaCdnHost
@@ -550,7 +550,7 @@ object NetworkRepo {
      */
     private fun <T> pageIOFlow(
         request: suspend () -> Response<ResponseBody>,
-        action: (String) -> PageLoadingState<T>,
+        action: (String) -> PagedUiState<T>,
     ) = flow {
         val requestResult = request.invoke()
         val resultBody = requestResult.body()?.string()?.replaceBackupMediaCdnHost()
@@ -560,7 +560,7 @@ object NetworkRepo {
             requestResult.throwRequestException()
         }
     }.catch { e ->
-        emit(PageLoadingState.Error(handleException(e)))
+        emit(PagedUiState.Error(handleException(e)))
     }.flowOn(Dispatchers.IO)
 
     /**

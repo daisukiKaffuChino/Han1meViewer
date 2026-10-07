@@ -5,7 +5,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListType
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +19,7 @@ class FavSubViewModel(scope: CoroutineScope) :
     override var favVideoPage = 1
     private var csrfToken: String? = null
 
-    override val favVideoStateFlow: StateFlow<PageLoadingState<MyListItems<HanimeInfo>>> = itemsStateFlow.asStateFlow()
+    override val favVideoStateFlow: StateFlow<PagedUiState<MyListItems<HanimeInfo>>> = itemsStateFlow.asStateFlow()
     override val favVideoFlow: StateFlow<List<HanimeInfo>> = itemsFlow.asStateFlow()
 
     override fun getMyFavVideoItems(userId: String, page: Int) {

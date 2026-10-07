@@ -12,11 +12,10 @@ class PagedUiStateTest {
     @Test
     fun `dataOrNull exposes payload for success, no-more-data and cached error`() {
         assertEquals("a", PagedUiState.Success("a").dataOrNull)
-        assertEquals("b", PagedUiState.NoMoreData("b").dataOrNull)
         assertEquals("c", PagedUiState.Error(IOException("x"), cached = "c").dataOrNull)
         assertNull(PagedUiState.Loading.dataOrNull)
         assertNull(PagedUiState.Empty.dataOrNull)
-        assertNull(PagedUiState.NoMoreData<String>().dataOrNull)
+        assertNull(PagedUiState.NoMoreData.dataOrNull)
         assertNull(PagedUiState.Error<String>(IOException("x")).dataOrNull)
     }
 
@@ -26,7 +25,7 @@ class PagedUiStateTest {
         assertFalse(PagedUiState.Success("a").isFirstPageLoading)
 
         assertTrue(PagedUiState.Empty.isFirstPageEmpty)
-        assertFalse(PagedUiState.NoMoreData<String>().isFirstPageEmpty)
+        assertFalse(PagedUiState.NoMoreData.isFirstPageEmpty)
 
         assertTrue(PagedUiState.Error<String>(IOException("x")).isFirstPageError)
         assertFalse(PagedUiState.Error(IOException("x"), cached = "c").isFirstPageError)

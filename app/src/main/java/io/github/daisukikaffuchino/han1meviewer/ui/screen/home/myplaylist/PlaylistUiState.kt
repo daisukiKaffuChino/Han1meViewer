@@ -2,7 +2,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.myplaylist
 
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Playlists
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 
 /**
  * 播放列表页面 UI 状态。

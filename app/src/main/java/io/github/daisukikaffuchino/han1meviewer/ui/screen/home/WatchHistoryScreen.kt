@@ -73,7 +73,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.WatchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.OnlineWatchHistorySort
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.CardContainerSurface
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
@@ -108,7 +108,7 @@ import java.util.Locale
 fun WatchHistoryTabScreen(
     localHistoriesFlow: Flow<List<WatchHistoryEntity>>,
     onlineItems: StateFlow<List<HanimeInfo>>,
-    onlineState: StateFlow<PageLoadingState<*>>,
+    onlineState: StateFlow<PagedUiState<*>>,
     onlineSort: StateFlow<OnlineWatchHistorySort>,
     onlineLoadedPageCount: StateFlow<Int>,
     onlineTotalPages: StateFlow<Int>,
@@ -139,7 +139,7 @@ fun WatchHistoryTabScreen(
     var showDeleteAllLocalDialog by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(pagerState.currentPage) {
-        if (pagerState.currentPage == 1 && currentOnlineItems.isEmpty() && currentOnlineLoadedPageCount == 0 && currentOnlineState is PageLoadingState.Loading) {
+        if (pagerState.currentPage == 1 && currentOnlineItems.isEmpty() && currentOnlineLoadedPageCount == 0 && currentOnlineState is PagedUiState.Loading) {
             onRefreshOnline(currentOnlineSort)
         }
     }
@@ -322,7 +322,7 @@ private fun rememberWatchHistoryFabVisibility(
 @Composable
 private fun OnlineWatchHistoryScreen(
     items: List<HanimeInfo>,
-    state: PageLoadingState<*>,
+    state: PagedUiState<*>,
     sort: OnlineWatchHistorySort,
     loadedPageCount: Int,
     totalPages: Int,
@@ -359,9 +359,9 @@ private fun OnlineWatchHistoryScreen(
             searchPagination ||
             items.isEmpty() ||
             isLoadingMore ||
-            state is PageLoadingState.Loading ||
-            state is PageLoadingState.NoMoreData ||
-            state is PageLoadingState.Error
+            state is PagedUiState.Loading ||
+            state is PagedUiState.NoMoreData ||
+            state is PagedUiState.Error
         ) {
             return@LaunchedEffect
         }
@@ -426,9 +426,9 @@ private fun OnlineWatchHistoryScreen(
             }
         ) {
             PageContent(
-                isLoading = state is PageLoadingState.Loading && items.isEmpty(),
-                isError = state is PageLoadingState.Error,
-                isEmpty = state is PageLoadingState.NoMoreData && items.isEmpty(),
+                isLoading = state is PagedUiState.Loading && items.isEmpty(),
+                isError = state is PagedUiState.Error,
+                isEmpty = state is PagedUiState.NoMoreData && items.isEmpty(),
                 onRetry = { onRefresh(sort) },
                 error = {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -504,7 +504,7 @@ private fun OnlineWatchHistoryGrid(
     items: List<HanimeInfo>,
     gridState: LazyGridState,
     loadedPageCount: Int,
-    state: PageLoadingState<*>,
+    state: PagedUiState<*>,
     isLoadingMore: Boolean,
     snackbarHostState: androidx.compose.material3.SnackbarHostState,
     onOpenVideo: (HanimeInfo) -> Unit,

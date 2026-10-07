@@ -10,7 +10,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ModifiedPlaylistArgs
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Playlists
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.myplaylist.PlaylistUiState
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel.csrfToken
@@ -39,7 +39,7 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
     private val _cachedMyPlayList = MutableStateFlow<List<Playlists.Playlist>>(emptyList())
 
     private val _playlistStateFlow =
-        MutableStateFlow<PageLoadingState<MyListItems<HanimeInfo>>>(PageLoadingState.Loading)
+        MutableStateFlow<PagedUiState<MyListItems<HanimeInfo>>>(PagedUiState.Loading)
     override val playlistStateFlow = _playlistStateFlow.asStateFlow()
     private val _playlistDesc = MutableStateFlow<String?>(null)
     override val playlistDesc = _playlistDesc.asStateFlow()
@@ -188,41 +188,45 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
             if (page == 1 || refresh) {
                 _playlistFlow.value = emptyList()
                 _playlistDesc.value = null
-                _playlistStateFlow.value = PageLoadingState.Loading
+                _playlistStateFlow.value = PagedUiState.Loading
             } else {
-                _playlistStateFlow.value = PageLoadingState.Loading
+                _playlistStateFlow.value = PagedUiState.Loading
             }
             NetworkRepo.getMyPlayListItems(page, listCode).collect { state ->
                 LogUtil.i("getPlaylistItems","state:$state")
                 when (state) {
-                    is PageLoadingState.Success -> {
-                        LogUtil.i("getPlaylistItems","list size:${state.info.hanimeInfo.size}")
-                        _playlistDesc.value = state.info.desc
-                        _playlistTotalPages.value = state.info.maxPage
-                        val newList = state.info.hanimeInfo
+                    is PagedUiState.Success -> {
+                        LogUtil.i("getPlaylistItems","list size:${state.data.hanimeInfo.size}")
+                        _playlistDesc.value = state.data.desc
+                        _playlistTotalPages.value = state.data.maxPage
+                        val newList = state.data.hanimeInfo
                         if (newList.isEmpty()) {
-                            _playlistStateFlow.value = PageLoadingState.NoMoreData
+                            _playlistStateFlow.value = PagedUiState.NoMoreData
                         } else {
                             _playlistFlow.update { prevList ->
                                 val baseList = if (page == 1 || refresh) emptyList() else prevList
                                 (baseList + newList).distinctBy(HanimeInfo::videoCode)
                             }
-                            _playlistStateFlow.value = PageLoadingState.Success(state.info)
+                            _playlistStateFlow.value = PagedUiState.Success(state.data)
                         }
                     }
 
-                    is PageLoadingState.Error -> {
-                        _playlistStateFlow.value = PageLoadingState.Error(state.throwable)
+                    is PagedUiState.Error -> {
+                        _playlistStateFlow.value = PagedUiState.Error(state.throwable)
                     }
 
-                    is PageLoadingState.Loading -> {
+                    is PagedUiState.Loading -> {
                         if (page == 1 || refresh) {
                             _playlistFlow.value = emptyList()
                         }
                     }
 
-                    is PageLoadingState.NoMoreData -> {
-                        _playlistStateFlow.value = PageLoadingState.NoMoreData
+                    is PagedUiState.NoMoreData -> {
+                        _playlistStateFlow.value = PagedUiState.NoMoreData
+                    }
+
+                    is PagedUiState.Empty -> {
+                        _playlistStateFlow.value = PagedUiState.Empty
                     }
                 }
             }
@@ -267,7 +271,7 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
         }
     }
     fun clearMyListItems() {
-        _playlistStateFlow.value = PageLoadingState.Loading
+        _playlistStateFlow.value = PagedUiState.Loading
     }
     override fun clearCurrentList() {
         _playlistFlow.value = emptyList()

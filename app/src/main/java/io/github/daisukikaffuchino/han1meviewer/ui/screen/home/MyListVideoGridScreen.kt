@@ -28,7 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
@@ -67,7 +67,7 @@ import kotlinx.coroutines.flow.flowOf
 @Composable
 fun VideoGridScreen(
     items: List<HanimeInfo>,
-    state: PageLoadingState<*>,
+    state: PagedUiState<*>,
     deleteStateFlow: Flow<WebsiteState<Boolean>>,
     loadedPageCount: Int,
     totalPages: Int,
@@ -91,11 +91,11 @@ fun VideoGridScreen(
     val deleteSuccessText = stringResource(R.string.delete_success)
     val searchPagination = SettingsRepository.searchPagination
 
-    val refreshing = state is PageLoadingState.Loading && pendingRefresh
+    val refreshing = state is PagedUiState.Loading && pendingRefresh
     val refreshingState = rememberPullToRefreshState()
-    val isError = state is PageLoadingState.Error && items.isEmpty()
-    val isEmpty = state is PageLoadingState.NoMoreData && items.isEmpty()
-    val shouldBootstrap = items.isEmpty() && state is PageLoadingState.Loading && loadedPageCount == 0
+    val isError = state is PagedUiState.Error && items.isEmpty()
+    val isEmpty = state is PagedUiState.NoMoreData && items.isEmpty()
+    val shouldBootstrap = items.isEmpty() && state is PagedUiState.Loading && loadedPageCount == 0
 
     LaunchedEffect(shouldBootstrap) {
         if (shouldBootstrap && !pendingRefresh) {
@@ -105,7 +105,7 @@ fun VideoGridScreen(
     }
 
     LaunchedEffect(state) {
-        if (state !is PageLoadingState.Loading) {
+        if (state !is PagedUiState.Loading) {
             pendingRefresh = false
         }
     }
@@ -241,7 +241,7 @@ private fun VideoGridScreenPreview() {
     ComponentPreview {
         VideoGridScreen(
             items = fakeHomePageVideos.take(6),
-            state = PageLoadingState.Success(Unit),
+            state = PagedUiState.Success(Unit),
             deleteStateFlow = flowOf(WebsiteState.Success(true)),
             loadedPageCount = 2,
             totalPages = 10,

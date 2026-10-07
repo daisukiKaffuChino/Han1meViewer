@@ -7,7 +7,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ModifiedPlaylistArgs
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Playlists
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.myplaylist.PlaylistUiState
 import kotlinx.coroutines.Dispatchers
@@ -37,8 +37,8 @@ class LocalPlayListViewModel : ViewModel(), PlaylistController {
     override val currentListInfo: StateFlow<Pair<String, String>?> = _currentListInfo.asStateFlow()
 
     private val _playlistStateFlow =
-        MutableStateFlow<PageLoadingState<MyListItems<HanimeInfo>>>(PageLoadingState.Loading)
-    override val playlistStateFlow: StateFlow<PageLoadingState<MyListItems<HanimeInfo>>> =
+        MutableStateFlow<PagedUiState<MyListItems<HanimeInfo>>>(PagedUiState.Loading)
+    override val playlistStateFlow: StateFlow<PagedUiState<MyListItems<HanimeInfo>>> =
         _playlistStateFlow.asStateFlow()
 
     private val _playlistDesc = MutableStateFlow<String?>(null)
@@ -141,16 +141,16 @@ class LocalPlayListViewModel : ViewModel(), PlaylistController {
                 if (page == 1 || refresh) {
                     _playlistFlow.value = emptyList()
                     _playlistDesc.value = null
-                    _playlistStateFlow.value = PageLoadingState.Loading
+                    _playlistStateFlow.value = PagedUiState.Loading
                 }
                 val desc = LocalListRepository.getPlaylistDesc(listCode)
                 val items = LocalListRepository.getPlaylistItemsOnce(listCode)
                 _playlistDesc.value = desc
                 _playlistFlow.value = items
                 _playlistStateFlow.value = if (items.isEmpty()) {
-                    PageLoadingState.NoMoreData
+                    PagedUiState.NoMoreData
                 } else {
-                    PageLoadingState.Success(MyListItems(items, desc))
+                    PagedUiState.Success(MyListItems(items, desc))
                 }
                 currentPage = 2
             } finally {
@@ -193,7 +193,7 @@ class LocalPlayListViewModel : ViewModel(), PlaylistController {
             }.onSuccess {
                 _modifyPlaylistFlow.emit(WebsiteState.Success(ModifiedPlaylistArgs(title, desc, delete)))
                 if (delete) {
-                    _playlistStateFlow.value = PageLoadingState.Loading
+                    _playlistStateFlow.value = PagedUiState.Loading
                     _playlistFlow.value = emptyList()
                 }
             }.onFailure {

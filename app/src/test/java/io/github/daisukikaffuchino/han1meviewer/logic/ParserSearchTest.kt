@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.logic
 
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.utils.LogUtil
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -30,8 +30,8 @@ class ParserSearchTest {
     fun `normal search page parses cards and total pages`() {
         val state = Parser.hanimeSearch(fixture("search_normal.html"))
 
-        val success = state as PageLoadingState.Success
-        val result = success.info
+        val success = state as PagedUiState.Success
+        val result = success.data
         assertEquals(7, result.totalPages)
         assertEquals(2, result.list.size)
 
@@ -53,8 +53,8 @@ class ParserSearchTest {
     fun `simplified search page parses cards`() {
         val state = Parser.hanimeSearch(fixture("search_simplified.html"))
 
-        val success = state as PageLoadingState.Success
-        val result = success.info
+        val success = state as PagedUiState.Success
+        val result = success.data
         assertEquals(3, result.totalPages)
         assertEquals(2, result.list.size)
         assertEquals("777001", result.list[0].videoCode)
@@ -67,7 +67,7 @@ class ParserSearchTest {
     @Test
     fun `search page without cards reports no more data`() {
         val state = Parser.hanimeSearch(fixture("search_empty.html"))
-        assertEquals(PageLoadingState.NoMoreData, state)
+        assertEquals(PagedUiState.NoMoreData, state)
     }
 
     @Test

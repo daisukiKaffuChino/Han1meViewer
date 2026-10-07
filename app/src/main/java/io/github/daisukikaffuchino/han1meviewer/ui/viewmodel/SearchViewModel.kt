@@ -16,7 +16,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.SearchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeSearchResult
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.utils.loadAssetAs
 import io.github.daisukikaffuchino.utils.unsafeLazy
 import kotlinx.coroutines.Dispatchers
@@ -117,7 +117,7 @@ class SearchViewModel(
     }
 
     private val _searchStateFlow =
-        MutableStateFlow<PageLoadingState<HanimeSearchResult>>(PageLoadingState.Loading)
+        MutableStateFlow<PagedUiState<HanimeSearchResult>>(PagedUiState.Loading)
     val searchStateFlow = _searchStateFlow.asStateFlow()
 
     private val _searchFlow = MutableStateFlow(emptyList<HanimeInfo>())
@@ -129,7 +129,7 @@ class SearchViewModel(
 
     fun clearHanimeSearchResult() {
         _searchFlow.value = emptyList()
-        _searchStateFlow.value = PageLoadingState.Loading
+        _searchStateFlow.value = PagedUiState.Loading
         _totalPagesFlow.value = 1
     }
 
@@ -149,7 +149,7 @@ class SearchViewModel(
         gridFirstVisibleItemIndex = 0
         gridFirstVisibleItemScrollOffset = 0
         _searchFlow.value = emptyList()
-        _searchStateFlow.value = PageLoadingState.Loading
+        _searchStateFlow.value = PagedUiState.Loading
         _totalPagesFlow.value = 1
     }
 
@@ -165,9 +165,9 @@ class SearchViewModel(
                 duration, tags, brands
             ).collect { state ->
                 _searchStateFlow.value = state
-                if (state is PageLoadingState.Success) {
-                    _totalPagesFlow.value = state.info.totalPages
-                    val list = state.info.list
+                if (state is PagedUiState.Success) {
+                    _totalPagesFlow.value = state.data.totalPages
+                    val list = state.data.list
                     val updatedList = if (SettingsRepository.showPlayedIndicator) {
                         val codes = list.map { it.videoCode }
                         val watchedCodes = withContext(Dispatchers.IO) {

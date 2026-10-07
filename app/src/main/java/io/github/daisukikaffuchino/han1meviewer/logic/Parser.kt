@@ -23,7 +23,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.SubscriptionItem
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SubscriptionVideosItem
 import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccount
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoComments
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.toVideoCode
@@ -257,7 +257,7 @@ object Parser {
         )
     }
 
-    fun hanimeSearch(body: String): PageLoadingState<HanimeSearchResult> {
+    fun hanimeSearch(body: String): PagedUiState<HanimeSearchResult> {
         val parseBody = Jsoup.parse(body).body()
         val maxPage = parseSearchMaxPage(parseBody)
         val allContentsClass =
@@ -271,7 +271,7 @@ object Parser {
         } else if (allSimplifiedContentsClass != null) {
             return hanimeSearchSimplified(allSimplifiedContentsClass, maxPage)
         }
-        return PageLoadingState.Success(HanimeSearchResult(emptyList(), maxPage))
+        return PagedUiState.Success(HanimeSearchResult(emptyList(), maxPage))
     }
 
     private fun hanimeNormalItemVer2(hanimeSearchItem: Element): HanimeInfo? {
@@ -326,34 +326,34 @@ object Parser {
     private fun hanimeSearchNormalVer2(
         allContentsClass: Element,
         maxPage: Int,
-    ): PageLoadingState<HanimeSearchResult> {
+    ): PagedUiState<HanimeSearchResult> {
         val hanimeSearchList = mutableListOf<HanimeInfo>()
         val hanimeSearchItems =
             allContentsClass.select("div[class^=horizontal-card]")
         if (hanimeSearchItems.isEmpty()) {
-            return PageLoadingState.NoMoreData
+            return PagedUiState.NoMoreData
         } else {
             hanimeSearchItems.forEach { hanimeSearchItem ->
                 hanimeNormalItemVer2(hanimeSearchItem)?.let(hanimeSearchList::add)
             }
         }
         LogUtil.d("search_result", "$hanimeSearchList")
-        return PageLoadingState.Success(HanimeSearchResult(hanimeSearchList, maxPage))
+        return PagedUiState.Success(HanimeSearchResult(hanimeSearchList, maxPage))
     }
 
     // 出来后是简化版视频单元的页面用这个
     private fun hanimeSearchSimplified(
         allSimplifiedContentsClass: Element,
         maxPage: Int,
-    ): PageLoadingState<HanimeSearchResult> {
+    ): PagedUiState<HanimeSearchResult> {
         val hanimeSearchList = mutableListOf<HanimeInfo>()
         val hanimeSearchItems = allSimplifiedContentsClass.children()
         if (hanimeSearchItems.isEmpty()) {
-            return PageLoadingState.NoMoreData
+            return PagedUiState.NoMoreData
         } else hanimeSearchItems.forEach { hanimeSearchItem ->
             hanimeSimplifiedItem(hanimeSearchItem)?.let(hanimeSearchList::add)
         }
-        return PageLoadingState.Success(HanimeSearchResult(hanimeSearchList, maxPage))
+        return PagedUiState.Success(HanimeSearchResult(hanimeSearchList, maxPage))
     }
 
     /**
@@ -763,7 +763,7 @@ object Parser {
         )
     }
 
-    fun myListItems(body: String): PageLoadingState<MyListItems<HanimeInfo>> {
+    fun myListItems(body: String): PagedUiState<MyListItems<HanimeInfo>> {
         val parseBody = Jsoup.parse(body).body()
         val csrfToken = parseBody.selectFirst("input[name=_token]")?.attr("value")
         val desc = parseBody.getElementById("playlist-show-description")?.ownText()
@@ -771,7 +771,7 @@ object Parser {
         val myListHanimeList = allHanimeClass.extractHanimeInfo("div[class^=user-tab-item-wrapper]")
         val maxPage = parseListMaxPage(parseBody)
 
-        return PageLoadingState.Success(
+        return PagedUiState.Success(
             MyListItems(
                 myListHanimeList,
                 desc = desc,
@@ -781,7 +781,7 @@ object Parser {
         )
     }
 
-    fun myPlayListItems(body: String): PageLoadingState<MyListItems<HanimeInfo>> {
+    fun myPlayListItems(body: String): PagedUiState<MyListItems<HanimeInfo>> {
         val parseBody = Jsoup.parse(body).body()
         val csrfToken = parseBody.selectFirst("input[name=_token]")?.attr("value")
         val desc = parseBody.select("p.playlist-description").first()?.text()
@@ -789,7 +789,7 @@ object Parser {
         val myListHanimeList = allHanimeClass.extractHanimeInfo("div[class^=user-tab-item-wrapper]")
         val maxPage = parseListMaxPage(parseBody)
 
-        return PageLoadingState.Success(
+        return PagedUiState.Success(
             MyListItems(
                 myListHanimeList,
                 desc = desc,
@@ -799,15 +799,15 @@ object Parser {
         )
     }
 
-    fun onlineWatchHistoryItems(body: String): PageLoadingState<MyListItems<HanimeInfo>> {
+    fun onlineWatchHistoryItems(body: String): PagedUiState<MyListItems<HanimeInfo>> {
         val parseBody = Jsoup.parse(body).body()
         val csrfToken = parseBody.selectFirst("input[name=_token]")?.attr("value")
         val allHanimeClass = parseBody.getElementsByClass("horizontal-row").firstOrNull()
         val items = allHanimeClass.extractHanimeInfo("div[class^=user-tab-item-wrapper]")
         return if (items.isEmpty()) {
-            PageLoadingState.NoMoreData
+            PagedUiState.NoMoreData
         } else {
-            PageLoadingState.Success(
+            PagedUiState.Success(
                 MyListItems(
                     items,
                     csrfToken = csrfToken,

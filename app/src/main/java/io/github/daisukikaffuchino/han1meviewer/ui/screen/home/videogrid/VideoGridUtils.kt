@@ -2,7 +2,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.videogrid
 
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 
 /**
  * 判断视频网格是否需要加载更多。
@@ -13,10 +13,10 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
  */
 fun LazyGridState.canLoadMore(
     items: List<HanimeInfo>,
-    state: PageLoadingState<*>,
+    state: PagedUiState<*>,
 ): Boolean {
     if (items.isEmpty()) return false
-    if (state is PageLoadingState.Loading || state is PageLoadingState.NoMoreData || state is PageLoadingState.Error) {
+    if (state is PagedUiState.Loading || state is PagedUiState.NoMoreData || state is PagedUiState.Error) {
         return false
     }
     val lastVisible = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: return false

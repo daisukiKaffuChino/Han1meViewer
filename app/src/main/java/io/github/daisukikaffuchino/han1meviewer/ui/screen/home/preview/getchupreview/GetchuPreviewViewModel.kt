@@ -88,7 +88,7 @@ class GetchuPreviewViewModel : ViewModel() {
             is PagedUiState.Loading -> "Loading"
             is PagedUiState.Empty -> "Empty"
             is PagedUiState.Error -> "Error(${throwable::class.simpleName}: ${throwable.message})"
-            is PagedUiState.NoMoreData<*> -> "NoMoreData"
+            is PagedUiState.NoMoreData -> "NoMoreData"
             is PagedUiState.Success<*> -> when (val value = data) {
                 is GetchuPreview -> "Success(GetchuPreview groups=${value.groups.size} totalItems=${value.groups.sumOf { it.items.size }})"
                 is GetchuPreviewDetail -> "Success(GetchuPreviewDetail title=${value.title.take(60)} samples=${value.sampleImages.size})"

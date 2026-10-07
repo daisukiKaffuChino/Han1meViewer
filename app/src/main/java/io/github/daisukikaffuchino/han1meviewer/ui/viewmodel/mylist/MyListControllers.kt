@@ -2,7 +2,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.mylist
 
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
  * 稍后再看列表的在线/本地共用接口，供路由层按登录状态切换实现。
  */
 interface WatchLaterListController {
-    val watchLaterStateFlow: StateFlow<PageLoadingState<MyListItems<HanimeInfo>>>
+    val watchLaterStateFlow: StateFlow<PagedUiState<MyListItems<HanimeInfo>>>
     val watchLaterFlow: StateFlow<List<HanimeInfo>>
     val deleteMyWatchLaterFlow: SharedFlow<WebsiteState<Boolean>>
     val loadedPageCount: StateFlow<Int>
@@ -28,7 +28,7 @@ interface WatchLaterListController {
  * 我喜欢的影片列表的在线/本地共用接口，供路由层按登录状态切换实现。
  */
 interface FavVideoListController {
-    val favVideoStateFlow: StateFlow<PageLoadingState<MyListItems<HanimeInfo>>>
+    val favVideoStateFlow: StateFlow<PagedUiState<MyListItems<HanimeInfo>>>
     val favVideoFlow: StateFlow<List<HanimeInfo>>
     val deleteMyFavVideoFlow: SharedFlow<WebsiteState<Boolean>>
     val loadedPageCount: StateFlow<Int>

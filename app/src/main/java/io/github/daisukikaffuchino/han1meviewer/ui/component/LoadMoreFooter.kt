@@ -23,7 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.daisukikaffuchino.han1meviewer.R
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
@@ -38,7 +38,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoadMoreFooter(
-    state: PageLoadingState<*>,
+    state: PagedUiState<*>,
     modifier: Modifier = Modifier,
     textColor: Color = MaterialTheme.colorScheme.onSurface,
     loadedPage: Int? = null,
@@ -51,7 +51,7 @@ fun LoadMoreFooter(
         contentAlignment = Alignment.Center
     ) {
         when {
-            state is PageLoadingState.Loading || isLoadingMore -> {
+            state is PagedUiState.Loading || isLoadingMore -> {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -67,7 +67,7 @@ fun LoadMoreFooter(
                 }
             }
 
-            state is PageLoadingState.NoMoreData -> {
+            state is PagedUiState.NoMoreData -> {
                 Text(
                     text = if (loadedPage == null)
                         stringResource(R.string.load_complete)
@@ -78,9 +78,9 @@ fun LoadMoreFooter(
                 )
             }
 
-            state is PageLoadingState.Success<*> -> {}
+            state is PagedUiState.Success<*> -> {}
 
-            state is PageLoadingState.Error -> {
+            state is PagedUiState.Error -> {
                 Text(
                     text = stringResource(R.string.load_failed_retry),
                     color = MaterialTheme.colorScheme.error,
@@ -94,7 +94,7 @@ fun LoadMoreFooter(
 @Preview(showBackground = true)
 @Composable
 fun LoadMoreFooterPreview() {
-    var loadMoreState by remember { mutableStateOf<PageLoadingState<*>>(PageLoadingState.Loading) }
+    var loadMoreState by remember { mutableStateOf<PagedUiState<*>>(PagedUiState.Loading) }
 
     LazyColumn {
         items(20) { index ->
@@ -112,8 +112,8 @@ fun LoadMoreFooterPreview() {
 
     LaunchedEffect(Unit) {
         delay(5000.milliseconds)
-        loadMoreState = PageLoadingState.Loading
+        loadMoreState = PagedUiState.Loading
         delay(5000.milliseconds)
-        loadMoreState = PageLoadingState.NoMoreData
+        loadMoreState = PagedUiState.NoMoreData
     }
 }

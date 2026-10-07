@@ -3,7 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.mylist
 import io.github.daisukikaffuchino.han1meviewer.logic.LocalListRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +24,7 @@ class LocalWatchLaterSubViewModel(
 ) : WatchLaterListController {
 
     private val itemsStateFlow =
-        MutableStateFlow<PageLoadingState<MyListItems<HanimeInfo>>>(PageLoadingState.Loading)
+        MutableStateFlow<PagedUiState<MyListItems<HanimeInfo>>>(PagedUiState.Loading)
     private val itemsFlow = MutableStateFlow(emptyList<HanimeInfo>())
     private val deleteFlow = MutableSharedFlow<WebsiteState<Boolean>>()
     private val loadedPageCountFlow = MutableStateFlow(0)
@@ -32,7 +32,7 @@ class LocalWatchLaterSubViewModel(
     private val isLoadingMoreFlow = MutableStateFlow(false)
     private var loadJob: Job? = null
 
-    override val watchLaterStateFlow: StateFlow<PageLoadingState<MyListItems<HanimeInfo>>> =
+    override val watchLaterStateFlow: StateFlow<PagedUiState<MyListItems<HanimeInfo>>> =
         itemsStateFlow.asStateFlow()
     override val watchLaterFlow: StateFlow<List<HanimeInfo>> = itemsFlow.asStateFlow()
     override val deleteMyWatchLaterFlow: SharedFlow<WebsiteState<Boolean>> = deleteFlow.asSharedFlow()
@@ -48,7 +48,7 @@ class LocalWatchLaterSubViewModel(
                 itemsFlow.value = list
                 loadedPageCountFlow.value = 1
                 isLoadingMoreFlow.value = false
-                itemsStateFlow.value = PageLoadingState.NoMoreData
+                itemsStateFlow.value = PagedUiState.NoMoreData
             }
         }
     }
@@ -69,7 +69,7 @@ class LocalWatchLaterSubViewModel(
         loadJob?.cancel()
         loadJob = null
         itemsFlow.value = emptyList()
-        itemsStateFlow.value = PageLoadingState.Loading
+        itemsStateFlow.value = PagedUiState.Loading
         loadedPageCountFlow.value = 0
         totalPagesFlow.value = 1
         isLoadingMoreFlow.value = false

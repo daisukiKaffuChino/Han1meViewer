@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Playlists
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.LoadMoreFooter
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
@@ -127,9 +127,9 @@ fun PlaylistContent(
                             )
                         } else {
                             LoadMoreFooter(
-                                state = if (uiState.noMorePlaylists) PageLoadingState.NoMoreData
-                                else if (uiState.isLoadingMore) PageLoadingState.Loading
-                                else PageLoadingState.Success(Unit),
+                                state = if (uiState.noMorePlaylists) PagedUiState.NoMoreData
+                                else if (uiState.isLoadingMore) PagedUiState.Loading
+                                else PagedUiState.Success(Unit),
                                 loadedPage = uiState.playlistPage - 1,
                                 isLoadingMore = uiState.isLoadingMore
                             )

@@ -54,7 +54,7 @@ import androidx.compose.ui.unit.dp
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PaginationPager
@@ -140,11 +140,11 @@ fun PlaylistBottomSheet(
         dragHandle = null,
         containerColor = HanimeDefaults.Colors.pageSurface,
     ) {
-        if (playlist.isEmpty() && playlistState is PageLoadingState.Loading) {
+        if (playlist.isEmpty() && playlistState is PagedUiState.Loading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-        } else if (playlist.isEmpty() && playlistState is PageLoadingState.Error) {
+        } else if (playlist.isEmpty() && playlistState is PagedUiState.Error) {
             Box(Modifier
                 .fillMaxSize()
                 .height(200.dp), contentAlignment = Alignment.Center) {
@@ -213,7 +213,7 @@ private fun PlaylistSheetContent(
     playlist: List<HanimeInfo>,
     playListTitle: String,
     playlistDesc: kotlinx.coroutines.flow.StateFlow<String?>,
-    playlistState: PageLoadingState<*>,
+    playlistState: PagedUiState<*>,
     onClickItem: (String) -> Unit,
     viewModel: PlaylistController,
     context: Context,
@@ -369,7 +369,7 @@ private fun PlaylistSheetContent(
                 }
 
                 item(span = { GridItemSpan(columns) }) {
-                    if (playlistState is PageLoadingState.Loading &&
+                    if (playlistState is PagedUiState.Loading &&
                         viewModel.currentPage > 1 &&
                         !searchPagination
                     ) {
@@ -396,7 +396,7 @@ private fun PlaylistSheetContent(
                                 },
                                 modifier = Modifier.padding(vertical = 4.dp),
                             )
-                        } else if (playlistState is PageLoadingState.NoMoreData) {
+                        } else if (playlistState is PagedUiState.NoMoreData) {
                             Box(
                                 Modifier
                                     .fillMaxWidth()
@@ -424,8 +424,8 @@ private fun PlaylistSheetContent(
                     val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
                     if (!searchPagination &&
                         lastVisibleItem >= totalItems - 3 &&
-                        playlistState !is PageLoadingState.Loading &&
-                        playlistState !is PageLoadingState.NoMoreData &&
+                        playlistState !is PagedUiState.Loading &&
+                        playlistState !is PagedUiState.NoMoreData &&
                         !viewModel.isLoadingMore
                     ) {
                         viewModel.currentPage++

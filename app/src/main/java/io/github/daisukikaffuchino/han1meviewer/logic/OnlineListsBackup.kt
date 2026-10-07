@@ -7,7 +7,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.ListsExport
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListType
 import io.github.daisukikaffuchino.han1meviewer.logic.model.PlaylistExport
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Playlists
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import kotlinx.coroutines.flow.Flow
@@ -135,17 +135,18 @@ object OnlineListsBackup {
         var page = 1
         while (true) {
             val state = NetworkRepo.getMyListItems(userId, type, page)
-                .first { it !is PageLoadingState.Loading }
+                .first { it !is PagedUiState.Loading }
             when (state) {
-                is PageLoadingState.Success -> {
-                    if (state.info.hanimeInfo.isEmpty()) return result
-                    result += state.info.hanimeInfo.map { it.toListItemExport() }
+                is PagedUiState.Success -> {
+                    if (state.data.hanimeInfo.isEmpty()) return result
+                    result += state.data.hanimeInfo.map { it.toListItemExport() }
                     page++
                 }
 
-                is PageLoadingState.Error -> throw state.throwable
-                is PageLoadingState.NoMoreData -> return result
-                is PageLoadingState.Loading -> return result
+                is PagedUiState.Error -> throw state.throwable
+                is PagedUiState.NoMoreData -> return result
+                is PagedUiState.Empty -> return result
+                is PagedUiState.Loading -> return result
             }
         }
     }
@@ -177,18 +178,19 @@ object OnlineListsBackup {
         var page = 1
         while (true) {
             val state = NetworkRepo.getMyPlayListItems(page, listCode)
-                .first { it !is PageLoadingState.Loading }
+                .first { it !is PagedUiState.Loading }
             when (state) {
-                is PageLoadingState.Success -> {
-                    if (page == 1) desc = state.info.desc.orEmpty()
-                    if (state.info.hanimeInfo.isEmpty()) return result to desc
-                    result += state.info.hanimeInfo.map { it.toListItemExport() }
+                is PagedUiState.Success -> {
+                    if (page == 1) desc = state.data.desc.orEmpty()
+                    if (state.data.hanimeInfo.isEmpty()) return result to desc
+                    result += state.data.hanimeInfo.map { it.toListItemExport() }
                     page++
                 }
 
-                is PageLoadingState.Error -> throw state.throwable
-                is PageLoadingState.NoMoreData -> return result to desc
-                is PageLoadingState.Loading -> return result to desc
+                is PagedUiState.Error -> throw state.throwable
+                is PagedUiState.NoMoreData -> return result to desc
+                is PagedUiState.Empty -> return result to desc
+                is PagedUiState.Loading -> return result to desc
             }
         }
     }

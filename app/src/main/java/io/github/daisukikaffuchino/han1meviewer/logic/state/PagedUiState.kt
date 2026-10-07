@@ -1,11 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.state
 
-/**
- * 统一的“页面级”状态模型（替代历史上的 `PageState` / `PageLoadingState` 重复实现）。
- *
- * 本次先替换 `PageState`（Home / GetchuPreview），`PageLoadingState` 的使用点
- * 会在后续子步骤中逐步迁移到本类型。
- */
+/** 统一的“页面级”状态模型，取代历史上并行存在的两套分页状态类型。 */
 sealed interface PagedUiState<out T> {
 
     /** 首次加载中（尚无数据）。 */
@@ -14,8 +9,8 @@ sealed interface PagedUiState<out T> {
     /** 加载完成但没有内容。 */
     data object Empty : PagedUiState<Nothing>
 
-    /** 已到列表末尾；[data] 为已加载到的数据（可空）。 */
-    data class NoMoreData<out T>(val data: T? = null) : PagedUiState<T>
+    /** 已到列表末尾。数据由调用方单独持有（列表为空即“无内容”）。 */
+    data object NoMoreData : PagedUiState<Nothing>
 
     /** 加载成功；[isRefreshing] 表示正在下拉刷新（此时仍展示旧数据）。 */
     data class Success<out T>(
@@ -35,11 +30,10 @@ sealed interface PagedUiState<out T> {
     }
 }
 
-/** 当前可展示的数据（Success / NoMoreData / Error 的缓存）。 */
+/** 当前可展示的数据（`Success` 的数据，或 `Error` 的缓存）。 */
 val <T> PagedUiState<T>.dataOrNull: T?
     get() = when (this) {
         is PagedUiState.Success -> data
-        is PagedUiState.NoMoreData -> data
         is PagedUiState.Error -> cached
         else -> null
     }

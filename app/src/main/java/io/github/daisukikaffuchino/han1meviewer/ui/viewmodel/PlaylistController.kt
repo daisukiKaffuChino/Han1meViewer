@@ -4,7 +4,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ModifiedPlaylistArgs
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Playlists
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.myplaylist.PlaylistUiState
 import kotlinx.coroutines.flow.SharedFlow
@@ -18,7 +18,7 @@ interface PlaylistController {
     val myPlaylistsFlow: StateFlow<WebsiteState<Playlists>>
     val mainUiState: StateFlow<PlaylistUiState>
     val refreshCompleted: SharedFlow<Unit>
-    val playlistStateFlow: StateFlow<PageLoadingState<MyListItems<HanimeInfo>>>
+    val playlistStateFlow: StateFlow<PagedUiState<MyListItems<HanimeInfo>>>
     val playlistFlow: StateFlow<List<HanimeInfo>>
     val playlistDesc: StateFlow<String?>
     val currentListInfo: StateFlow<Pair<String, String>?>

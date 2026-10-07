@@ -3,7 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.mylist
 import io.github.daisukikaffuchino.han1meviewer.logic.LocalListRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +24,7 @@ class LocalFavSubViewModel(
 ) : FavVideoListController {
 
     private val itemsStateFlow =
-        MutableStateFlow<PageLoadingState<MyListItems<HanimeInfo>>>(PageLoadingState.Loading)
+        MutableStateFlow<PagedUiState<MyListItems<HanimeInfo>>>(PagedUiState.Loading)
     private val itemsFlow = MutableStateFlow(emptyList<HanimeInfo>())
     private val deleteFlow = MutableSharedFlow<WebsiteState<Boolean>>()
     private val loadedPageCountFlow = MutableStateFlow(0)
@@ -32,7 +32,7 @@ class LocalFavSubViewModel(
     private val isLoadingMoreFlow = MutableStateFlow(false)
     private var loadJob: Job? = null
 
-    override val favVideoStateFlow: StateFlow<PageLoadingState<MyListItems<HanimeInfo>>> =
+    override val favVideoStateFlow: StateFlow<PagedUiState<MyListItems<HanimeInfo>>> =
         itemsStateFlow.asStateFlow()
     override val favVideoFlow: StateFlow<List<HanimeInfo>> = itemsFlow.asStateFlow()
     override val deleteMyFavVideoFlow: SharedFlow<WebsiteState<Boolean>> = deleteFlow.asSharedFlow()
@@ -48,7 +48,7 @@ class LocalFavSubViewModel(
                 itemsFlow.value = list
                 loadedPageCountFlow.value = 1
                 isLoadingMoreFlow.value = false
-                itemsStateFlow.value = PageLoadingState.NoMoreData
+                itemsStateFlow.value = PagedUiState.NoMoreData
             }
         }
     }
@@ -69,7 +69,7 @@ class LocalFavSubViewModel(
         loadJob?.cancel()
         loadJob = null
         itemsFlow.value = emptyList()
-        itemsStateFlow.value = PageLoadingState.Loading
+        itemsStateFlow.value = PagedUiState.Loading
         loadedPageCountFlow.value = 0
         totalPagesFlow.value = 1
         isLoadingMoreFlow.value = false

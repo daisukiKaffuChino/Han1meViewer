@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SubscriptionItem
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ArtistItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.LoadMoreFooter
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PaginationPager
@@ -185,7 +185,7 @@ fun SubscriptionContent(
                         )
                     } else {
                         LoadMoreFooter(
-                            state = PageLoadingState.Success(emptyList<String>()),
+                            state = PagedUiState.Success(emptyList<String>()),
                             isLoadingMore = uiState.canLoadMore,
                             loadedPage = uiState.currentPage
                         )

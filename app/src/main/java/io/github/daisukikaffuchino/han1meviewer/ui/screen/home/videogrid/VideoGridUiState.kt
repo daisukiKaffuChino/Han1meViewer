@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.videogrid
 
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 
 /**
  * 视频网格页面的 UI 状态。
@@ -16,7 +16,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
  */
 data class VideoGridUiState(
     val items: List<HanimeInfo> = emptyList(),
-    val state: PageLoadingState<*> = PageLoadingState.Loading,
+    val state: PagedUiState<*> = PagedUiState.Loading,
     val loadedPageCount: Int = 0,
     val totalPages: Int = 1,
     val isLoadingMore: Boolean = false,

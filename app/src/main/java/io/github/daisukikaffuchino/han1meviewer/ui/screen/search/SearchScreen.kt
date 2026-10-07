@@ -90,7 +90,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.SearchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo.Companion.NORMAL
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
-import io.github.daisukikaffuchino.han1meviewer.logic.state.PageLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PaginationPager
@@ -193,7 +193,7 @@ fun SearchScreen(
     }
 
     val hasSearchResults = searchResults.isNotEmpty() ||
-            ((searchState as? PageLoadingState.Success)?.info?.list?.isNotEmpty() == true)
+            ((searchState as? PagedUiState.Success)?.data?.list?.isNotEmpty() == true)
     val filter = remember(
         viewModel.genre,
         viewModel.sort,
@@ -274,7 +274,7 @@ fun SearchScreen(
         }
     }
     LaunchedEffect(searchState) {
-        if (searchState !is PageLoadingState.Loading) isRefreshing = false
+        if (searchState !is PagedUiState.Loading) isRefreshing = false
     }
     LaunchedEffect(filter.isNotEmpty(), hasSearchResults) {
         if (!filter.isNotEmpty() || !hasSearchResults) criteriaCollapsedFraction.floatValue = 0f
@@ -398,7 +398,7 @@ fun SearchScreen(
             if (hasSearched) {
                 // 已触发搜索，显示结果
                 val showResults = searchResults.ifEmpty {
-                    (searchState as? PageLoadingState.Success)?.info?.list ?: emptyList()
+                    (searchState as? PagedUiState.Success)?.data?.list ?: emptyList()
                 }
                 Box(Modifier.fillMaxSize()) {
                     if (!isRefreshing) SearchStateIndicator(searchState, showResults.size)
@@ -409,7 +409,7 @@ fun SearchScreen(
                             showPlayedIndicator,
                             onOpenVideo,
                             { viewModel.page++; executeSearch() },
-                            !searchPagination && searchState !is PageLoadingState.NoMoreData,
+                            !searchPagination && searchState !is PagedUiState.NoMoreData,
                             gridState,
                             pagination = if (searchPagination) {
                                 SearchPagination(
@@ -631,7 +631,7 @@ data class SearchPagination(
 
 @Composable
 fun SearchResultsGrid(
-    videos: List<HanimeInfo>, state: PageLoadingState<*>, showPlayedIndicator: Boolean,
+    videos: List<HanimeInfo>, state: PagedUiState<*>, showPlayedIndicator: Boolean,
     onVideoClick: (String) -> Unit,
     onLoadMore: () -> Unit,
     canLoadMore: Boolean, gridState: LazyGridState, modifier: Modifier = Modifier,
@@ -647,7 +647,7 @@ fun SearchResultsGrid(
                 }
             }
     }
-    LaunchedEffect(state) { if (state !is PageLoadingState.Loading) isLoadingMore = false }
+    LaunchedEffect(state) { if (state !is PagedUiState.Loading) isLoadingMore = false }
     Box(modifier = modifier.fillMaxSize()) {
         val normalCardWidth = VideoNormalCardMinWidth
         val simplifiedCardWidth = VideoSimplifiedCardMinWidth
@@ -682,7 +682,7 @@ fun SearchResultsGrid(
                     onLongClickVideosItem = { _, _ -> }
                 )
             }
-            if (canLoadMore && state is PageLoadingState.Loading) {
+            if (canLoadMore && state is PagedUiState.Loading) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Box(
                         Modifier
@@ -715,13 +715,13 @@ fun SearchResultsGrid(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SearchStateIndicator(
-    state: PageLoadingState<*>,
+    state: PagedUiState<*>,
     resultCount: Int,
     modifier: Modifier = Modifier
 ) {
     val loadingHint = rememberRandomLoadingHint()
     when (state) {
-        is PageLoadingState.Loading -> if (resultCount == 0) Box(
+        is PagedUiState.Loading -> if (resultCount == 0) Box(
             modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
@@ -740,12 +740,17 @@ fun SearchStateIndicator(
             }
         }
 
-        is PageLoadingState.NoMoreData -> if (resultCount == 0) EmptyContent(
+        is PagedUiState.NoMoreData -> if (resultCount == 0) EmptyContent(
             hint = stringResource(R.string.search_no_results),
             picRes = R.drawable.h_chan_speechless
         )
 
-        is PageLoadingState.Error -> EmptyContent(
+        is PagedUiState.Empty -> if (resultCount == 0) EmptyContent(
+            hint = stringResource(R.string.search_no_results),
+            picRes = R.drawable.h_chan_speechless
+        )
+
+        is PagedUiState.Error -> EmptyContent(
             hint = stringResource(
                 R.string.search_load_failed_with_reason,
                 state.throwable.message.orEmpty()
@@ -753,7 +758,7 @@ fun SearchStateIndicator(
             picRes = R.drawable.h_chan_sad
         )
 
-        is PageLoadingState.Success -> if (resultCount == 0) EmptyContent(
+        is PagedUiState.Success -> if (resultCount == 0) EmptyContent(
             hint = stringResource(R.string.search_no_results),
             picRes = R.drawable.h_chan_speechless
         )
@@ -939,7 +944,7 @@ private fun SearchResultsGridPreview() {
     MaterialTheme {
         SearchResultsGrid(
             fakeHomePageVideos,
-            PageLoadingState.Success(fakeHomePageVideos),
+            PagedUiState.Success(fakeHomePageVideos),
             true,
             {},
             {},
