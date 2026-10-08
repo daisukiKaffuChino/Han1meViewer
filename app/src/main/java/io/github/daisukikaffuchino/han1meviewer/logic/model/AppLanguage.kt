@@ -1,5 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.model
 
+/** [Local] 本地配置模型：语言偏好。 */
 enum class AppLanguage(val code: String?) {
     SYSTEM(null),
     ENGLISH("en"),

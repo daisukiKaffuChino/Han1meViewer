@@ -15,8 +15,8 @@ import io.github.daisukikaffuchino.han1meviewer.LOCAL_DATE_TIME_FORMAT
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.ExperimentalTime
 
+/** [DTO] 网页解析产物*/
 @Keep
 data class Announcement(
     @JvmField val title: String,
@@ -30,7 +30,6 @@ data class Announcement(
 ) {
     // Required by serializers and callers that need an empty model instance.
     constructor() : this("", "", null, null, 0L, 1, null, false)
-    @OptIn(ExperimentalTime::class)
     fun getFormattedDate(): String {
         return kotlin.time.Instant
             .fromEpochSeconds(timestamp)

@@ -4,6 +4,7 @@ package io.github.daisukikaffuchino.han1meviewer.logic.model
  * @project Hanime1
  * @author Yenaly Liew
  * @time 2022/06/08 008 22:45
+ * [DTO] 网页解析产物（首页）。
  */
 data class HomePage(
     val csrfToken: String?,

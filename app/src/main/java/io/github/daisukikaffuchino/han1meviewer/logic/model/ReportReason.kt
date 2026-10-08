@@ -7,6 +7,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.util.Locale
 
+/** [Local] assets 静态配置模型：举报原因。 */
 @Suppress("EqualsOrHashCode")
 @Serializable
 @Parcelize

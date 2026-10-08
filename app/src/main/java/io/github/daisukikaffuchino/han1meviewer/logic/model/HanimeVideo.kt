@@ -10,6 +10,7 @@ import kotlinx.serialization.Transient
  * @project Hanime1
  * @author Yenaly Liew
  * @time 2022/06/11 011 20:30
+ * [Domain] 领域模型：影片详情。
  */
 @Serializable
 data class HanimeVideo(

@@ -3,7 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.logic.model
 import kotlinx.serialization.Serializable
 
 /**
- * 列表导入/导出文件格式，本地与在线数据共用。
+ * [Local] 本地 / 在线列表的导入导出文件格式。
  */
 @Serializable
 data class ListsExport(

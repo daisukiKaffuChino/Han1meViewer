@@ -4,6 +4,7 @@ package io.github.daisukikaffuchino.han1meviewer.logic.model
  * @project Han1meViewer
  * @author Yenaly Liew
  * @time 2023/08/26 026 17:47
+ * [DTO] 网页解析产物（播放清单列表）。
  */
 data class Playlists(
     val playlists: List<Playlist>,

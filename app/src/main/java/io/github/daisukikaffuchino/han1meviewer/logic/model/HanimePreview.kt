@@ -4,6 +4,7 @@ package io.github.daisukikaffuchino.han1meviewer.logic.model
  * @project Hanime1
  * @author Yenaly Liew
  * @time 2022/06/24 024 15:05
+ * [DTO] 网页解析产物（预览页）。
  */
 data class HanimePreview(
     val headerPicUrl: String?,

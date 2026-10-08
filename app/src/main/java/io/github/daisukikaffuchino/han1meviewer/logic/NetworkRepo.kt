@@ -8,6 +8,7 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.CloudflareBlockedException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.HanimeNotFoundException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.IPBlockedException
+import io.github.daisukikaffuchino.han1meviewer.logic.exception.InvalidCredentialsException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.ParseException
 import io.github.daisukikaffuchino.han1meviewer.logic.model.CommentPlace
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ModifiedPlaylistArgs
@@ -512,11 +513,11 @@ object NetworkRepo {
                 LogUtil.d("login_headers", req.headers().toMultimap().toString())
                 emit(UiState.Success(req.headers().values("Set-Cookie")))
             } else {
-                emit(UiState.Error(IllegalStateException(getString(R.string.account_or_password_wrong))))
+                emit(UiState.Error(InvalidCredentialsException(getString(R.string.account_or_password_wrong))))
             }
         } else {
             // 雙重保險
-            emit(UiState.Error(IllegalStateException(getString(R.string.account_or_password_wrong))))
+            emit(UiState.Error(InvalidCredentialsException(getString(R.string.account_or_password_wrong))))
         }
     }.catch { e ->
         emit(UiState.Error(handleException(e)))

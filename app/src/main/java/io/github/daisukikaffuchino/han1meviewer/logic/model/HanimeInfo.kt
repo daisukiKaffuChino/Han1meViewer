@@ -3,6 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.logic.model
 /**
  * @project Han1meViewer
  * @author Yenaly Liew
+ * [Domain] 领域模型：影片卡片 / 列表项通用模型（HanimeInfo / HanimeInfoType）。
  */
 interface HanimeInfoType : MultiItemEntity
 

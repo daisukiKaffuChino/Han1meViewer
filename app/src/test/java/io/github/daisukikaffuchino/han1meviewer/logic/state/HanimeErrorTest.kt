@@ -3,11 +3,13 @@ package io.github.daisukikaffuchino.han1meviewer.logic.state
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.CloudflareBlockedException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.HanimeNotFoundException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.IPBlockedException
+import io.github.daisukikaffuchino.han1meviewer.logic.exception.InvalidCredentialsException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.LoginStateExpiredException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.NotLoggedInException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.ParseException
 import java.io.IOException
 import java.net.ConnectException
+import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLHandshakeException
@@ -38,6 +40,10 @@ class HanimeErrorTest {
             LoginStateExpiredException("x").toHanimeError().kind,
         )
         assertEquals(HanimeErrorKind.NotLoggedIn, NotLoggedInException().toHanimeError().kind)
+        assertEquals(
+            HanimeErrorKind.InvalidCredentials,
+            InvalidCredentialsException("x").toHanimeError().kind,
+        )
         assertEquals(HanimeErrorKind.Parse, ParseException("x").toHanimeError().kind)
     }
 
@@ -48,6 +54,18 @@ class HanimeErrorTest {
         assertEquals(HanimeErrorKind.Timeout, SocketTimeoutException("x").toHanimeError().kind)
         assertEquals(HanimeErrorKind.Connect, ConnectException("x").toHanimeError().kind)
         assertEquals(HanimeErrorKind.Network, IOException("x").toHanimeError().kind)
+    }
+
+    @Test
+    fun `socket exceptions distinguish connection reset from generic network errors`() {
+        assertEquals(
+            HanimeErrorKind.ConnectionReset,
+            SocketException("Connection reset").toHanimeError().kind,
+        )
+        assertEquals(
+            HanimeErrorKind.Network,
+            SocketException("broken pipe").toHanimeError().kind,
+        )
     }
 
     @Test
@@ -67,7 +85,9 @@ class HanimeErrorTest {
         assertFalse(HanimeErrorKind.SessionExpired.isRetryable)
         assertFalse(HanimeErrorKind.NotLoggedIn.isRetryable)
         assertFalse(HanimeErrorKind.NotFound.isRetryable)
+        assertFalse(HanimeErrorKind.InvalidCredentials.isRetryable)
         assertTrue(HanimeErrorKind.Timeout.isRetryable)
+        assertTrue(HanimeErrorKind.ConnectionReset.isRetryable)
         assertTrue(HanimeErrorKind.Network.isRetryable)
         assertTrue(HanimeErrorKind.CloudflareChallenge.isRetryable)
     }

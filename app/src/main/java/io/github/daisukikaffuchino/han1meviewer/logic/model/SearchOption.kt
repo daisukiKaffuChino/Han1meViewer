@@ -10,6 +10,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.util.Locale
 
+/** [Local] assets 静态配置模型：搜索选项。 */
 @Suppress("EqualsOrHashCode")
 @Serializable
 @Parcelize

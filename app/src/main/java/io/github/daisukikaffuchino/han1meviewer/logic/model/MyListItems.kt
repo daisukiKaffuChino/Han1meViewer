@@ -4,6 +4,7 @@ package io.github.daisukikaffuchino.han1meviewer.logic.model
  * @project Han1meViewer
  * @author Yenaly Liew
  * @time 2022/07/05 005 15:30
+ * [DTO] 网页解析产物（我的列表 / 播放清单）。
  */
 data class MyListItems<I>(
     val hanimeInfo: List<I>,

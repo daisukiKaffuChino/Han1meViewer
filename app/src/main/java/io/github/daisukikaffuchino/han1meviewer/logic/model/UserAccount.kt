@@ -1,5 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.model
 
+/** [DTO] 网页解析产物（账号页）。 */
 data class UserAccount(
     val csrfToken: String?,
     val avatarUrl: String,

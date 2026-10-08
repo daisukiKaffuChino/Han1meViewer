@@ -28,6 +28,7 @@ import io.github.daisukikaffuchino.han1meviewer.USER_AGENT
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.network.CloudflareVerificationCoordinator
 import io.github.daisukikaffuchino.han1meviewer.logic.network.ech.HyWebViewHelper
+import io.github.daisukikaffuchino.han1meviewer.logic.state.HanimeErrorKind
 import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.login
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
@@ -86,7 +87,7 @@ fun LoginRouteScreen(
                             is UiState.Error -> {
                                 isLoggingIn = false
                                 LogUtil.e("Login", "登录失败", state.throwable)
-                                if (state.throwable is IllegalStateException) {
+                                if (state.error.kind == HanimeErrorKind.InvalidCredentials) {
                                     SonnerToast.error(R.string.account_or_password_wrong)
                                 } else {
                                     SonnerToast.error(R.string.login_failed)

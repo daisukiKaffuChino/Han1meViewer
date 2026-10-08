@@ -4,6 +4,7 @@ package io.github.daisukikaffuchino.han1meviewer.logic.model
  * @project Hanime1
  * @author Yenaly Liew
  * @time 2022/06/20 020 21:56
+ * [DTO] 网页解析产物（评论区）。
  */
 data class VideoComments(
     val videoComment: MutableList<VideoComment>,

@@ -3,6 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.logic.model
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
+/** [DTO] 网页解析产物（订阅页）。 */
 @Parcelize
 data class MySubscriptions(
     val subscriptions: List<SubscriptionItem>,

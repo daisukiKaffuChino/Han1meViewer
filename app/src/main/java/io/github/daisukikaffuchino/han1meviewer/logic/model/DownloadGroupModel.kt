@@ -11,6 +11,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.VideoWithC
  * 初始版本
  * 实现分组展示和展开/折叠功能
  * 实现分组移动、重命名等
+ * [Local] 由下载实体聚合出的展示模型。
  */
 
 sealed class DownloadedNode

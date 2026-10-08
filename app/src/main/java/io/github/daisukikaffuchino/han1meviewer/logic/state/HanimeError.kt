@@ -3,11 +3,13 @@ package io.github.daisukikaffuchino.han1meviewer.logic.state
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.CloudflareBlockedException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.HanimeNotFoundException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.IPBlockedException
+import io.github.daisukikaffuchino.han1meviewer.logic.exception.InvalidCredentialsException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.LoginStateExpiredException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.NotLoggedInException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.ParseException
 import java.io.IOException
 import java.net.ConnectException
+import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLHandshakeException
@@ -34,6 +36,9 @@ enum class HanimeErrorKind {
     /** 未登录但访问了需要登录的资源。 */
     NotLoggedIn,
 
+    /** 账号或密码错误。 */
+    InvalidCredentials,
+
     /** HTML / JSON 解析失败。 */
     Parse,
 
@@ -52,6 +57,9 @@ enum class HanimeErrorKind {
     /** 其它网络 IO 错误。 */
     Network,
 
+    /** 连接被重置。 */
+    ConnectionReset,
+
     /** 未分类。 */
     Unknown,
     ;
@@ -59,7 +67,7 @@ enum class HanimeErrorKind {
     /** 是否值得让用户点“重试”。 */
     val isRetryable: Boolean
         get() = when (this) {
-            SessionExpired, NotLoggedIn, NotFound -> false
+            SessionExpired, NotLoggedIn, NotFound, InvalidCredentials -> false
             else -> true
         }
 }
@@ -80,6 +88,7 @@ fun Throwable.toHanimeError(): HanimeError {
         is IPBlockedException -> HanimeErrorKind.IpBlocked
         is CloudflareBlockedException -> HanimeErrorKind.CloudflareChallenge
         is HanimeNotFoundException -> HanimeErrorKind.NotFound
+        is InvalidCredentialsException -> HanimeErrorKind.InvalidCredentials
         is LoginStateExpiredException -> HanimeErrorKind.SessionExpired
         is NotLoggedInException -> HanimeErrorKind.NotLoggedIn
         is ParseException -> HanimeErrorKind.Parse
@@ -87,6 +96,13 @@ fun Throwable.toHanimeError(): HanimeError {
         is UnknownHostException -> HanimeErrorKind.Dns
         is SocketTimeoutException -> HanimeErrorKind.Timeout
         is ConnectException -> HanimeErrorKind.Connect
+        is SocketException ->
+            if (message?.contains("connection reset", ignoreCase = true) == true) {
+                HanimeErrorKind.ConnectionReset
+            } else {
+                HanimeErrorKind.Network
+            }
+
         is IOException -> HanimeErrorKind.Network
         else -> HanimeErrorKind.Unknown
     }

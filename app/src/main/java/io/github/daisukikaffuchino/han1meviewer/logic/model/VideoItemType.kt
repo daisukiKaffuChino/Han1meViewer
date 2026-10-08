@@ -1,5 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.model
 
+/** [Domain] 领域模型的结构约束：列表项字段。 */
 interface VideoItemType {
     val title: String
     val coverUrl: String

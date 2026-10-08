@@ -1,5 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.logic.model
 
+/** [DTO] 网页解析产物（Getchu）。 */
 data class GetchuPreview(
     val dateCode: String,
     val groups: List<Group>,

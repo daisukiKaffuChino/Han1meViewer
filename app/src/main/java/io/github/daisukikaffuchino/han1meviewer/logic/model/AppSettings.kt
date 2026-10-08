@@ -87,6 +87,7 @@ enum class VideoLandscapeLayoutStyle(val value: String) {
     }
 }
 
+/** [Local] 本地配置模型：DataStore 承载的全部设置。 */
 data class AppSettings(
     val appLanguage: AppLanguage = AppLanguage.SYSTEM,
     val themeMode: ThemeMode = ThemeMode.Light,
