@@ -30,7 +30,7 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SubscriptionItem
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SubscriptionVideosItem
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ChoiceDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PullRefreshOverlay
@@ -80,25 +80,25 @@ fun SubscriptionScreen(
     var isRefreshing by rememberSaveable { mutableStateOf(false) }
 
     val canLoadMore = viewModel.canLoadMore()
-    val maxPage = (state as? WebsiteState.Success)?.info?.maxPage ?: 1
+    val maxPage = (state as? UiState.Success)?.data?.maxPage ?: 1
 
-    val showCached = state is WebsiteState.Loading && cachedArtists.value.isNotEmpty() ||
-            state is WebsiteState.Error && cachedArtists.value.isNotEmpty()
+    val showCached = state is UiState.Loading && cachedArtists.value.isNotEmpty() ||
+            state is UiState.Error && cachedArtists.value.isNotEmpty()
 
     LaunchedEffect(state) {
         when (val s = state) {
-            is WebsiteState.Success -> {
-                cachedArtists.value = s.info.subscriptions.toList()
-                cachedVideos.value = s.info.subscriptionsVideos.toList()
+            is UiState.Success -> {
+                cachedArtists.value = s.data.subscriptions.toList()
+                cachedVideos.value = s.data.subscriptionsVideos.toList()
             }
 
-            is WebsiteState.Loading -> {
+            is UiState.Loading -> {
                 if (cachedArtists.value.isEmpty()) viewModel.loadMySubscriptions()
             }
 
             else -> Unit
         }
-        if (state !is WebsiteState.Loading) {
+        if (state !is UiState.Loading) {
             isRefreshing = false
         }
     }
@@ -110,7 +110,7 @@ fun SubscriptionScreen(
         canLoadMore = canLoadMore,
         currentPage = loadedPage,
         maxPage = maxPage,
-        error = (state as? WebsiteState.Error)?.throwable,
+        error = (state as? UiState.Error)?.throwable,
         showCached = showCached,
     )
 
@@ -176,7 +176,7 @@ fun SubscriptionScreen(
                 )
         ) {
             when (state) {
-                is WebsiteState.Loading -> {
+                is UiState.Loading -> {
                     if (cachedArtists.value.isEmpty() || cachedVideos.value.isEmpty()) {
                         LoadingIndicator(Modifier.align(Alignment.Center))
                     } else {
@@ -189,12 +189,12 @@ fun SubscriptionScreen(
                     }
                 }
 
-                is WebsiteState.Error -> {
+                is UiState.Error -> {
                     if (cachedArtists.value.isEmpty()) {
                         EmptyContent(
                             hint = stringResource(
                                 R.string.load_failed_with_reason,
-                                (state as WebsiteState.Error).throwable.message.orEmpty()
+                                (state as UiState.Error).throwable.message.orEmpty()
                             ),
                             picRes = R.drawable.h_chan_sad
                         )
@@ -208,7 +208,16 @@ fun SubscriptionScreen(
                     }
                 }
 
-                is WebsiteState.Success -> {
+                is UiState.Empty -> {
+                    SubscriptionContent(
+                        uiState = uiState,
+                        onEvent = handleEvent,
+                        gridState = gridState,
+                        artistRows = settings.subscriptionArtistRows,
+                    )
+                }
+
+                is UiState.Success -> {
                     SubscriptionContent(
                         uiState = uiState,
                         onEvent = handleEvent,

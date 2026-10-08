@@ -7,7 +7,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MySubscriptions
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SubscriptionItem
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SubscriptionVideosItem
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -19,8 +19,8 @@ import kotlinx.coroutines.launch
 
 class MySubscriptionsViewModel : ViewModel() {
 
-    private val _subscriptionsState = MutableStateFlow<WebsiteState<MySubscriptions>>(WebsiteState.Loading)
-    val subscriptionsState: StateFlow<WebsiteState<MySubscriptions>> = _subscriptionsState.asStateFlow()
+    private val _subscriptionsState = MutableStateFlow<UiState<MySubscriptions>>(UiState.Loading)
+    val subscriptionsState: StateFlow<UiState<MySubscriptions>> = _subscriptionsState.asStateFlow()
 
     private var currentPage = 1
     private var hasMore = true
@@ -37,7 +37,7 @@ class MySubscriptionsViewModel : ViewModel() {
     private var hasLoaded = false
     fun reset() {
         hasLoaded = false
-        _subscriptionsState.value = WebsiteState.Loading
+        _subscriptionsState.value = UiState.Loading
     }
 
     fun loadMySubscriptions(forceReload: Boolean = false) {
@@ -55,18 +55,18 @@ class MySubscriptionsViewModel : ViewModel() {
             NetworkRepo.getMySubscriptions(page = currentPage)
                 .onStart {
                     if (currentPage == 1) {
-                        _subscriptionsState.value = WebsiteState.Loading
+                        _subscriptionsState.value = UiState.Loading
                     }
                 }
                 .catch { e ->
-                    _subscriptionsState.value = WebsiteState.Error(e)
+                    _subscriptionsState.value = UiState.Error(e)
                     _refreshCompleted.emit(Unit)
                     isLoadingMore = false
                 }
                 .collect { state ->
-                    if (state is WebsiteState.Success) {
+                    if (state is UiState.Success) {
                         _refreshCompleted.emit(Unit)
-                        val info = state.info
+                        val info = state.data
                         if (currentPage == 1) {
                             cachedArtists.clear()
                             cachedArtists.addAll(info.subscriptions)
@@ -79,15 +79,15 @@ class MySubscriptionsViewModel : ViewModel() {
                         } else {
                             hasMore = false
                         }
-                        _subscriptionsState.value = WebsiteState.Success(
+                        _subscriptionsState.value = UiState.Success(
                             MySubscriptions(
                                 subscriptions = cachedArtists.toList(),
                                 subscriptionsVideos = cachedVideos.toList(),
                                 maxPage = info.maxPage
                                 )
                         )
-                    } else if (state is WebsiteState.Error){
-                        _subscriptionsState.value = WebsiteState.Error(state.throwable)
+                    } else if (state is UiState.Error){
+                        _subscriptionsState.value = UiState.Error(state.throwable)
                     }
                     isLoadingMore = false
                 }
@@ -103,7 +103,7 @@ class MySubscriptionsViewModel : ViewModel() {
         cachedVideos.clear()
         cachedArtists.clear()
         isLoadingMore = false
-        _subscriptionsState.value = WebsiteState.Loading
+        _subscriptionsState.value = UiState.Loading
         loadMySubscriptions(forceReload = false)
     }
 }

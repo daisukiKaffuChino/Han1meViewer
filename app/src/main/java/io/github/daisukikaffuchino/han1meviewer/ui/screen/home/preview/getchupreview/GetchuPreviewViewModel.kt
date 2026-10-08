@@ -8,7 +8,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.GetchuNetworkRepo.getGetch
 import io.github.daisukikaffuchino.han1meviewer.logic.model.GetchuPreview
 import io.github.daisukikaffuchino.han1meviewer.logic.model.GetchuPreviewDetail
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -75,11 +75,12 @@ class GetchuPreviewViewModel : ViewModel() {
         _detailStates.value += (id to state)
     }
 
-    private fun <T> WebsiteState<T>.toPageState(): PagedUiState<T> {
+    private fun <T> UiState<T>.toPageState(): PagedUiState<T> {
         return when (this) {
-            is WebsiteState.Loading -> PagedUiState.Loading
-            is WebsiteState.Error -> PagedUiState.Error(throwable)
-            is WebsiteState.Success -> PagedUiState.Success(info)
+            is UiState.Loading -> PagedUiState.Loading
+            is UiState.Empty -> PagedUiState.Empty
+            is UiState.Error -> PagedUiState.Error(throwable)
+            is UiState.Success -> PagedUiState.Success(data)
         }
     }
 

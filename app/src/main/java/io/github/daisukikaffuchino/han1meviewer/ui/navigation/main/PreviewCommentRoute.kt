@@ -24,7 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.daisukikaffuchino.han1meviewer.PREVIEW_COMMENT_PREFIX
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.video.ChildCommentScreen
@@ -86,15 +86,15 @@ fun PreviewCommentRouteScreen(
 
     LaunchedEffect(Unit) {
         commentState.collect { state ->
-            if (state is WebsiteState.Success) {
-                viewModel.currentUserId = state.info.currentUserId
+            if (state is UiState.Success) {
+                viewModel.currentUserId = state.data.currentUserId
             }
         }
     }
 
     LaunchedEffect(Unit) {
         viewModel.postCommentFlow.collect { state ->
-            if (state is WebsiteState.Success) {
+            if (state is UiState.Success) {
                 viewModel.getComment(PREVIEW_COMMENT_PREFIX, route.dateCode)
             }
         }
@@ -102,7 +102,7 @@ fun PreviewCommentRouteScreen(
 
     LaunchedEffect(Unit) {
         viewModel.postReplyFlow.collect { state ->
-            if (state is WebsiteState.Success) {
+            if (state is UiState.Success) {
                 viewModel.getComment(PREVIEW_COMMENT_PREFIX, route.dateCode)
             }
         }
@@ -110,8 +110,8 @@ fun PreviewCommentRouteScreen(
 
     LaunchedEffect(Unit) {
         viewModel.commentLikeFlow.collect { state ->
-            if (state is WebsiteState.Success) {
-                viewModel.handleCommentLike(state.info)
+            if (state is UiState.Success) {
+                viewModel.handleCommentLike(state.data)
             }
         }
     }

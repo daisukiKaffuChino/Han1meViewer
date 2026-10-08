@@ -6,7 +6,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListType
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel.csrfToken
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +26,7 @@ class WatchLaterSubViewModel(scope: CoroutineScope) :
         loadItems(MyListType.WATCH_LATER, SettingsRepository.savedUserId, page)
     }
 
-    private val _deleteMyWatchLaterFlow = MutableSharedFlow<WebsiteState<Boolean>>()
+    private val _deleteMyWatchLaterFlow = MutableSharedFlow<UiState<Boolean>>()
     override val deleteMyWatchLaterFlow = _deleteMyWatchLaterFlow.asSharedFlow()
 
     override fun deleteMyWatchLater(videoCode: String, position: Int) {
@@ -44,9 +44,10 @@ class WatchLaterSubViewModel(scope: CoroutineScope) :
             position = position,
             mapState = { state ->
                 when (state) {
-                    is WebsiteState.Error -> WebsiteState.Error(state.throwable)
-                    WebsiteState.Loading -> WebsiteState.Loading
-                    is WebsiteState.Success -> WebsiteState.Success(true)
+                    is UiState.Error -> UiState.Error(state.throwable)
+                    UiState.Loading -> UiState.Loading
+                    UiState.Empty -> UiState.Empty
+                    is UiState.Success -> UiState.Success(true)
                 }
             },
         )

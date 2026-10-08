@@ -57,8 +57,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.WatchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SearchOption
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoLandscapeLayoutStyle
-import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.HanimeErrorKind
 import io.github.daisukikaffuchino.han1meviewer.logic.state.toHanimeError
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
@@ -484,17 +483,17 @@ fun VideoRouteHostScreen(
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
             viewModel.hanimeVideoStateFlow.collect { state ->
                 when (state) {
-                    is VideoLoadingState.Error -> {
+                    is UiState.Error -> {
                         state.throwable.localizedMessage?.let(SonnerToast::error)
                         if (state.throwable.toHanimeError().kind == HanimeErrorKind.Parse) {
                             uriHandler.openUri(getHanimeVideoLink(route.videoCode))
                         }
                     }
 
-                    is VideoLoadingState.Loading -> Unit
+                    is UiState.Loading -> Unit
 
-                    is VideoLoadingState.Success -> {
-                        val info = state.info
+                    is UiState.Success -> {
+                        val info = state.data
                         videoTitle = info.title
                         val qualities = info.videoUrls.map { (label, link) ->
                             PlaybackQuality(
@@ -549,7 +548,7 @@ fun VideoRouteHostScreen(
                         }
                     }
 
-                    is VideoLoadingState.NoContent -> SonnerToast.error(R.string.video_might_not_exist)
+                    is UiState.Empty -> SonnerToast.error(R.string.video_might_not_exist)
                 }
             }
         }
@@ -582,21 +581,23 @@ fun VideoRouteHostScreen(
             launch {
                 viewModel.localFavoriteActionFlow.collect { state ->
                     when (state) {
-                        is WebsiteState.Error -> SonnerToast.error(R.string.add_failed)
-                        is WebsiteState.Success -> SonnerToast.success(
-                            if (state.info) R.string.add_success
+                        is UiState.Error -> SonnerToast.error(R.string.add_failed)
+                        is UiState.Success -> SonnerToast.success(
+                            if (state.data) R.string.add_success
                             else R.string.local_favorite_cancelled
                         )
-                        WebsiteState.Loading -> Unit
+                        UiState.Loading -> Unit
+                        UiState.Empty -> Unit
                     }
                 }
             }
             launch {
                 viewModel.localMyListActionFlow.collect { state ->
                     when (state) {
-                        is WebsiteState.Error -> SonnerToast.error(R.string.modify_failed)
-                        is WebsiteState.Success -> SonnerToast.success(R.string.modify_success)
-                        WebsiteState.Loading -> Unit
+                        is UiState.Error -> SonnerToast.error(R.string.modify_failed)
+                        is UiState.Success -> SonnerToast.success(R.string.modify_success)
+                        UiState.Loading -> Unit
+                        UiState.Empty -> Unit
                     }
                 }
             }
@@ -703,7 +704,7 @@ fun VideoRouteHostScreen(
         isLocked = isPlayerLocked,
         showPoster = !playbackState.engine.hasRenderedFirstFrame,
         showLoading =
-            videoState is VideoLoadingState.Loading ||
+            videoState is UiState.Loading ||
                     playbackState.engine.phase == PlaybackPhase.Preparing,
         showRetry = playbackState.engine.phase == PlaybackPhase.Error,
         showResumeButton = showResumeButton,

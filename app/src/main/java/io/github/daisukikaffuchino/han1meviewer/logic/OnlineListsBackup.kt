@@ -8,8 +8,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListType
 import io.github.daisukikaffuchino.han1meviewer.logic.model.PlaylistExport
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Playlists
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
@@ -156,16 +155,17 @@ object OnlineListsBackup {
         var page = 1
         while (true) {
             val state = NetworkRepo.getPlaylists(page, userId)
-                .first { it !is WebsiteState.Loading }
+                .first { it !is UiState.Loading }
             when (state) {
-                is WebsiteState.Success -> {
-                    if (state.info.playlists.isEmpty()) return result
-                    result += state.info.playlists
+                is UiState.Success -> {
+                    if (state.data.playlists.isEmpty()) return result
+                    result += state.data.playlists
                     page++
                 }
 
-                is WebsiteState.Error -> throw state.throwable
-                is WebsiteState.Loading -> return result
+                is UiState.Error -> throw state.throwable
+                is UiState.Empty -> return result
+                is UiState.Loading -> return result
             }
         }
     }
@@ -197,23 +197,24 @@ object OnlineListsBackup {
 
     private suspend fun fetchCsrfToken(userId: String): String {
         val state = NetworkRepo.getPlaylists(1, userId)
-            .first { it !is WebsiteState.Loading }
+            .first { it !is UiState.Loading }
         return when (state) {
-            is WebsiteState.Success -> state.info.csrfToken ?: error("Missing CSRF token")
-            is WebsiteState.Error -> throw state.throwable
-            is WebsiteState.Loading -> error("Missing CSRF token")
+            is UiState.Success -> state.data.csrfToken ?: error("Missing CSRF token")
+            is UiState.Error -> throw state.throwable
+            is UiState.Empty -> error("Missing CSRF token")
+            is UiState.Loading -> error("Missing CSRF token")
         }
     }
 
     private suspend fun fetchVideoCsrfToken(videoCode: String): String? {
         val state = NetworkRepo.getHanimeVideo(videoCode)
-            .first { it !is VideoLoadingState.Loading }
+            .first { it !is UiState.Loading }
         return when (state) {
-            is VideoLoadingState.Success -> state.info.csrfToken
+            is UiState.Success -> state.data.csrfToken
             // 失败时返回 null，让调用处的 elvis 兜底 fetchCsrfToken(userId) 生效
-            is VideoLoadingState.Error -> null
-            is VideoLoadingState.Loading -> null
-            is VideoLoadingState.NoContent -> null
+            is UiState.Error -> null
+            is UiState.Loading -> null
+            is UiState.Empty -> null
         }
     }
 
@@ -222,25 +223,26 @@ object OnlineListsBackup {
         playlistTitle: String,
     ): String? {
         val state = NetworkRepo.getHanimeVideo(videoCode)
-            .first { it !is VideoLoadingState.Loading }
+            .first { it !is UiState.Loading }
         return when (state) {
-            is VideoLoadingState.Success -> state.info.myList?.myListInfo
+            is UiState.Success -> state.data.myList?.myListInfo
                 ?.firstOrNull { it.title == playlistTitle }
                 ?.code
 
             // 失败时返回 null，让调用处的 elvis 链继续走到明确的 error(...) 提示
-            is VideoLoadingState.Error -> null
-            is VideoLoadingState.Loading -> null
-            is VideoLoadingState.NoContent -> null
+            is UiState.Error -> null
+            is UiState.Loading -> null
+            is UiState.Empty -> null
         }
     }
 
-    private suspend fun <T> awaitWebsiteSuccess(flow: Flow<WebsiteState<T>>): T {
-        val state = flow.first { it !is WebsiteState.Loading }
+    private suspend fun <T> awaitWebsiteSuccess(flow: Flow<UiState<T>>): T {
+        val state = flow.first { it !is UiState.Loading }
         return when (state) {
-            is WebsiteState.Success -> state.info
-            is WebsiteState.Error -> throw state.throwable
-            is WebsiteState.Loading -> error("Unexpected loading state")
+            is UiState.Success -> state.data
+            is UiState.Error -> throw state.throwable
+            is UiState.Empty -> error("Unexpected empty state")
+            is UiState.Loading -> error("Unexpected loading state")
         }
     }
 

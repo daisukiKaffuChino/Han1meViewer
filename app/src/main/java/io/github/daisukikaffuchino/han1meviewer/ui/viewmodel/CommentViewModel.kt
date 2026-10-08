@@ -10,7 +10,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.CommentPlace
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ReportReason
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoCommentArgs
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoComments
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.video.CommentSortType
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel.csrfToken
 import io.github.daisukikaffuchino.utils.loadAssetAs
@@ -50,11 +50,11 @@ class CommentViewModel : ViewModel() {
     )
 
     private val _videoCommentStateFlow =
-        MutableStateFlow<WebsiteState<VideoComments>>(WebsiteState.Loading)
+        MutableStateFlow<UiState<VideoComments>>(UiState.Loading)
     val videoCommentStateFlow = _videoCommentStateFlow.asStateFlow()
 
     private val _videoReplyStateFlow =
-        MutableStateFlow<WebsiteState<VideoComments>>(WebsiteState.Loading)
+        MutableStateFlow<UiState<VideoComments>>(UiState.Loading)
     val videoReplyStateFlow = _videoReplyStateFlow.asStateFlow()
 
     private val _videoCommentFlow = MutableStateFlow(emptyList<VideoComments.VideoComment>())
@@ -64,15 +64,15 @@ class CommentViewModel : ViewModel() {
     val videoReplyFlow = _videoReplyFlow.asStateFlow()
 
     private val _postCommentFlow =
-        MutableSharedFlow<WebsiteState<Unit>>(replay = 0)
+        MutableSharedFlow<UiState<Unit>>(replay = 0)
     val postCommentFlow = _postCommentFlow.asSharedFlow()
 
     private val _postReplyFlow =
-        MutableSharedFlow<WebsiteState<Unit>>(replay = 0)
+        MutableSharedFlow<UiState<Unit>>(replay = 0)
     val postReplyFlow = _postReplyFlow.asSharedFlow()
 
     private val _commentLikeFlow =
-        MutableSharedFlow<WebsiteState<VideoCommentArgs>>(replay = 0)
+        MutableSharedFlow<UiState<VideoCommentArgs>>(replay = 0)
     val commentLikeFlow = _commentLikeFlow.asSharedFlow()
     val reportReason by unsafeLazy {
         loadAssetAs<List<ReportReason>>("report_reason.json").orEmpty()
@@ -110,13 +110,13 @@ class CommentViewModel : ViewModel() {
     }
     fun getComment(type: String, code: String) {
         viewModelScope.launch {
-            _videoCommentStateFlow.value = WebsiteState.Loading
+            _videoCommentStateFlow.value = UiState.Loading
             NetworkRepo.getComments(type, code).collect { state ->
                 _videoCommentStateFlow.value = state
                 _videoCommentFlow.update { prevList ->
                     when (state) {
-                        is WebsiteState.Success -> state.info.videoComment
-                        is WebsiteState.Loading -> emptyList()
+                        is UiState.Success -> state.data.videoComment
+                        is UiState.Loading -> emptyList()
                         else -> prevList
                     }
                 }
@@ -131,13 +131,13 @@ class CommentViewModel : ViewModel() {
     fun getCommentReply(commentId: String) {
         viewModelScope.launch {
             // 每次获取评论回复时，都会重新加载
-            _videoReplyStateFlow.value = WebsiteState.Loading
+            _videoReplyStateFlow.value = UiState.Loading
             NetworkRepo.getCommentReply(commentId).collect { state ->
                 _videoReplyStateFlow.value = state
                 _videoReplyFlow.update { prevList ->
                     when (state) {
-                        is WebsiteState.Success -> state.info.videoComment
-                        is WebsiteState.Loading -> emptyList()
+                        is UiState.Success -> state.data.videoComment
+                        is UiState.Loading -> emptyList()
                         else -> prevList
                     }
                 }
@@ -207,12 +207,12 @@ class CommentViewModel : ViewModel() {
                 commentPosition, comment
             ).collect { argState ->
                 _commentLikeFlow.emit(argState)
-                if (argState is WebsiteState.Success) {
+                if (argState is UiState.Success) {
                     when (commentPlace) {
                         CommentPlace.COMMENT -> _videoCommentFlow.update { prevList ->
                             prevList.map { item ->
                                 if (item.reportableId == comment.reportableId){
-                                    item.handleCommentLike(argState.info)
+                                    item.handleCommentLike(argState.data)
                                 } else {
                                     item
                                 }
@@ -222,7 +222,7 @@ class CommentViewModel : ViewModel() {
                         CommentPlace.CHILD_COMMENT -> _videoReplyFlow.update { prevList ->
                             prevList.map { item ->
                                 if (item.reportableId == comment.reportableId){
-                                    item.handleCommentLike(argState.info)
+                                    item.handleCommentLike(argState.data)
                                 } else {
                                     item
                                 }
@@ -276,7 +276,7 @@ class CommentViewModel : ViewModel() {
                 reportableId = reportableId
             ).collect { state ->
                 when(state){
-                    is WebsiteState.Error -> {
+                    is UiState.Error -> {
                         _reportMessage.emit(
                             Message(
                                 R.string.report_failed,
@@ -284,10 +284,13 @@ class CommentViewModel : ViewModel() {
                             )
                         )
                     }
-                    WebsiteState.Loading -> {
+                    UiState.Loading -> {
 
                     }
-                    is WebsiteState.Success<*> -> {
+                    UiState.Empty -> {
+
+                    }
+                    is UiState.Success<*> -> {
                         _reportMessage.emit(Message(R.string.report_success))
                     }
                 }

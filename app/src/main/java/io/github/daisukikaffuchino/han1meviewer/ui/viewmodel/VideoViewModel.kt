@@ -22,8 +22,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.WatchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.download.HanimeDownloadEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo
-import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel.csrfToken
 import io.github.daisukikaffuchino.han1meviewer.util.TagLocalizer
 import androidx.lifecycle.ViewModel
@@ -102,7 +101,7 @@ class VideoViewModel(
     private val _videoList = MutableLiveData<List<HanimeInfo>>()
     val videoList: LiveData<List<HanimeInfo>> = _videoList
     private val _hanimeVideoStateFlow =
-        MutableStateFlow<VideoLoadingState<HanimeVideo>>(VideoLoadingState.Loading)
+        MutableStateFlow<UiState<HanimeVideo>>(UiState.Loading)
     val hanimeVideoStateFlow = _hanimeVideoStateFlow.asStateFlow()
 
     private val _hanimeVideoFlow = MutableStateFlow<HanimeVideo?>(null)
@@ -267,7 +266,7 @@ class VideoViewModel(
     fun getHanimeVideo(videoCode: String,localUri: String? = null) {
         if (videoCode == "-1"){
             val localPlayInfo = buildLocalPlayInfo(localUri)
-            _hanimeVideoStateFlow.value = VideoLoadingState.Success(localPlayInfo)
+            _hanimeVideoStateFlow.value = UiState.Success(localPlayInfo)
             _hanimeVideoFlow.value = localPlayInfo
             return
         }
@@ -276,9 +275,9 @@ class VideoViewModel(
             val flow = if (fromDownload) {
                 videoCacheStore.load(videoCode).map { hv ->
                     if (hv == null) {
-                        VideoLoadingState.NoContent
+                        UiState.Empty
                     } else {
-                        VideoLoadingState.Success(hv)
+                        UiState.Success(hv)
                     }
                 }
             } else {
@@ -286,29 +285,29 @@ class VideoViewModel(
             }
             flow.collect { state ->
                 val emitState = when {
-                    localUri != null && state is VideoLoadingState.Success -> {
+                    localUri != null && state is UiState.Success -> {
                         val resolution = HanimeResolution()
                         resolution.parseResolution(
                             HanimeResolution.RES_1080P,
                             resLink = localUri,
                             type = "video/mp4"
                         )
-                        VideoLoadingState.Success(
-                            state.info.copy(videoUrls = resolution.toResolutionLinkMap())
+                        UiState.Success(
+                            state.data.copy(videoUrls = resolution.toResolutionLinkMap())
                                 .withLocalizedLabels()
                         )
                     }
 
-                    state is VideoLoadingState.Success -> {
-                        VideoLoadingState.Success(state.info.withLocalizedLabels())
+                    state is UiState.Success -> {
+                        UiState.Success(state.data.withLocalizedLabels())
                     }
 
                     else -> state
                 }
                 _hanimeVideoStateFlow.value = emitState
-                if (emitState is VideoLoadingState.Success) {
-                    _hanimeVideoFlow.update { emitState.info }
-                    csrfToken = emitState.info.csrfToken
+                if (emitState is UiState.Success) {
+                    _hanimeVideoFlow.update { emitState.data }
+                    csrfToken = emitState.data.csrfToken
                 }
             }
         }
@@ -318,13 +317,13 @@ class VideoViewModel(
         val cached = videoIntroUiStateMap[code]?.cachedVideo?.withLocalizedLabels() ?: return false
         updateVideoIntroUiState(code) { copy(introRestored = true) }
         _hanimeVideoFlow.value = cached
-        _hanimeVideoStateFlow.value = VideoLoadingState.Success(cached)
+        _hanimeVideoStateFlow.value = UiState.Success(cached)
         return true
     }
 
 
 
-    private val _addToFavVideoFlow = MutableSharedFlow<WebsiteState<Boolean>>()
+    private val _addToFavVideoFlow = MutableSharedFlow<UiState<Boolean>>()
     val addToFavVideoFlow = _addToFavVideoFlow.asSharedFlow()
 
     private val _loadDownloadedFlow = MutableSharedFlow<HanimeDownloadEntity?>()
@@ -372,14 +371,14 @@ class VideoViewModel(
                 token = csrfToken,
             ).collect { state ->
                 _addToFavVideoFlow.emit(state)
-                if (state is WebsiteState.Success) {
+                if (state is UiState.Success) {
                     _hanimeVideoFlow.update { it?.rateVideo(isPositive) }
                 }
             }
         }
     }
 
-    private val _modifyMyListFlow = MutableSharedFlow<WebsiteState<Int>>()
+    private val _modifyMyListFlow = MutableSharedFlow<UiState<Int>>()
     val modifyMyListFlow = _modifyMyListFlow.asSharedFlow()
 
     fun modifyMyList(
@@ -400,10 +399,10 @@ class VideoViewModel(
         }
     }
 
-    private val _localFavoriteActionFlow = MutableSharedFlow<WebsiteState<Boolean>>()
+    private val _localFavoriteActionFlow = MutableSharedFlow<UiState<Boolean>>()
     val localFavoriteActionFlow = _localFavoriteActionFlow.asSharedFlow()
 
-    private val _localMyListActionFlow = MutableSharedFlow<WebsiteState<Boolean>>()
+    private val _localMyListActionFlow = MutableSharedFlow<UiState<Boolean>>()
     val localMyListActionFlow = _localMyListActionFlow.asSharedFlow()
 
     fun toggleLocalFavorite() {
@@ -418,9 +417,9 @@ class VideoViewModel(
                 }
                 !isFavorite
             }.onSuccess { isFavorite ->
-                _localFavoriteActionFlow.emit(WebsiteState.Success(isFavorite))
+                _localFavoriteActionFlow.emit(UiState.Success(isFavorite))
             }.onFailure {
-                _localFavoriteActionFlow.emit(WebsiteState.Error(it))
+                _localFavoriteActionFlow.emit(UiState.Error(it))
             }
         }
     }
@@ -450,9 +449,9 @@ class VideoViewModel(
                     }
                 }
             }.onSuccess {
-                _localMyListActionFlow.emit(WebsiteState.Success(true))
+                _localMyListActionFlow.emit(UiState.Success(true))
             }.onFailure {
-                _localMyListActionFlow.emit(WebsiteState.Error(it))
+                _localMyListActionFlow.emit(UiState.Error(it))
             }
         }
     }
@@ -478,7 +477,7 @@ class VideoViewModel(
     }
 
     // true代表已关注成功，false代表取消关注成功
-    private val _subscribeArtistFlow = MutableSharedFlow<WebsiteState<Boolean>>()
+    private val _subscribeArtistFlow = MutableSharedFlow<UiState<Boolean>>()
     val subscribeArtistFlow = _subscribeArtistFlow.asSharedFlow()
 
     fun subscribeArtist(
@@ -488,7 +487,7 @@ class VideoViewModel(
         viewModelScope.launch {
             NetworkRepo.subscribeArtist(csrfToken, userId, artistId, true).collect { state ->
                 _subscribeArtistFlow.emit(state)
-                if (state is WebsiteState.Success) {
+                if (state is UiState.Success) {
                     _hanimeVideoFlow.update {
                         it?.copy(artist = it.artist?.copy(post = it.artist.post?.copy(isSubscribed = true)))
                     }
@@ -504,7 +503,7 @@ class VideoViewModel(
         viewModelScope.launch {
             NetworkRepo.subscribeArtist(csrfToken, userId, artistId, false).collect { state ->
                 _subscribeArtistFlow.emit(state)
-                if (state is WebsiteState.Success) {
+                if (state is UiState.Success) {
                     _hanimeVideoFlow.update {
                         it?.copy(artist = it.artist?.copy(post = it.artist.post?.copy(isSubscribed = false)))
                     }

@@ -19,8 +19,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.network.HanimeNetwork
 import io.github.daisukikaffuchino.han1meviewer.logic.network.NetworkFailure
 import io.github.daisukikaffuchino.han1meviewer.logic.network.NetworkFailureClassifier
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.replaceBackupMediaCdnHost
 import io.github.daisukikaffuchino.utils.applicationContext
 import kotlinx.coroutines.CancellationException
@@ -142,11 +141,11 @@ object NetworkRepo {
         permittedSuccessCode = intArrayOf(302),
     ) {
         if (it.isBlank()) {
-            WebsiteState.Success(Unit)
+            UiState.Success(Unit)
         } else {
             when (val result = Parser.userAccountPage(it)) {
-                is WebsiteState.Error -> WebsiteState.Error(result.throwable)
-                else -> WebsiteState.Success(Unit)
+                is UiState.Error -> UiState.Error(result.throwable)
+                else -> UiState.Success(Unit)
             }
         }
     }
@@ -170,11 +169,11 @@ object NetworkRepo {
         permittedSuccessCode = intArrayOf(302),
     ) {
         if (it.isBlank()) {
-            WebsiteState.Success(Unit)
+            UiState.Success(Unit)
         } else {
             when (val result = Parser.userAccountPage(it)) {
-                is WebsiteState.Error -> WebsiteState.Error(result.throwable)
-                else -> WebsiteState.Success(Unit)
+                is UiState.Error -> UiState.Error(result.throwable)
+                else -> UiState.Success(Unit)
             }
         }
     }
@@ -202,11 +201,11 @@ object NetworkRepo {
         permittedSuccessCode = intArrayOf(302),
     ) {
         if (it.isBlank()) {
-            WebsiteState.Success(Unit)
+            UiState.Success(Unit)
         } else {
             when (val result = Parser.userAccountPage(it)) {
-                is WebsiteState.Error -> WebsiteState.Error(result.throwable)
-                else -> WebsiteState.Success(Unit)
+                is UiState.Error -> UiState.Error(result.throwable)
+                else -> UiState.Success(Unit)
             }
         }
     }
@@ -226,9 +225,9 @@ object NetworkRepo {
         val jsonObject = JSONObject(it)
         val success = jsonObject.optBoolean("success", false)
         if (success) {
-            WebsiteState.Success(position)
+            UiState.Success(position)
         } else {
-            WebsiteState.Error(IllegalStateException("cannot delete it ?!"))
+            UiState.Error(IllegalStateException("cannot delete it ?!"))
         }
     }
 
@@ -260,10 +259,10 @@ object NetworkRepo {
         val jsonObject = JSONObject(deleteBody)
         val returnVideoCode = jsonObject.get("video_id").toString()
         if (videoCode == returnVideoCode) {
-            return@websiteIOFlow WebsiteState.Success(position)
+            return@websiteIOFlow UiState.Success(position)
         }
 
-        return@websiteIOFlow WebsiteState.Error(IllegalStateException("cannot delete it ?!"))
+        return@websiteIOFlow UiState.Error(IllegalStateException("cannot delete it ?!"))
     }
 
     fun getPlaylists(page: Int, userId: String ) = websiteIOFlow(
@@ -285,7 +284,7 @@ object NetworkRepo {
         }
     ) {
         LogUtil.d("add_to_fav_body", it)
-        return@websiteIOFlow WebsiteState.Success(likeStatus)
+        return@websiteIOFlow UiState.Success(likeStatus)
     }
 
     fun rateVideo(
@@ -312,7 +311,7 @@ object NetworkRepo {
         }
     ) {
         LogUtil.d("rate_video_body", it)
-        return@websiteIOFlow WebsiteState.Success(isPositive)
+        return@websiteIOFlow UiState.Success(isPositive)
     }
 
     fun createPlaylist(
@@ -329,7 +328,7 @@ object NetworkRepo {
         permittedSuccessCode = intArrayOf(500)
     ) {
         LogUtil.d("create_playlist_body", it)
-        return@websiteIOFlow WebsiteState.Success(Unit)
+        return@websiteIOFlow UiState.Success(Unit)
     }
 
     fun addToMyList(
@@ -346,7 +345,7 @@ object NetworkRepo {
         }
     ) {
         LogUtil.d("add_to_playlist_body", it)
-        return@websiteIOFlow WebsiteState.Success(position)
+        return@websiteIOFlow UiState.Success(position)
     }
 
     fun modifyPlaylist(
@@ -366,7 +365,7 @@ object NetworkRepo {
         permittedSuccessCode = intArrayOf(302)
     ) {
         LogUtil.d("modify_playlist_body", it)
-        return@websiteIOFlow WebsiteState.Success(
+        return@websiteIOFlow UiState.Success(
             ModifiedPlaylistArgs(
                 title = title, desc = description, isDeleted = delete,
             )
@@ -402,7 +401,7 @@ object NetworkRepo {
         }
     ) {
         LogUtil.d("post_comment_body", it)
-        return@websiteIOFlow WebsiteState.Success(Unit)
+        return@websiteIOFlow UiState.Success(Unit)
     }
 
     fun postCommentReply(
@@ -417,7 +416,7 @@ object NetworkRepo {
         }
     ) {
         LogUtil.d("post_comment_reply_body", it)
-        return@websiteIOFlow WebsiteState.Success(Unit)
+        return@websiteIOFlow UiState.Success(Unit)
     }
 
     fun likeComment(
@@ -443,7 +442,7 @@ object NetworkRepo {
         }
     ) {
         LogUtil.d("like_comment_body", it)
-        return@websiteIOFlow WebsiteState.Success(
+        return@websiteIOFlow UiState.Success(
             VideoCommentArgs(
                 commentPosition, isPositive, comment
             )
@@ -490,7 +489,7 @@ object NetworkRepo {
         }
     ) {
         LogUtil.d("subscribe_artist_body", it)
-        return@websiteIOFlow WebsiteState.Success(status)
+        return@websiteIOFlow UiState.Success(status)
     }
 
     //</editor-fold>
@@ -498,7 +497,7 @@ object NetworkRepo {
     //<editor-fold desc="Base">
 
     fun login(email: String, password: String) = flow {
-        emit(WebsiteState.Loading)
+        emit(UiState.Loading)
         // 首先获取token
         val loginPage = HanimeNetwork.hanimeService.getLoginPage()
         val token = loginPage.body()?.string()?.let(Parser::extractTokenFromLoginPage)
@@ -511,16 +510,16 @@ object NetworkRepo {
                 // Cookie 會返回 XSRF-TOKEN 和 hanime1_session，我們只需要後者
                 // 错误的，还需要 remember_web 字段！但我没找到！
                 LogUtil.d("login_headers", req.headers().toMultimap().toString())
-                emit(WebsiteState.Success(req.headers().values("Set-Cookie")))
+                emit(UiState.Success(req.headers().values("Set-Cookie")))
             } else {
-                emit(WebsiteState.Error(IllegalStateException(getString(R.string.account_or_password_wrong))))
+                emit(UiState.Error(IllegalStateException(getString(R.string.account_or_password_wrong))))
             }
         } else {
             // 雙重保險
-            emit(WebsiteState.Error(IllegalStateException(getString(R.string.account_or_password_wrong))))
+            emit(UiState.Error(IllegalStateException(getString(R.string.account_or_password_wrong))))
         }
     }.catch { e ->
-        emit(WebsiteState.Error(handleException(e)))
+        emit(UiState.Error(handleException(e)))
     }.flowOn(Dispatchers.IO)
 
     /**
@@ -531,7 +530,7 @@ object NetworkRepo {
     private fun <T> websiteIOFlow(
         request: suspend () -> Response<ResponseBody>,
         permittedSuccessCode: IntArray? = null,
-        action: (String) -> WebsiteState<T>,
+        action: (String) -> UiState<T>,
     ) = flow {
         val requestResult = request.invoke()
         val resultBody = requestResult.body()?.string()?.replaceBackupMediaCdnHost()
@@ -542,7 +541,7 @@ object NetworkRepo {
             requestResult.throwRequestException()
         }
     }.catch { e ->
-        emit(WebsiteState.Error(handleException(e)))
+        emit(UiState.Error(handleException(e)))
     }.flowOn(Dispatchers.IO)
 
     /**
@@ -568,7 +567,7 @@ object NetworkRepo {
      */
     private fun <T> videoIOFlow(
         request: suspend () -> Response<ResponseBody>,
-        action: (String) -> VideoLoadingState<T>,
+        action: (String) -> UiState<T>,
     ) = flow {
         val requestResult = request.invoke()
         val resultBody = requestResult.body()?.string()?.replaceBackupMediaCdnHost()
@@ -578,7 +577,7 @@ object NetworkRepo {
             requestResult.throwRequestException()
         }
     }.catch { e ->
-        emit(VideoLoadingState.Error(handleException(e)))
+        emit(UiState.Error(handleException(e)))
     }.flowOn(Dispatchers.IO)
 
     internal fun Response<ResponseBody>.throwRequestException(): Nothing {

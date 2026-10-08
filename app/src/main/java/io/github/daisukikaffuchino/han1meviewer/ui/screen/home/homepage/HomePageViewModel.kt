@@ -15,7 +15,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.WatchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Announcement
 import io.github.daisukikaffuchino.han1meviewer.logic.state.HanimeErrorKind
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.toHanimeError
 import io.github.daisukikaffuchino.han1meviewer.logout
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel
@@ -108,7 +108,8 @@ class HomePageViewModel: ViewModel() {
             }
             NetworkRepo.getHomePage().collect { networkState ->
                 when (networkState){
-                    is WebsiteState.Error -> {
+                    is UiState.Empty -> _homePageFlow.value = PagedUiState.Empty
+                    is UiState.Error -> {
                         if (networkState.throwable.toHanimeError().kind == HanimeErrorKind.SessionExpired) {
                             logout()
                             _sessionExpiredMessage.emit(
@@ -122,16 +123,16 @@ class HomePageViewModel: ViewModel() {
                         _homePageFlow.value =
                             PagedUiState.Error(networkState.throwable, cached = previousData)
                     }
-                    is WebsiteState.Success -> {
-                        AppViewModel.csrfToken = networkState.info.csrfToken
-                        networkState.info.userId.takeIf { it.isNotEmpty() }?.let { userId ->
+                    is UiState.Success -> {
+                        AppViewModel.csrfToken = networkState.data.csrfToken
+                        networkState.data.userId.takeIf { it.isNotEmpty() }?.let { userId ->
                             SettingsRepository.setSavedUserId(userId)
                         }
-                        val homeData = HomeData(page = networkState.info)
+                        val homeData = HomeData(page = networkState.data)
                         _homePageFlow.value =
                             PagedUiState.Success(data = homeData, isRefreshing = false)
                     }
-                    is WebsiteState.Loading -> { }
+                    is UiState.Loading -> { }
                 }
             }
         }

@@ -58,7 +58,7 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccount
 import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccountAction
 import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccountSubmittingState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
@@ -107,11 +107,12 @@ fun AccountScreen(
 
         viewModel.actionFlow.collect { event ->
             when (event.state) {
-                is WebsiteState.Error -> {
+                UiState.Empty -> Unit
+                is UiState.Error -> {
                     SonnerToast.error(event.state.throwable.message ?: modifyFailed)
                 }
 
-                is WebsiteState.Success -> {
+                is UiState.Success -> {
                     when (event.action) {
                         UserAccountAction.ProfileUpdated,
                         UserAccountAction.AvatarUpdated -> onRefreshHome()
@@ -126,7 +127,7 @@ fun AccountScreen(
                     SonnerToast.error(message)
                 }
 
-                WebsiteState.Loading -> Unit
+                UiState.Loading -> Unit
             }
         }
     }
@@ -137,9 +138,9 @@ fun AccountScreen(
     ) { paddingValues ->
         val loadingHint = rememberRandomLoadingHint()
         PageContent(
-            isLoading = state is WebsiteState.Loading,
-            isError = state is WebsiteState.Error,
-            isEmpty = state !is WebsiteState.Success,
+            isLoading = state is UiState.Loading,
+            isError = state is UiState.Error,
+            isEmpty = state !is UiState.Success,
             onRetry = { viewModel.loadAccount(forceReload = true) },
             loadingMessage = loadingHint,
             error = {
@@ -156,7 +157,7 @@ fun AccountScreen(
                 }
             },
         ) {
-            val account = (state as? WebsiteState.Success)?.info ?: return@PageContent
+            val account = (state as? UiState.Success)?.data ?: return@PageContent
             AccountContent(
                 account = account,
                 submittingState = submittingState,

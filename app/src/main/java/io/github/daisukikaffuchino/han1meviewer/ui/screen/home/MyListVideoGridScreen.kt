@@ -29,7 +29,7 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
@@ -68,7 +68,7 @@ import kotlinx.coroutines.flow.flowOf
 fun VideoGridScreen(
     items: List<HanimeInfo>,
     state: PagedUiState<*>,
-    deleteStateFlow: Flow<WebsiteState<Boolean>>,
+    deleteStateFlow: Flow<UiState<Boolean>>,
     loadedPageCount: Int,
     totalPages: Int,
     isLoadingMore: Boolean,
@@ -119,9 +119,10 @@ fun VideoGridScreen(
     LaunchedEffect(deleteStateFlow, deleteFailedText, deleteSuccessText) {
         deleteStateFlow.collect { deleteState ->
             when (deleteState) {
-                is WebsiteState.Error -> snackbarHostState.showSnackbar(message = deleteFailedText)
-                is WebsiteState.Success -> snackbarHostState.showSnackbar(message = deleteSuccessText)
-                WebsiteState.Loading -> Unit
+                is UiState.Error -> snackbarHostState.showSnackbar(message = deleteFailedText)
+                is UiState.Success -> snackbarHostState.showSnackbar(message = deleteSuccessText)
+                UiState.Loading -> Unit
+                UiState.Empty -> Unit
             }
         }
     }
@@ -242,7 +243,7 @@ private fun VideoGridScreenPreview() {
         VideoGridScreen(
             items = fakeHomePageVideos.take(6),
             state = PagedUiState.Success(Unit),
-            deleteStateFlow = flowOf(WebsiteState.Success(true)),
+            deleteStateFlow = flowOf(UiState.Success(true)),
             loadedPageCount = 2,
             totalPages = 10,
             isLoadingMore = false,

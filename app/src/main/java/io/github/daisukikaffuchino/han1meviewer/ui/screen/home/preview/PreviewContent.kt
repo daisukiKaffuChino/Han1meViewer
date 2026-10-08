@@ -48,7 +48,7 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.state.HanimeErrorKind
 import io.github.daisukikaffuchino.han1meviewer.logic.state.toHanimeError
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimePreview
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.pienization
 import io.github.daisukikaffuchino.han1meviewer.ui.component.CardContainerSurface
 import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledTonalButton
@@ -198,13 +198,19 @@ fun PreviewContent(
                 }
 
                 when (uiState.displayState) {
-                    is WebsiteState.Loading -> item {
+                    is UiState.Loading -> item {
                         LoadingContent(
                             message = loadingHint
                         )
                     }
 
-                    is WebsiteState.Error -> item {
+                    is UiState.Empty -> item {
+                        EmptyContent(
+                            hint = stringResource(R.string.empty_content),
+                        )
+                    }
+
+                    is UiState.Error -> item {
                         val isPreviewEmpty =
                             uiState.displayState.throwable.toHanimeError().kind == HanimeErrorKind.NotFound
                         ErrorContent(
@@ -220,10 +226,10 @@ fun PreviewContent(
                         )
                     }
 
-                    is WebsiteState.Success -> {
+                    is UiState.Success -> {
                         item {
                             PreviewTourRow(
-                                latestHanime = uiState.displayState.info.latestHanime,
+                                latestHanime = uiState.displayState.data.latestHanime,
                                 selectedIndex = uiState.routeState.selectedIndex,
                                 onSelect = { onEvent(PreviewEvent.OnSelectTourItem(it)) },
                             )

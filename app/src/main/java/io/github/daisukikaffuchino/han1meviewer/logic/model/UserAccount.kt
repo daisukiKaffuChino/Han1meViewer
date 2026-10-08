@@ -26,5 +26,5 @@ enum class UserAccountSubmittingState {
 
 data class UserAccountActionEvent(
     val action: UserAccountAction,
-    val state: io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState<Unit>,
+    val state: io.github.daisukikaffuchino.han1meviewer.logic.state.UiState<Unit>,
 )

@@ -74,7 +74,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.entity.WatchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.OnlineWatchHistorySort
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.CardContainerSurface
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.FilledIconButton
@@ -114,7 +114,7 @@ fun WatchHistoryTabScreen(
     onlineTotalPages: StateFlow<Int>,
     onlineIsLoadingMore: StateFlow<Boolean>,
     onlineRefreshing: () -> Boolean,
-    onlineDeleteStateFlow: SharedFlow<WebsiteState<Boolean>>,
+    onlineDeleteStateFlow: SharedFlow<UiState<Boolean>>,
     onBack: () -> Unit,
     onOpenLocalVideo: (WatchHistoryEntity) -> Unit,
     onDeleteLocalHistory: (WatchHistoryEntity) -> Unit,
@@ -328,7 +328,7 @@ private fun OnlineWatchHistoryScreen(
     totalPages: Int,
     isLoadingMore: Boolean,
     refreshing: Boolean,
-    deleteStateFlow: SharedFlow<WebsiteState<Boolean>>,
+    deleteStateFlow: SharedFlow<UiState<Boolean>>,
     onOpenVideo: (HanimeInfo) -> Unit,
     onDeleteVideo: (HanimeInfo) -> Unit,
     onRefresh: (OnlineWatchHistorySort) -> Unit,
@@ -347,9 +347,10 @@ private fun OnlineWatchHistoryScreen(
     LaunchedEffect(deleteStateFlow, deleteFailedText, deleteSuccessText) {
         deleteStateFlow.collect { deleteState ->
             when (deleteState) {
-                is WebsiteState.Error -> snackbarHostState.showSnackbar(message = deleteFailedText)
-                is WebsiteState.Success -> snackbarHostState.showSnackbar(message = deleteSuccessText)
-                WebsiteState.Loading -> Unit
+                is UiState.Error -> snackbarHostState.showSnackbar(message = deleteFailedText)
+                is UiState.Success -> snackbarHostState.showSnackbar(message = deleteSuccessText)
+                UiState.Loading -> Unit
+                UiState.Empty -> Unit
             }
         }
     }

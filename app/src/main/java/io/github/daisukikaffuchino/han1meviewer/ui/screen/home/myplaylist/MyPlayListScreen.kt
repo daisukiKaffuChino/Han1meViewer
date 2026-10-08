@@ -31,7 +31,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import io.github.daisukikaffuchino.han1meviewer.R
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PullRefreshOverlay
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
@@ -90,9 +90,10 @@ fun PlaylistScreen(
     LaunchedEffect(Unit) {
         viewModel.createPlaylistFlow.collect { result ->
             when (result) {
-                is WebsiteState.Error -> SonnerToast.error(R.string.add_failed)
-                is WebsiteState.Loading -> Unit
-                is WebsiteState.Success -> {
+                is UiState.Error -> SonnerToast.error(R.string.add_failed)
+                is UiState.Loading -> Unit
+                is UiState.Empty -> Unit
+                is UiState.Success -> {
                     SonnerToast.success(R.string.add_success)
                     viewModel.loadMyPlayList()
                 }
@@ -162,7 +163,7 @@ fun PlaylistScreen(
                     onRefresh = { handleEvent(PlaylistEvent.OnRefresh) })
         ) {
             when (state) {
-                is WebsiteState.Loading -> {
+                is UiState.Loading -> {
                     if (uiState.playlists.isEmpty()) {
                         LoadingIndicator(Modifier.align(Alignment.Center))
                     } else {
@@ -170,12 +171,12 @@ fun PlaylistScreen(
                     }
                 }
 
-                is WebsiteState.Error -> {
+                is UiState.Error -> {
                     if (uiState.playlists.isEmpty()) {
                         EmptyContent(
                             hint = stringResource(
                                 R.string.load_failed_with_reason,
-                                (state as WebsiteState.Error).throwable.message.orEmpty()
+                                (state as UiState.Error).throwable.message.orEmpty()
                             ),
                             picRes = R.drawable.h_chan_sad
                         )
@@ -184,7 +185,11 @@ fun PlaylistScreen(
                     }
                 }
 
-                is WebsiteState.Success -> {
+                is UiState.Empty -> {
+                    PlaylistContent(uiState = uiState, onEvent = handleEvent, rawState = state)
+                }
+
+                is UiState.Success -> {
                     PlaylistContent(uiState = uiState, onEvent = handleEvent, rawState = state)
                 }
             }

@@ -11,7 +11,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.ModifiedPlaylistArgs
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Playlists
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.myplaylist.PlaylistUiState
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel.csrfToken
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -33,8 +33,8 @@ data class PlaylistSheetScrollState(
 
 class MyPlayListViewModel : ViewModel(), PlaylistController {
 
-    private val _myPlaylistsFlow = MutableStateFlow<WebsiteState<Playlists>>(WebsiteState.Loading)
-    override val myPlaylistsFlow: StateFlow<WebsiteState<Playlists>> = _myPlaylistsFlow.asStateFlow()
+    private val _myPlaylistsFlow = MutableStateFlow<UiState<Playlists>>(UiState.Loading)
+    override val myPlaylistsFlow: StateFlow<UiState<Playlists>> = _myPlaylistsFlow.asStateFlow()
 
     private val _cachedMyPlayList = MutableStateFlow<List<Playlists.Playlist>>(emptyList())
 
@@ -138,18 +138,22 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
         viewModelScope.launch {
             NetworkRepo.getPlaylists(page, userId).collect { state ->
                 when (state) {
-                    is WebsiteState.Loading -> {
+                    is UiState.Loading -> {
                         if (page == 1 || forceReload) {
                             _myPlaylistsFlow.value = state
                         }
                     }
-                    is WebsiteState.Error -> {
+                    is UiState.Error -> {
                         _myPlaylistsFlow.value = state
                         _isLoadingMorePlaylists.value = false
                     }
-                    is WebsiteState.Success -> {
-                        val newList = state.info.playlists
-                        _playlistsTotalPages.value = state.info.maxPage
+                    is UiState.Empty -> {
+                        _myPlaylistsFlow.value = state
+                        _isLoadingMorePlaylists.value = false
+                    }
+                    is UiState.Success -> {
+                        val newList = state.data.playlists
+                        _playlistsTotalPages.value = state.data.maxPage
                         if (page == 1 || forceReload) {
                             _cachedMyPlayList.value = newList
                         } else {
@@ -240,7 +244,7 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
         getPlaylistItems(page, listCode, refresh = true)
     }
 
-    private val _deleteFromPlaylistFlow = MutableSharedFlow<WebsiteState<Int>>()
+    private val _deleteFromPlaylistFlow = MutableSharedFlow<UiState<Int>>()
     override val deleteFromPlaylistFlow = _deleteFromPlaylistFlow.asSharedFlow()
     // 从详情页删除某视频
     override fun deleteFromPlaylist(listCode: String, videoCode: String, position: Int) {
@@ -248,7 +252,7 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
             NetworkRepo.deleteMyListItems(listCode, videoCode, position, csrfToken).collect {
                 _deleteFromPlaylistFlow.emit(it)
                 _playlistFlow.update { prevList ->
-                    if (it is WebsiteState.Success) {
+                    if (it is UiState.Success) {
                         prevList.toMutableList().apply { removeAt(position) }
                     } else prevList
                 }
@@ -256,7 +260,7 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
         }
     }
 
-    private val _modifyPlaylistFlow = MutableSharedFlow<WebsiteState<ModifiedPlaylistArgs>>()
+    private val _modifyPlaylistFlow = MutableSharedFlow<UiState<ModifiedPlaylistArgs>>()
     override val modifyPlaylistFlow = _modifyPlaylistFlow.asSharedFlow()
     // 编辑Playlist
     override fun modifyPlaylist(listCode: String, title: String, desc: String, delete: Boolean) {
@@ -276,7 +280,7 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
     override fun clearCurrentList() {
         _playlistFlow.value = emptyList()
     }
-    private val _createPlaylistFlow = MutableSharedFlow<WebsiteState<Unit>>()
+    private val _createPlaylistFlow = MutableSharedFlow<UiState<Unit>>()
     override val createPlaylistFlow = _createPlaylistFlow.asSharedFlow()
     //创建Playlist
     override fun createPlaylist(title: String, description: String) {

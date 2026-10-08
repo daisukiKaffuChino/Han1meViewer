@@ -5,7 +5,7 @@ import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
 import io.github.daisukikaffuchino.han1meviewer.GETCHU_BASE_URL
 import io.github.daisukikaffuchino.han1meviewer.logic.model.GetchuPreview
 import io.github.daisukikaffuchino.han1meviewer.logic.model.GetchuPreviewDetail
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import org.json.JSONObject
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
@@ -13,7 +13,7 @@ import java.util.regex.Pattern
 import kotlin.runCatching
 
 object GetchuParser {
-    fun getchuPreview(body: String, dateCode: String): WebsiteState<GetchuPreview> {
+    fun getchuPreview(body: String, dateCode: String): UiState<GetchuPreview> {
         val parseBody = Jsoup.parse(body, GETCHU_BASE_URL).body()
         LogUtil.d(
             "GetchuPreviewParser",
@@ -71,10 +71,10 @@ object GetchuParser {
             "parse list result date=$dateCode groups=${groups.size} totalItems=${groups.sumOf { it.items.size }}"
         )
 
-        return WebsiteState.Success(GetchuPreview(dateCode = dateCode, groups = groups))
+        return UiState.Success(GetchuPreview(dateCode = dateCode, groups = groups))
     }
 
-    fun getchuPreviewDetail(body: String, id: String): WebsiteState<GetchuPreviewDetail> {
+    fun getchuPreviewDetail(body: String, id: String): UiState<GetchuPreviewDetail> {
         val parseBody = Jsoup.parse(body, GETCHU_BASE_URL).body()
         LogUtil.d(
             "GetchuPreviewParser",
@@ -206,7 +206,7 @@ object GetchuParser {
                     "videos=${videoUrls.size} series=${seriesItems.size} related=${seriesItems.size}"
         )
 
-        return WebsiteState.Success(
+        return UiState.Success(
             GetchuPreviewDetail(
                 id = id,
                 title = title,

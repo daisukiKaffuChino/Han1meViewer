@@ -55,7 +55,7 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PaginationPager
 import io.github.daisukikaffuchino.han1meviewer.ui.component.VideoCardItem
@@ -173,10 +173,11 @@ fun PlaylistBottomSheet(
     LaunchedEffect(Unit) {
         vm.modifyPlaylistFlow.collect { result ->
             when (result) {
-                is WebsiteState.Error -> SonnerToast.error(R.string.modify_failed)
-                WebsiteState.Loading -> {}
-                is WebsiteState.Success -> {
-                    if (result.info.isDeleted) {
+                is UiState.Error -> SonnerToast.error(R.string.modify_failed)
+                UiState.Loading -> {}
+                UiState.Empty -> {}
+                is UiState.Success -> {
+                    if (result.data.isDeleted) {
                         sheetState.hide()
                         onDismiss()
                         SonnerToast.success(R.string.delete_success)
@@ -194,9 +195,10 @@ fun PlaylistBottomSheet(
     LaunchedEffect(Unit) {
         vm.deleteFromPlaylistFlow.collect { result ->
             when (result) {
-                is WebsiteState.Error -> SonnerToast.error(R.string.delete_failed)
-                is WebsiteState.Loading -> {}
-                is WebsiteState.Success -> {
+                is UiState.Error -> SonnerToast.error(R.string.delete_failed)
+                is UiState.Loading -> {}
+                UiState.Empty -> {}
+                is UiState.Success -> {
                     SonnerToast.success(R.string.delete_success)
                     vm.loadMyPlayList()
                 }

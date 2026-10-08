@@ -81,7 +81,7 @@ import io.github.daisukikaffuchino.han1meviewer.ResolutionLinkMap
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.CheckInRecordEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo
-import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ExpandableRichText
 import io.github.daisukikaffuchino.han1meviewer.ui.component.TagChipGroup
 import io.github.daisukikaffuchino.han1meviewer.ui.component.VideoCardItem
@@ -118,7 +118,7 @@ data class DownloadPromptState(
 @Composable
 fun VideoIntroductionScreen(
     video: HanimeVideo?,
-    state: VideoLoadingState<HanimeVideo>,
+    state: UiState<HanimeVideo>,
     fromDownload: Boolean,
     hideRelatedInIntro: Boolean,
     playlistInitialIndex: Int?,
@@ -156,7 +156,7 @@ fun VideoIntroductionScreen(
             .fillMaxSize()
             .widthIn(max = maxScreenWidth)
     ) {
-        val currentVideo = video ?: (state as? VideoLoadingState.Success)?.info
+        val currentVideo = video ?: (state as? UiState.Success)?.data
         val loadingHint = rememberRandomLoadingHint()
         when {
             currentVideo != null -> VideoIntroductionContent(
@@ -191,14 +191,14 @@ fun VideoIntroductionScreen(
                 onIntroductionLinkClick = onIntroductionLinkClick,
             )
 
-            state is VideoLoadingState.Error -> ErrorContent(
+            state is UiState.Error -> ErrorContent(
                 title = stringResource(R.string.load_failed_retry),
                 message = state.throwable.message,
                 onRetry = onRetry,
                 modifier = Modifier.align(Alignment.Center),
             )
 
-            state is VideoLoadingState.NoContent -> EmptyContent(
+            state is UiState.Empty -> EmptyContent(
                 hint = stringResource(R.string.video_might_not_exist),
             )
 
@@ -1459,7 +1459,7 @@ private fun VideoIntroductionScreenPreview() {
     ComponentPreview {
         VideoIntroductionScreen(
             video = fakeVideoIntroduction,
-            state = VideoLoadingState.Success(fakeVideoIntroduction),
+            state = UiState.Success(fakeVideoIntroduction),
             fromDownload = false,
             hideRelatedInIntro = false,
             playlistInitialIndex = 1,
@@ -1499,7 +1499,7 @@ private fun VideoIntroductionScreenLoadingPreview() {
     ComponentPreview {
         VideoIntroductionScreen(
             video = null,
-            state = VideoLoadingState.Loading,
+            state = UiState.Loading,
             fromDownload = false,
             hideRelatedInIntro = false,
             playlistInitialIndex = 0,
@@ -1539,7 +1539,7 @@ private fun VideoIntroductionScreenErrorPreview() {
     ComponentPreview {
         VideoIntroductionScreen(
             video = null,
-            state = VideoLoadingState.Error(Throwable("network error")),
+            state = UiState.Error(Throwable("network error")),
             fromDownload = false,
             hideRelatedInIntro = false,
             playlistInitialIndex = 0,

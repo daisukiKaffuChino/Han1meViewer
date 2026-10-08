@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimePreview
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.util.TagLocalizer
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,10 +21,10 @@ import kotlinx.coroutines.withContext
  */
 class PreviewViewModel : ViewModel() {
 
-    private val previewCache = linkedMapOf<String, WebsiteState<HanimePreview>>()
+    private val previewCache = linkedMapOf<String, UiState<HanimePreview>>()
 
     private val _previewFlow =
-        MutableStateFlow<WebsiteState<HanimePreview>>(WebsiteState.Loading)
+        MutableStateFlow<UiState<HanimePreview>>(UiState.Loading)
     val previewFlow = _previewFlow.asStateFlow()
 
     fun getHanimePreview(date: String) {
@@ -36,7 +36,7 @@ class PreviewViewModel : ViewModel() {
             NetworkRepo.getHanimePreview(date).collect { preview ->
                 val localizedPreview = preview.withLocalizedTags()
                 _previewFlow.value = localizedPreview
-                if (localizedPreview !is WebsiteState.Loading) {
+                if (localizedPreview !is UiState.Loading) {
                     previewCache[date] = localizedPreview
                 }
             }
@@ -49,19 +49,19 @@ class PreviewViewModel : ViewModel() {
             val preview = runCatching {
                 withContext(Dispatchers.IO) {
                     NetworkRepo.getHanimePreview(date)
-                        .catch { emit(WebsiteState.Error(it)) }
-                        .first { it !is WebsiteState.Loading }
+                        .catch { emit(UiState.Error(it)) }
+                        .first { it !is UiState.Loading }
                 }
-            }.getOrElse { WebsiteState.Error(it) }
+            }.getOrElse { UiState.Error(it) }
             previewCache[date] = preview.withLocalizedTags()
         }
     }
 
-    fun getCachedPreview(date: String): WebsiteState<HanimePreview>? = previewCache[date]
+    fun getCachedPreview(date: String): UiState<HanimePreview>? = previewCache[date]
 
-    private fun WebsiteState<HanimePreview>.withLocalizedTags(): WebsiteState<HanimePreview> {
-        return if (this is WebsiteState.Success) {
-            WebsiteState.Success(info.withLocalizedTags())
+    private fun UiState<HanimePreview>.withLocalizedTags(): UiState<HanimePreview> {
+        return if (this is UiState.Success) {
+            UiState.Success(data.withLocalizedTags())
         } else {
             this
         }

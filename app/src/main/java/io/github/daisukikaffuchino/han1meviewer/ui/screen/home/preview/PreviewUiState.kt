@@ -2,7 +2,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.preview
 
 import androidx.compose.runtime.saveable.listSaver
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimePreview
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 
 /**
  * 预览页面路由状态。
@@ -78,7 +78,7 @@ data class PreviewUiState(
     val prevDateLabel: String = "",
     val nextDateLabel: String = "",
     val monthAnimationDirection: Int = 1,
-    val displayState: WebsiteState<HanimePreview> = WebsiteState.Loading,
+    val displayState: UiState<HanimePreview> = UiState.Loading,
     val commentCount: Int = 0,
     val canPrev: Boolean = false,
     val canNext: Boolean = false,

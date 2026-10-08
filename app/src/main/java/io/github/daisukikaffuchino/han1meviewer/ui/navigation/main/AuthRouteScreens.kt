@@ -28,7 +28,7 @@ import io.github.daisukikaffuchino.han1meviewer.USER_AGENT
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.network.CloudflareVerificationCoordinator
 import io.github.daisukikaffuchino.han1meviewer.logic.network.ech.HyWebViewHelper
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.login
 import io.github.daisukikaffuchino.han1meviewer.ui.activity.MainActivity
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.login.LoginDialog
@@ -81,8 +81,9 @@ fun LoginRouteScreen(
                 scope.launch {
                     NetworkRepo.login(username, password).collect { state ->
                         when (state) {
-                            WebsiteState.Loading -> Unit
-                            is WebsiteState.Error -> {
+                            UiState.Loading -> Unit
+                            UiState.Empty -> Unit
+                            is UiState.Error -> {
                                 isLoggingIn = false
                                 LogUtil.e("Login", "登录失败", state.throwable)
                                 if (state.throwable is IllegalStateException) {
@@ -91,8 +92,8 @@ fun LoginRouteScreen(
                                     SonnerToast.error(R.string.login_failed)
                                 }
                             }
-                            is WebsiteState.Success -> {
-                                login(state.info)
+                            is UiState.Success -> {
+                                login(state.data)
                                 isLoggingIn = false
                                 showLoginDialog = false
                                 SonnerToast.success(R.string.login_success)

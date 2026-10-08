@@ -9,7 +9,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.OnlineWatchHistorySort
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel.csrfToken
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -40,7 +40,7 @@ class OnlineWatchHistoryViewModel : ViewModel() {
     private val _isLoadingMore = MutableStateFlow(false)
     val isLoadingMore = _isLoadingMore.asStateFlow()
 
-    private val _deleteFlow = MutableSharedFlow<WebsiteState<Boolean>>()
+    private val _deleteFlow = MutableSharedFlow<UiState<Boolean>>()
     val deleteFlow = _deleteFlow.asSharedFlow()
 
     private var isRefreshing = true
@@ -161,15 +161,16 @@ class OnlineWatchHistoryViewModel : ViewModel() {
                 csrfToken = csrfToken,
             ).collect { state ->
                 when (state) {
-                    is WebsiteState.Success -> {
+                    is UiState.Success -> {
                         _items.update { list ->
-                            list.toMutableList().apply { removeAt(state.info) }
+                            list.toMutableList().apply { removeAt(state.data) }
                         }
-                        _deleteFlow.emit(WebsiteState.Success(true))
+                        _deleteFlow.emit(UiState.Success(true))
                     }
 
-                    is WebsiteState.Error -> _deleteFlow.emit(WebsiteState.Error(state.throwable))
-                    WebsiteState.Loading -> _deleteFlow.emit(WebsiteState.Loading)
+                    is UiState.Error -> _deleteFlow.emit(UiState.Error(state.throwable))
+                    UiState.Loading -> _deleteFlow.emit(UiState.Loading)
+                    UiState.Empty -> _deleteFlow.emit(UiState.Empty)
                 }
             }
         }

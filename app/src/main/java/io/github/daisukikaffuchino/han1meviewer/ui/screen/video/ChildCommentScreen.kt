@@ -42,7 +42,7 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ReportReason
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoCommentArgs
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoComments
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.CommentReplyBar
 import io.github.daisukikaffuchino.han1meviewer.ui.component.CommentReportDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
@@ -67,10 +67,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun ChildCommentScreen(
     commentsFlow: StateFlow<List<VideoComments.VideoComment>>,
-    commentStateFlow: StateFlow<WebsiteState<VideoComments>>,
+    commentStateFlow: StateFlow<UiState<VideoComments>>,
     reportMessageFlow: Flow<CommentMessage>,
-    postReplyStateFlow: Flow<WebsiteState<Unit>>,
-    commentLikeStateFlow: Flow<WebsiteState<VideoCommentArgs>>,
+    postReplyStateFlow: Flow<UiState<Unit>>,
+    commentLikeStateFlow: Flow<UiState<VideoCommentArgs>>,
     reportReasons: List<ReportReason>,
     isAlreadyLogin: Boolean,
     onRefresh: () -> Unit,
@@ -110,9 +110,10 @@ fun ChildCommentScreen(
     LaunchedEffect(postReplyStateFlow) {
         postReplyStateFlow.collect { replyState ->
             when (replyState) {
-                is WebsiteState.Error -> snackbarHostState.showSnackbar(sendFailedText)
-                WebsiteState.Loading -> snackbarHostState.showSnackbar(sendingReplyText)
-                is WebsiteState.Success -> {
+                is UiState.Error -> snackbarHostState.showSnackbar(sendFailedText)
+                UiState.Empty -> Unit
+                UiState.Loading -> snackbarHostState.showSnackbar(sendingReplyText)
+                is UiState.Success -> {
                     snackbarHostState.showSnackbar(sendSuccessText)
                     onRefresh()
                 }
@@ -123,13 +124,15 @@ fun ChildCommentScreen(
     LaunchedEffect(commentLikeStateFlow) {
         commentLikeStateFlow.collect { likeState ->
             when (likeState) {
-                is WebsiteState.Error -> {
+                is UiState.Error -> {
                     snackbarHostState.showSnackbar(likeState.throwable.message ?: "unknown")
                 }
 
-                WebsiteState.Loading -> Unit
+                UiState.Loading -> Unit
 
-                is WebsiteState.Success -> onCommentLikeSuccess(likeState.info)
+                UiState.Empty -> Unit
+
+                is UiState.Success -> onCommentLikeSuccess(likeState.data)
             }
         }
     }
@@ -203,14 +206,14 @@ fun ChildCommentScreen(
                 )
             }
 
-            val initialLoading = state is WebsiteState.Loading && sortedComments.isEmpty()
-            val initialError = state is WebsiteState.Error && sortedComments.isEmpty()
+            val initialLoading = state is UiState.Loading && sortedComments.isEmpty()
+            val initialError = state is UiState.Error && sortedComments.isEmpty()
             val loadingHint = rememberRandomLoadingHint()
             PageContent(
                 isLoading = initialLoading,
                 isError = initialError,
                 isEmpty = sortedComments.isEmpty(),
-                errorMessage = (state as? WebsiteState.Error)?.throwable?.message ?: "",
+                errorMessage = (state as? UiState.Error)?.throwable?.message ?: "",
                 onRetry = onRefresh,
                 loading = {
                     LoadingContent(
@@ -223,7 +226,7 @@ fun ChildCommentScreen(
                 error = {
                     ErrorContent(
                         title = stringResource(R.string.load_reply_failed),
-                        message = (state as WebsiteState.Error).throwable.message,
+                        message = (state as UiState.Error).throwable.message,
                         onRetry = onRefresh,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -308,11 +311,11 @@ private fun ChildCommentScreenPreview() {
     ComponentPreview {
         ChildCommentScreen(
             commentsFlow = MutableStateFlow(fakeCommentList),
-            commentStateFlow = MutableStateFlow(WebsiteState.Success(VideoComments(fakeCommentList.toMutableList()))),
+            commentStateFlow = MutableStateFlow(UiState.Success(VideoComments(fakeCommentList.toMutableList()))),
             reportMessageFlow = flowOf(CommentMessage("")),
-            postReplyStateFlow = flowOf(WebsiteState.Success(Unit)),
+            postReplyStateFlow = flowOf(UiState.Success(Unit)),
             commentLikeStateFlow = flowOf(
-                WebsiteState.Success(
+                UiState.Success(
                     VideoCommentArgs(
                         isPositive = true,
                         commentPosition = 0,
@@ -347,10 +350,10 @@ private fun ChildCommentScreenEmptyPreview() {
     ComponentPreview {
         ChildCommentScreen(
             commentsFlow = MutableStateFlow(emptyList()),
-            commentStateFlow = MutableStateFlow(WebsiteState.Success(VideoComments(mutableListOf()))),
+            commentStateFlow = MutableStateFlow(UiState.Success(VideoComments(mutableListOf()))),
             reportMessageFlow = flowOf(CommentMessage("")),
-            postReplyStateFlow = flowOf(WebsiteState.Loading),
-            commentLikeStateFlow = flowOf(WebsiteState.Loading),
+            postReplyStateFlow = flowOf(UiState.Loading),
+            commentLikeStateFlow = flowOf(UiState.Loading),
             reportReasons = emptyList(),
             isAlreadyLogin = true,
             onRefresh = {},

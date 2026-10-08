@@ -60,7 +60,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ReportReason
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoComments
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.CommentReplyBar
 import io.github.daisukikaffuchino.han1meviewer.ui.component.CommentReportDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
@@ -84,7 +84,7 @@ import kotlinx.coroutines.launch
 fun CommentScreen(
     modifier: Modifier = Modifier,
     commentsFlow: StateFlow<List<VideoComments.VideoComment>>,
-    commentStateFlow: StateFlow<WebsiteState<VideoComments>>,
+    commentStateFlow: StateFlow<UiState<VideoComments>>,
     reportMessageFlow: Flow<CommentMessage>,
     currentSortType: StateFlow<CommentSortType>,
     reportReasons: List<ReportReason>,
@@ -251,29 +251,29 @@ fun CommentScreen(
                     )
             ) {
                 PullToRefreshBox(
-                    isRefreshing = state is WebsiteState.Loading && !isPreviewCommentPrefetched,
+                    isRefreshing = state is UiState.Loading && !isPreviewCommentPrefetched,
                     onRefresh = onRefresh,
                     state = refreshingState,
                     modifier = Modifier.fillMaxSize(),
                     indicator = {
                         PullToRefreshDefaults.LoadingIndicator(
                             state = refreshingState,
-                            isRefreshing = state is WebsiteState.Loading && !isPreviewCommentPrefetched,
+                            isRefreshing = state is UiState.Loading && !isPreviewCommentPrefetched,
                             modifier = Modifier.align(Alignment.TopCenter),
                         )
                     }
                 ) {
-                    val loadError = state is WebsiteState.Error && sortedComments.isEmpty()
+                    val loadError = state is UiState.Error && sortedComments.isEmpty()
                     PageContent(
                         isLoading = false,
                         isError = loadError,
                         isEmpty = sortedComments.isEmpty(),
-                        errorMessage = (state as? WebsiteState.Error)?.throwable?.message ?: "",
+                        errorMessage = (state as? UiState.Error)?.throwable?.message ?: "",
                         onRetry = onRefresh,
                         error = {
                             ErrorContent(
                                 title = stringResource(R.string.load_failed_retry),
-                                message = (state as WebsiteState.Error).throwable.message,
+                                message = (state as UiState.Error).throwable.message,
                                 onRetry = onRefresh,
                                 modifier = Modifier
                                     .align(Alignment.Center)
@@ -470,7 +470,7 @@ private fun rememberCommentFabVisibility(listState: LazyListState): androidx.com
 private fun CommentScreenPreview() {
     CommentScreen(
         commentsFlow = MutableStateFlow(fakeCommentList),
-        commentStateFlow = MutableStateFlow(WebsiteState.Success(VideoComments(fakeCommentList.toMutableList()))),
+        commentStateFlow = MutableStateFlow(UiState.Success(VideoComments(fakeCommentList.toMutableList()))),
         reportMessageFlow = flowOf(CommentMessage("")),
         currentSortType = MutableStateFlow(CommentSortType.LATEST),
         reportReasons = listOf(
@@ -501,7 +501,7 @@ private fun CommentScreenPreview() {
 private fun CommentScreenEmptyPreview() {
     CommentScreen(
         commentsFlow = MutableStateFlow(emptyList()),
-        commentStateFlow = MutableStateFlow(WebsiteState.Success(VideoComments(fakeCommentList.toMutableList()))),
+        commentStateFlow = MutableStateFlow(UiState.Success(VideoComments(fakeCommentList.toMutableList()))),
         reportMessageFlow = flowOf(CommentMessage("")),
         currentSortType = MutableStateFlow(CommentSortType.LATEST),
         reportReasons = emptyList(),

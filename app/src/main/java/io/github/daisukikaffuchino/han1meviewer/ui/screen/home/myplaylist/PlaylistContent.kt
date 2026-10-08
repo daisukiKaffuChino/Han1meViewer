@@ -24,7 +24,7 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Playlists
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.LoadMoreFooter
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PaginationPager
@@ -48,7 +48,7 @@ import kotlinx.coroutines.launch
 fun PlaylistContent(
     uiState: PlaylistUiState,
     onEvent: (PlaylistEvent) -> Unit,
-    rawState: WebsiteState<Playlists>,
+    rawState: UiState<Playlists>,
 ) {
     val gridState = rememberLazyGridState()
     val noMore = uiState.noMorePlaylists
@@ -77,16 +77,16 @@ fun PlaylistContent(
         }
     ) { state ->
         PageContent(
-            isLoading = state is WebsiteState.Loading,
-            isError = state is WebsiteState.Error,
-            isEmpty = state is WebsiteState.Success &&
-                state.info.playlists.isEmpty() && uiState.playlists.isEmpty(),
+            isLoading = state is UiState.Loading,
+            isError = state is UiState.Error,
+            isEmpty = state is UiState.Success &&
+                state.data.playlists.isEmpty() && uiState.playlists.isEmpty(),
             onRetry = { onEvent(PlaylistEvent.OnRefresh) },
             error = {
                 ErrorContent(
                     message = stringResource(
                         R.string.load_failed_with_reason,
-                        (state as WebsiteState.Error).throwable.message.orEmpty(),
+                        (state as UiState.Error).throwable.message.orEmpty(),
                     ),
                     onRetry = { onEvent(PlaylistEvent.OnRefresh) },
                 )

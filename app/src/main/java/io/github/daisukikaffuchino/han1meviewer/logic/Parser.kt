@@ -24,8 +24,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.SubscriptionVideosIt
 import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccount
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoComments
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.toVideoCode
 import kotlinx.datetime.LocalDate
 import org.json.JSONObject
@@ -58,7 +57,7 @@ object Parser {
             ?: throw ParseException("Can't find csrf token from login page.")
     }
 
-    fun homePageVer2(body: String): WebsiteState<HomePage> {
+    fun homePageVer2(body: String): UiState<HomePage> {
         val isAVSite = SettingsRepository.baseUrl == HANIME_URL[3]
         val parseBody = Jsoup.parse(body).body()
         val csrfToken = parseBody.selectFirst("input[name=_token]")?.attr("value") // csrf token
@@ -71,7 +70,7 @@ object Parser {
         val userHomePageLink = parseBody.getElementById("user-modal-trigger")?.attr("href")?:""
 
         if (isAlreadyLogin && isLoginStateExpired(userHomePageLink, username)) {
-            return WebsiteState.Error(LoginStateExpiredException(getString(R.string.login_state_expired)))
+            return UiState.Error(LoginStateExpiredException(getString(R.string.login_state_expired)))
         }
 
         val userIdRegex = Regex("""/user/(\d+)""")
@@ -182,7 +181,7 @@ object Parser {
         }
 
         // emit!
-        return WebsiteState.Success(
+        return UiState.Success(
             HomePage(
                 csrfToken,
                 avatarUrl, username, banner = banner,
@@ -364,7 +363,7 @@ object Parser {
         return Regex.avCdnHost.replace(url) { "${it.groupValues[1]}t33.cdn2020.com" }
     }
 
-    fun hanimeVideoVer2(body: String): VideoLoadingState<HanimeVideo> {
+    fun hanimeVideoVer2(body: String): UiState<HanimeVideo> {
         val parseBody = Jsoup.parse(body).body()
         val csrfToken = parseBody.selectFirst("input[name=_token]")?.attr("value") // csrf token
 
@@ -635,7 +634,7 @@ object Parser {
         } else null
         val originalComic = parseBody.selectFirst("a.video-comic-btn")?.attr("href")
 
-        return VideoLoadingState.Success(
+        return UiState.Success(
             HanimeVideo(
                 title = title, coverUrl = videoCoverUrl,
                 chineseTitle = chineseTitle.logIfParseNull(
@@ -665,7 +664,7 @@ object Parser {
         )
     }
 
-    fun hanimePreview(body: String): WebsiteState<HanimePreview> {
+    fun hanimePreview(body: String): UiState<HanimePreview> {
         val parseBody = Jsoup.parse(body).body()
 
         // latest hanime
@@ -749,7 +748,7 @@ object Parser {
         val hasNext = parseBody.getElementsByClass("hidden-md hidden-lg").firstOrNull()
             ?.select("div[style*=right]")?.firstOrNull() != null
 
-        return WebsiteState.Success(
+        return UiState.Success(
             HanimePreview(
                 headerPicUrl = headerPicUrl.logIfParseNull(
                     Parser::hanimePreview.name,
@@ -817,10 +816,10 @@ object Parser {
         }
     }
 
-    fun userAccountPage(body: String): WebsiteState<UserAccount> {
+    fun userAccountPage(body: String): UiState<UserAccount> {
         val parseBody = Jsoup.parse(body).body()
         extractFormError(parseBody)?.let { errorMessage ->
-            return WebsiteState.Error(IllegalStateException(errorMessage))
+            return UiState.Error(IllegalStateException(errorMessage))
         }
 
         val csrfToken = parseBody.selectFirst("meta[name=csrf-token]")?.attr("content")
@@ -842,7 +841,7 @@ object Parser {
             .mapNotNull { it.value.toIntOrNull() }
             .toList()
 
-        return WebsiteState.Success(
+        return UiState.Success(
             UserAccount(
                 csrfToken = csrfToken,
                 avatarUrl = avatarUrl,
@@ -874,7 +873,7 @@ object Parser {
     }
 
 
-    fun playlists(body: String): WebsiteState<Playlists> {
+    fun playlists(body: String): UiState<Playlists> {
         val parseBody = Jsoup.parse(body).body()
         val csrfToken = parseBody.selectFirst("input[name=_token]")?.attr("value")
         val lists = parseBody.getElementsByClass("user-tab-item-wrapper")
@@ -891,7 +890,7 @@ object Parser {
                 listCode = listCode, title = listTitle, total = formatedTotal, coverUrl = coverUrl
             )
         }
-        return WebsiteState.Success(
+        return UiState.Success(
             Playlists(
                 playlists = playlists,
                 csrfToken = csrfToken,
@@ -901,7 +900,7 @@ object Parser {
     }
 
     @SuppressLint("BuildListAdds")
-    fun comments(body: String): WebsiteState<VideoComments> {
+    fun comments(body: String): UiState<VideoComments> {
         val jsonObject = JSONObject(body)
         val commentBody = jsonObject.get("comments").toString()
         val parseBody = Jsoup.parse(commentBody).body()
@@ -977,7 +976,7 @@ object Parser {
             )
         }
         LogUtil.d("commentList", commentList.toString())
-        return WebsiteState.Success(
+        return UiState.Success(
             VideoComments(
                 commentList,
                 currentUserId,
@@ -986,7 +985,7 @@ object Parser {
         )
     }
 
-    fun commentReply(body: String): WebsiteState<VideoComments> {
+    fun commentReply(body: String): UiState<VideoComments> {
         val jsonObject = JSONObject(body)
         val replyBody = jsonObject.get("replies").toString()
         val replyList = mutableListOf<VideoComments.VideoComment>()
@@ -1065,22 +1064,22 @@ object Parser {
             }
         }
 
-        return WebsiteState.Success(VideoComments(replyList))
+        return UiState.Success(VideoComments(replyList))
     }
 
-    fun reportCommentResponse(body: String): WebsiteState<String> {
+    fun reportCommentResponse(body: String): UiState<String> {
         // 暂时无法判断是否举报成功
-        return WebsiteState.Success("已成功檢舉該則評論，我們會儘快處理您的檢舉。")
+        return UiState.Success("已成功檢舉該則評論，我們會儘快處理您的檢舉。")
     }
 
-    fun getMySubscriptions(body: String): WebsiteState<MySubscriptions> {
+    fun getMySubscriptions(body: String): UiState<MySubscriptions> {
         val parseBody = Jsoup.parse(body).body()
         val maxPage = parseMaxPage(parseBody)
         LogUtil.i("getMySubscriptions", "MaxPageList=$maxPage")
         val subscriptionsRoot = parseBody.selectFirst("div.subscriptions-nav")
-            ?: return WebsiteState.Error(IllegalStateException("找不到 subscriptions-nav"))
+            ?: return UiState.Error(IllegalStateException("找不到 subscriptions-nav"))
         val subscriptionsVideosRoot = parseBody.selectFirst("div.content-padding-new")
-            ?: return WebsiteState.Error(IllegalStateException("找不到 subscriptionsVideosRoot"))
+            ?: return UiState.Error(IllegalStateException("找不到 subscriptionsVideosRoot"))
 
         // 解析订阅作者
         val artists = subscriptionsRoot.select("div.subscriptions-artist-card").mapNotNull { card ->
@@ -1131,7 +1130,7 @@ object Parser {
                 }
             }
 
-        return WebsiteState.Success(
+        return UiState.Success(
             MySubscriptions(
                 subscriptions = artists,
                 subscriptionsVideos = videos,

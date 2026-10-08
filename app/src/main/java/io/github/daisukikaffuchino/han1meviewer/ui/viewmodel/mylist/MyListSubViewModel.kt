@@ -5,7 +5,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListType
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,11 +71,11 @@ abstract class MyListSubViewModel(
     }
 
     protected fun <T, R> deleteItem(
-        deleteCall: suspend () -> kotlinx.coroutines.flow.Flow<WebsiteState<T>>,
-        emitTo: MutableSharedFlow<WebsiteState<R>>,
+        deleteCall: suspend () -> kotlinx.coroutines.flow.Flow<UiState<T>>,
+        emitTo: MutableSharedFlow<UiState<R>>,
         position: Int,
-        mapState: (WebsiteState<T>) -> WebsiteState<R>,
-        isSuccess: (WebsiteState<T>) -> Boolean = { it is WebsiteState.Success },
+        mapState: (UiState<T>) -> UiState<R>,
+        isSuccess: (UiState<T>) -> Boolean = { it is UiState.Success },
     ) {
         scope.launch {
             deleteCall().collect { deleteState ->

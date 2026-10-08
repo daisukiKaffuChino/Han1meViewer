@@ -20,7 +20,7 @@ import io.github.daisukikaffuchino.han1meviewer.getHanimeShareText
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.CheckInRecordEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeVideo
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.bridge.VideoPageHost
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeTheme
@@ -160,9 +160,9 @@ fun RenderVideoCommentContent(
 
         LaunchedEffect(Unit) {
             viewModel.videoCommentStateFlow.collect { state ->
-                if (state is WebsiteState.Success) {
-                    viewModel.currentUserId = state.info.currentUserId
-                    pageHost?.showCommentBadge(state.info.videoComment.size)
+                if (state is UiState.Success) {
+                    viewModel.currentUserId = state.data.currentUserId
+                    pageHost?.showCommentBadge(state.data.videoComment.size)
                 }
             }
         }

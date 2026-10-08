@@ -9,7 +9,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
-import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.bridge.VideoPageHost
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.CommentViewModel
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.VideoViewModel
@@ -18,7 +18,7 @@ import io.github.daisukikaffuchino.utils.application
 @Composable
 fun VideoRouteContent(
     videoCode: String,
-    videoState: VideoLoadingState<*>,
+    videoState: UiState<*>,
     videoViewModel: VideoViewModel,
     commentViewModel: CommentViewModel,
     fromDownload: Boolean,

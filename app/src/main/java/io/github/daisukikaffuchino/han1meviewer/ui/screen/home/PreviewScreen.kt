@@ -23,7 +23,7 @@ import coil3.request.crossfade
 import io.github.daisukikaffuchino.han1meviewer.PREVIEW_COMMENT_PREFIX
 import io.github.daisukikaffuchino.han1meviewer.HANIME_BASE_URL
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimePreview
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeHomePageVideos
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeNewHanimeInfo
@@ -94,7 +94,7 @@ fun PreviewScreen(
 
     LaunchedEffect(previewState) {
         when (previewState) {
-            is WebsiteState.Success -> preloadImages(previewState.info)
+            is UiState.Success -> preloadImages(previewState.data)
             else -> Unit
         }
     }
@@ -123,32 +123,33 @@ fun PreviewScreen(
 
     val displayState = remember(currentDateCode, previewState) {
         val cached = previewViewModel.getCachedPreview(currentDateCode)
-        if (previewState is WebsiteState.Loading && cached is WebsiteState.Success) {
+        if (previewState is UiState.Loading && cached is UiState.Success) {
             cached
         } else {
             previewState
         }
     }
 
-    val success = displayState as? WebsiteState.Success
-    val previewInfoList = success?.info?.previewInfo.orEmpty()
+    val success = displayState as? UiState.Success
+    val previewInfoList = success?.data?.previewInfo.orEmpty()
     val previewPagerState = rememberPagerState(
         initialPage = selectedIndex,
         pageCount = { previewInfoList.size.coerceAtLeast(1) })
     val scope = rememberCoroutineScope()
 
     val canPrev = when (displayState) {
-        is WebsiteState.Loading -> false
-        is WebsiteState.Success -> displayState.info.hasPrevious
-        is WebsiteState.Error -> true
+        is UiState.Loading -> false
+        is UiState.Success -> displayState.data.hasPrevious
+        is UiState.Error -> true
+        is UiState.Empty -> false
     }
     val canNext = when (displayState) {
-        is WebsiteState.Success -> displayState.info.hasNext
+        is UiState.Success -> displayState.data.hasNext
         else -> false
     }
     val monthHeaderState = remember(
         currentDateCode,
-        success?.info?.headerPicUrl,
+        success?.data?.headerPicUrl,
         prevDateLabel,
         nextDateLabel,
         canPrev,
@@ -156,7 +157,7 @@ fun PreviewScreen(
     ) {
         PreviewMonthHeaderState(
             dateCode = currentDateCode,
-            headerImageUrl = success?.info?.headerPicUrl,
+            headerImageUrl = success?.data?.headerPicUrl,
             prevLabel = prevDateLabel,
             nextLabel = nextDateLabel,
             canPrev = canPrev,
@@ -281,7 +282,7 @@ private fun PreviewScreenPreview() {
                 currentDateLabel = "2024/1",
                 prevDateLabel = "2023/12",
                 nextDateLabel = "2024/2",
-                displayState = WebsiteState.Success(preview),
+                displayState = UiState.Success(preview),
                 commentCount = 12,
                 monthHeaderState = PreviewMonthHeaderState(
                     dateCode = "202401",

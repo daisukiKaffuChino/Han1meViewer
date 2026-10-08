@@ -8,7 +8,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.ModifiedPlaylistArgs
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Playlists
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.myplaylist.PlaylistUiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -28,8 +28,8 @@ import kotlinx.coroutines.launch
  */
 class LocalPlayListViewModel : ViewModel(), PlaylistController {
 
-    private val _myPlaylistsFlow = MutableStateFlow<WebsiteState<Playlists>>(WebsiteState.Loading)
-    override val myPlaylistsFlow: StateFlow<WebsiteState<Playlists>> = _myPlaylistsFlow.asStateFlow()
+    private val _myPlaylistsFlow = MutableStateFlow<UiState<Playlists>>(UiState.Loading)
+    override val myPlaylistsFlow: StateFlow<UiState<Playlists>> = _myPlaylistsFlow.asStateFlow()
 
     private val _cachedMyPlayList = MutableStateFlow<List<Playlists.Playlist>>(emptyList())
     private val _showSheet = MutableStateFlow(false)
@@ -51,14 +51,14 @@ class LocalPlayListViewModel : ViewModel(), PlaylistController {
         MutableStateFlow<Map<String, PlaylistSheetScrollState>>(emptyMap())
     private val _refreshCompleted = MutableSharedFlow<Unit>()
     override val refreshCompleted: SharedFlow<Unit> = _refreshCompleted.asSharedFlow()
-    private val _modifyPlaylistFlow = MutableSharedFlow<WebsiteState<ModifiedPlaylistArgs>>()
-    override val modifyPlaylistFlow: SharedFlow<WebsiteState<ModifiedPlaylistArgs>> =
+    private val _modifyPlaylistFlow = MutableSharedFlow<UiState<ModifiedPlaylistArgs>>()
+    override val modifyPlaylistFlow: SharedFlow<UiState<ModifiedPlaylistArgs>> =
         _modifyPlaylistFlow.asSharedFlow()
-    private val _deleteFromPlaylistFlow = MutableSharedFlow<WebsiteState<Int>>()
-    override val deleteFromPlaylistFlow: SharedFlow<WebsiteState<Int>> =
+    private val _deleteFromPlaylistFlow = MutableSharedFlow<UiState<Int>>()
+    override val deleteFromPlaylistFlow: SharedFlow<UiState<Int>> =
         _deleteFromPlaylistFlow.asSharedFlow()
-    private val _createPlaylistFlow = MutableSharedFlow<WebsiteState<Unit>>()
-    override val createPlaylistFlow: SharedFlow<WebsiteState<Unit>> =
+    private val _createPlaylistFlow = MutableSharedFlow<UiState<Unit>>()
+    override val createPlaylistFlow: SharedFlow<UiState<Unit>> =
         _createPlaylistFlow.asSharedFlow()
 
     private val _isLoadingMorePlaylists = MutableStateFlow(false)
@@ -94,7 +94,7 @@ class LocalPlayListViewModel : ViewModel(), PlaylistController {
         viewModelScope.launch {
             LocalListRepository.observePlaylists().collect { playlists ->
                 _cachedMyPlayList.value = playlists
-                _myPlaylistsFlow.value = WebsiteState.Success(Playlists(playlists))
+                _myPlaylistsFlow.value = UiState.Success(Playlists(playlists))
                 _noMorePlaylists.value = true
                 _isLoadingMorePlaylists.value = false
                 _refreshCompleted.emit(Unit)
@@ -105,11 +105,11 @@ class LocalPlayListViewModel : ViewModel(), PlaylistController {
     override fun loadMyPlayList(page: Int, forceReload: Boolean) {
         viewModelScope.launch {
             if (page == 1 || forceReload) {
-                _myPlaylistsFlow.value = WebsiteState.Loading
+                _myPlaylistsFlow.value = UiState.Loading
             }
             val playlists = LocalListRepository.getPlaylistsOnce()
             _cachedMyPlayList.value = playlists
-            _myPlaylistsFlow.value = WebsiteState.Success(Playlists(playlists))
+            _myPlaylistsFlow.value = UiState.Success(Playlists(playlists))
             _noMorePlaylists.value = true
             _isLoadingMorePlaylists.value = false
             _refreshCompleted.emit(Unit)
@@ -191,13 +191,13 @@ class LocalPlayListViewModel : ViewModel(), PlaylistController {
                     LocalListRepository.updatePlaylist(listCode, title, desc)
                 }
             }.onSuccess {
-                _modifyPlaylistFlow.emit(WebsiteState.Success(ModifiedPlaylistArgs(title, desc, delete)))
+                _modifyPlaylistFlow.emit(UiState.Success(ModifiedPlaylistArgs(title, desc, delete)))
                 if (delete) {
                     _playlistStateFlow.value = PagedUiState.Loading
                     _playlistFlow.value = emptyList()
                 }
             }.onFailure {
-                _modifyPlaylistFlow.emit(WebsiteState.Error(it))
+                _modifyPlaylistFlow.emit(UiState.Error(it))
             }
         }
     }
@@ -207,14 +207,14 @@ class LocalPlayListViewModel : ViewModel(), PlaylistController {
             runCatching {
                 LocalListRepository.removeItem(listCode, videoCode)
             }.onSuccess {
-                _deleteFromPlaylistFlow.emit(WebsiteState.Success(position))
+                _deleteFromPlaylistFlow.emit(UiState.Success(position))
                 _playlistFlow.update { prev ->
                     prev.toMutableList().apply {
                         if (position in indices) removeAt(position)
                     }
                 }
             }.onFailure {
-                _deleteFromPlaylistFlow.emit(WebsiteState.Error(it))
+                _deleteFromPlaylistFlow.emit(UiState.Error(it))
             }
         }
     }
@@ -224,9 +224,9 @@ class LocalPlayListViewModel : ViewModel(), PlaylistController {
             runCatching {
                 LocalListRepository.createPlaylist(title, description)
             }.onSuccess {
-                _createPlaylistFlow.emit(WebsiteState.Success(Unit))
+                _createPlaylistFlow.emit(UiState.Success(Unit))
             }.onFailure {
-                _createPlaylistFlow.emit(WebsiteState.Error(it))
+                _createPlaylistFlow.emit(UiState.Error(it))
             }
         }
     }

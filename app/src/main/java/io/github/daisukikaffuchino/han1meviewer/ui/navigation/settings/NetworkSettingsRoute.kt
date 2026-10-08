@@ -31,7 +31,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.network.HProxySelector
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HanimeNetwork
 import io.github.daisukikaffuchino.han1meviewer.logic.network.ServiceCreator
 import io.github.daisukikaffuchino.han1meviewer.logic.network.ech.EchHttp
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.logout
 import io.github.daisukikaffuchino.han1meviewer.ui.component.ConfirmDialog
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.settings.DelayResultUi
@@ -536,7 +536,7 @@ private fun testCustomMirrorSite(context: Context, homeUrl: String, appendPath: 
             val apiBaseUrl = buildCustomMirrorApiBaseUrl(homeUrl, appendPath)
             val watchTestResult = testCustomMirrorWatchUrl(context, apiBaseUrl)
             when (val parseResult = Parser.homePageVer2(body)) {
-                is WebsiteState.Success -> if (watchTestResult == null) {
+                is UiState.Success -> if (watchTestResult == null) {
                     context.getString(
                         R.string.custom_mirror_site_test_success,
                         finalUrl,
@@ -551,16 +551,22 @@ private fun testCustomMirrorSite(context: Context, homeUrl: String, appendPath: 
                     )
                 }
 
-                is WebsiteState.Error -> context.getString(
+                is UiState.Error -> context.getString(
                     R.string.custom_mirror_site_test_parse_failed,
                     finalUrl,
                     parseResult.throwable.message ?: parseResult.throwable::class.java.simpleName,
                 )
 
-                WebsiteState.Loading -> context.getString(
+                UiState.Loading -> context.getString(
                     R.string.custom_mirror_site_test_parse_failed,
                     finalUrl,
                     context.getString(R.string.loading),
+                )
+
+                UiState.Empty -> context.getString(
+                    R.string.custom_mirror_site_test_parse_failed,
+                    finalUrl,
+                    context.getString(R.string.empty_content),
                 )
             }
         }

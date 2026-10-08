@@ -11,7 +11,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.daisukikaffuchino.han1meviewer.R
-import io.github.daisukikaffuchino.han1meviewer.logic.state.VideoLoadingState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.ErrorContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.LoadingContent
@@ -19,7 +19,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 
 @Composable
 fun VideoScreen(
-    state: VideoLoadingState<*>,
+    state: UiState<*>,
     onRetry: () -> Unit,
     content: @Composable () -> Unit,
 ) {
@@ -32,13 +32,13 @@ fun VideoScreen(
 
         if (LocalInspectionMode.current) {
             when (state) {
-                is VideoLoadingState.Loading -> {
+                is UiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         LoadingContent(message = stringResource(R.string.loading))
                     }
                 }
 
-                is VideoLoadingState.Error -> {
+                is UiState.Error -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         ErrorContent(
                             title = "视频加载失败",
@@ -48,7 +48,7 @@ fun VideoScreen(
                     }
                 }
 
-                is VideoLoadingState.NoContent -> {
+                is UiState.Empty -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         EmptyContent(hint = "该影片可能不存在")
                     }
@@ -65,7 +65,7 @@ fun VideoScreen(
 private fun VideoScreenLoadingPreview() {
     ComponentPreview {
         VideoScreen(
-            state = VideoLoadingState.Loading,
+            state = UiState.Loading,
             onRetry = {},
             content = {},
         )
@@ -77,7 +77,7 @@ private fun VideoScreenLoadingPreview() {
 private fun VideoScreenErrorPreview() {
     ComponentPreview {
         VideoScreen(
-            state = VideoLoadingState.Error(Throwable("network error")),
+            state = UiState.Error(Throwable("network error")),
             onRetry = {},
             content = {},
         )
@@ -89,7 +89,7 @@ private fun VideoScreenErrorPreview() {
 private fun VideoScreenNoContentPreview() {
     ComponentPreview {
         VideoScreen(
-            state = VideoLoadingState.NoContent,
+            state = UiState.Empty,
             onRetry = {},
             content = {},
         )

@@ -6,7 +6,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListType
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -26,7 +26,7 @@ class FavSubViewModel(scope: CoroutineScope) :
         loadItems(MyListType.FAV_VIDEO, userId, page) { csrfToken = it.csrfToken }
     }
 
-    private val _deleteMyFavVideoFlow = MutableSharedFlow<WebsiteState<Boolean>>()
+    private val _deleteMyFavVideoFlow = MutableSharedFlow<UiState<Boolean>>()
     override val deleteMyFavVideoFlow = _deleteMyFavVideoFlow.asSharedFlow()
 
     override fun deleteMyFavVideo(videoCode: String, position: Int) {

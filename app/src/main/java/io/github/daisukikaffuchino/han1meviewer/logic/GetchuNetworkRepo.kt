@@ -5,7 +5,7 @@ import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo.handleException
 import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo.throwRequestException
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HanimeNetwork
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
@@ -32,7 +32,7 @@ object GetchuNetworkRepo {
         bodyToString = { it.getchuString() },
     ) { body ->
         val detailState = GetchuParser.getchuPreviewDetail(body, id)
-        if (detailState !is WebsiteState.Success) return@websiteIOFlow detailState
+        if (detailState !is UiState.Success) return@websiteIOFlow detailState
 
         val parentId = body.extractGetchuSeriesParentId() ?: return@websiteIOFlow detailState
         runCatching {
@@ -47,11 +47,11 @@ object GetchuNetworkRepo {
             if (seriesItems.isEmpty()) {
                 detailState
             } else {
-                val detail = detailState.info
+                val detail = detailState.data
                 val mergedSeriesItems = (detail.seriesItems + seriesItems)
                     .distinctBy { it.id }
                     .filterNot { it.id == id }
-                WebsiteState.Success(
+                UiState.Success(
                     detail.copy(
                         seriesItems = mergedSeriesItems,
                         relatedItems = mergedSeriesItems,
@@ -64,7 +64,7 @@ object GetchuNetworkRepo {
         request: suspend () -> Response<ResponseBody>,
         permittedSuccessCode: IntArray? = null,
         bodyToString: (ResponseBody) -> String = ResponseBody::string,
-        action: suspend (String) -> WebsiteState<T>,
+        action: suspend (String) -> UiState<T>,
     ) = flow {
         val requestResult = request.invoke()
         val resultBody = requestResult.body()?.let(bodyToString)
@@ -75,7 +75,7 @@ object GetchuNetworkRepo {
             requestResult.throwRequestException()
         }
     }.catch { e ->
-        emit(WebsiteState.Error(handleException(e)))
+        emit(UiState.Error(handleException(e)))
     }.flowOn(Dispatchers.IO)
 
     private fun ResponseBody.getchuString(): String {

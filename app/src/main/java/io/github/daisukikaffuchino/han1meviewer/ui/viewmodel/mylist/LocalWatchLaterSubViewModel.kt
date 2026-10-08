@@ -4,7 +4,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.LocalListRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -26,7 +26,7 @@ class LocalWatchLaterSubViewModel(
     private val itemsStateFlow =
         MutableStateFlow<PagedUiState<MyListItems<HanimeInfo>>>(PagedUiState.Loading)
     private val itemsFlow = MutableStateFlow(emptyList<HanimeInfo>())
-    private val deleteFlow = MutableSharedFlow<WebsiteState<Boolean>>()
+    private val deleteFlow = MutableSharedFlow<UiState<Boolean>>()
     private val loadedPageCountFlow = MutableStateFlow(0)
     private val totalPagesFlow = MutableStateFlow(1)
     private val isLoadingMoreFlow = MutableStateFlow(false)
@@ -35,7 +35,7 @@ class LocalWatchLaterSubViewModel(
     override val watchLaterStateFlow: StateFlow<PagedUiState<MyListItems<HanimeInfo>>> =
         itemsStateFlow.asStateFlow()
     override val watchLaterFlow: StateFlow<List<HanimeInfo>> = itemsFlow.asStateFlow()
-    override val deleteMyWatchLaterFlow: SharedFlow<WebsiteState<Boolean>> = deleteFlow.asSharedFlow()
+    override val deleteMyWatchLaterFlow: SharedFlow<UiState<Boolean>> = deleteFlow.asSharedFlow()
     override val loadedPageCount: StateFlow<Int> = loadedPageCountFlow.asStateFlow()
     override val totalPages: StateFlow<Int> = totalPagesFlow.asStateFlow()
     override val isLoadingMore: StateFlow<Boolean> = isLoadingMoreFlow.asStateFlow()
@@ -58,9 +58,9 @@ class LocalWatchLaterSubViewModel(
             runCatching {
                 LocalListRepository.removeItem(LocalListRepository.WATCH_LATER_CODE, videoCode)
             }.onSuccess {
-                deleteFlow.emit(WebsiteState.Success(true))
+                deleteFlow.emit(UiState.Success(true))
             }.onFailure {
-                deleteFlow.emit(WebsiteState.Error(it))
+                deleteFlow.emit(UiState.Error(it))
             }
         }
     }

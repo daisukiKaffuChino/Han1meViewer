@@ -5,7 +5,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.ModifiedPlaylistArgs
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Playlists
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.myplaylist.PlaylistUiState
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,16 +15,16 @@ import kotlinx.coroutines.flow.StateFlow
  * 可以按登录状态复用同一套 UI。
  */
 interface PlaylistController {
-    val myPlaylistsFlow: StateFlow<WebsiteState<Playlists>>
+    val myPlaylistsFlow: StateFlow<UiState<Playlists>>
     val mainUiState: StateFlow<PlaylistUiState>
     val refreshCompleted: SharedFlow<Unit>
     val playlistStateFlow: StateFlow<PagedUiState<MyListItems<HanimeInfo>>>
     val playlistFlow: StateFlow<List<HanimeInfo>>
     val playlistDesc: StateFlow<String?>
     val currentListInfo: StateFlow<Pair<String, String>?>
-    val modifyPlaylistFlow: SharedFlow<WebsiteState<ModifiedPlaylistArgs>>
-    val deleteFromPlaylistFlow: SharedFlow<WebsiteState<Int>>
-    val createPlaylistFlow: SharedFlow<WebsiteState<Unit>>
+    val modifyPlaylistFlow: SharedFlow<UiState<ModifiedPlaylistArgs>>
+    val deleteFromPlaylistFlow: SharedFlow<UiState<Int>>
+    val createPlaylistFlow: SharedFlow<UiState<Unit>>
 
     var currentPage: Int
     var playlistPage: Int

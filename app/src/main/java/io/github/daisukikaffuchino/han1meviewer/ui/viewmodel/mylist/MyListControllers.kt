@@ -3,7 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.mylist
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
-import io.github.daisukikaffuchino.han1meviewer.logic.state.WebsiteState
+import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 interface WatchLaterListController {
     val watchLaterStateFlow: StateFlow<PagedUiState<MyListItems<HanimeInfo>>>
     val watchLaterFlow: StateFlow<List<HanimeInfo>>
-    val deleteMyWatchLaterFlow: SharedFlow<WebsiteState<Boolean>>
+    val deleteMyWatchLaterFlow: SharedFlow<UiState<Boolean>>
     val loadedPageCount: StateFlow<Int>
     val totalPages: StateFlow<Int>
     val isLoadingMore: StateFlow<Boolean>
@@ -30,7 +30,7 @@ interface WatchLaterListController {
 interface FavVideoListController {
     val favVideoStateFlow: StateFlow<PagedUiState<MyListItems<HanimeInfo>>>
     val favVideoFlow: StateFlow<List<HanimeInfo>>
-    val deleteMyFavVideoFlow: SharedFlow<WebsiteState<Boolean>>
+    val deleteMyFavVideoFlow: SharedFlow<UiState<Boolean>>
     val loadedPageCount: StateFlow<Int>
     val totalPages: StateFlow<Int>
     val isLoadingMore: StateFlow<Boolean>
