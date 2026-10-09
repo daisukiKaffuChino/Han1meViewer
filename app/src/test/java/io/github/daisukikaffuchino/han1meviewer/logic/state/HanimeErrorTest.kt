@@ -37,7 +37,7 @@ class HanimeErrorTest {
         assertEquals(HanimeErrorKind.NotFound, HanimeNotFoundException("x").toHanimeError().kind)
         assertEquals(
             HanimeErrorKind.SessionExpired,
-            LoginStateExpiredException("x").toHanimeError().kind,
+            LoginStateExpiredException().toHanimeError().kind,
         )
         assertEquals(HanimeErrorKind.NotLoggedIn, NotLoggedInException().toHanimeError().kind)
         assertEquals(

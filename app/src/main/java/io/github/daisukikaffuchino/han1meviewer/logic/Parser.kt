@@ -8,7 +8,6 @@ import io.github.daisukikaffuchino.han1meviewer.HanimeResolution
 import io.github.daisukikaffuchino.han1meviewer.LOCAL_DATE_FORMAT
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository.isAlreadyLogin
-import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.LoginStateExpiredException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.ParseException
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
@@ -57,8 +56,14 @@ object Parser {
             ?: throw ParseException("Can't find csrf token from login page.")
     }
 
-    fun homePageVer2(body: String): UiState<HomePage> {
-        val isAVSite = isAvSiteFromSettings
+    fun homePageVer2(body: String): UiState<HomePage> =
+        parseHomePageBody(body, isAvSite = isAvSiteFromSettings, isLoggedIn = isAlreadyLogin)
+
+    internal fun parseHomePageBody(
+        body: String,
+        isAvSite: Boolean,
+        isLoggedIn: Boolean,
+    ): UiState<HomePage> {
         val parseBody = Jsoup.parse(body).body()
         val csrfToken = parseBody.selectFirst("input[name=_token]")?.attr("value") // csrf token
         val homePageParse = parseBody.select("div[id=home-rows-wrapper] > div")
@@ -69,8 +74,8 @@ object Parser {
         val username: String? = userInfo?.getElementById("user-modal-name")?.text()
         val userHomePageLink = parseBody.getElementById("user-modal-trigger")?.attr("href")?:""
 
-        if (isAlreadyLogin && isLoginStateExpired(userHomePageLink, username)) {
-            return UiState.Error(LoginStateExpiredException(getString(R.string.login_state_expired)))
+        if (isLoggedIn && isLoginStateExpired(userHomePageLink, username)) {
+            return UiState.Error(LoginStateExpiredException())
         }
 
         val userIdRegex = Regex("""/user/(\d+)""")
@@ -126,11 +131,11 @@ object Parser {
         val cosplayClass = homePageParse.getOrNull(12)  // Cosplay
         val watchingNowClass = homePageParse.getOrNull(13)  // 他们在看
 
-        val newAnimeTrailerClass = homePageParse.getOrNull(if (isAVSite) 13 else 12)
+        val newAnimeTrailerClass = homePageParse.getOrNull(if (isAvSite) 13 else 12)
 
         val latestReleaseList = latestReleaseClass.extractHanimeInfo()
         val latestHanimeList = mutableListOf<HanimeInfo>()
-        if (isAVSite){
+        if (isAvSite) {
             latestHanimeList.addAll(latestUploadClass.extractHanimeInfo())
         } else {
             latestHanimeList.addAll(latestUploadClass.extractHanimeInfo())
@@ -141,7 +146,7 @@ object Parser {
         val threeDCGList = threeDCGClass.extractHanimeInfo()
         val twoPointFiveDAnimeList = twoPointFiveDAnimeClass.extractHanimeInfo()
         val twoDAnimeList = mutableListOf<HanimeInfo>()
-        if (isAVSite){
+        if (isAvSite) {
             twoDAnimeList.addAll(twoDAnimeClass.extractHanimeInfo())
         } else {
             twoDAnimeList.addAll(twoDAnimeClass.extractHanimeInfo())
@@ -153,7 +158,7 @@ object Parser {
         val watchingNowList = watchingNowClass.extractHanimeInfo()
 
         val newAnimeTrailerList = mutableListOf<HanimeInfo>()
-        if (isAVSite){
+        if (isAvSite) {
             newAnimeTrailerList.addAll(newAnimeTrailerClass.extractHanimeInfo())
         } else {
             val newAnimeTrailerItems =
@@ -207,7 +212,6 @@ object Parser {
         return userHomePageLink.contains("/login") || username.isNullOrBlank()
     }
 
-    private fun getString(resId: Int) = io.github.daisukikaffuchino.utils.applicationContext.getString(resId)
     fun Element?.extractHanimeInfo(selector: String = "div[class^=horizontal-card]"): MutableList<HanimeInfo> {
         val resultList = mutableListOf<HanimeInfo>()
         this?.select(selector)?.forEach { item ->
@@ -1210,13 +1214,8 @@ object Parser {
         funcName: String, varName: String, loginNeeded: Boolean = false,
     ): T? = also {
         if (it == null) {
-            if (loginNeeded) {
-                if (isAlreadyLogin) {
-                    LogUtil.d("Parse::$funcName", "[$varName] is null. 而且處於登入狀態，這有點不正常")
-                }
-            } else {
-                LogUtil.d("Parse::$funcName", "[$varName] is null. 這有點不正常")
-            }
+            val extra = if (loginNeeded) "（需要登入的欄位）" else ""
+            LogUtil.d("Parse::$funcName", "[$varName] is null. 這有點不正常$extra")
         }
     }
 }

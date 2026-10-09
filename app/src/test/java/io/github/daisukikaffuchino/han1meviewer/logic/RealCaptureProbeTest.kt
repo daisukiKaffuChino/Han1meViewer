@@ -55,6 +55,12 @@ class RealCaptureProbeTest {
         val realWatchHtml = watchFile.readText()
         val videoFixture = sanitizeVideo(realWatchHtml)
 
+        val homeFile = File(captureDir).listFiles()
+            ?.firstOrNull { it.name.startsWith("real_home_") && it.length() > 1000 }
+            ?: error("real home capture not found in $captureDir")
+        val realHomeHtml = homeFile.readText()
+        val homeFixture = sanitizeHome(realHomeHtml)
+
         // 脱敏检查：生成物里不能残留任何原标题文本
         originalTitles.forEach { title ->
             assertTrue(!searchFixture.contains(title), "sanitized fixture leaked a title: ${title.take(12)}…")
@@ -66,11 +72,15 @@ class RealCaptureProbeTest {
         val leakedRuns = Regex("[\\u3000-\\u9FFF\\uFF00-\\uFFEF]{2,}")
             .findAll(videoFixture).map { it.value }.toSet() - allowedRuns - setOf("…")
         assertTrue(leakedRuns.isEmpty(), "video fixture leaked unexpected text: $leakedRuns")
+        val homeLeaks = Regex("[\\u3000-\\u9FFF\\uFF00-\\uFFEF]{2,}")
+            .findAll(homeFixture).map { it.value }.toSet() - setOf("測試影片", "…")
+        assertTrue(homeLeaks.isEmpty(), "home fixture leaked unexpected text: $homeLeaks")
 
         File(fixtureDir).mkdirs()
         File(fixtureDir, "search_normal.html").writeText(searchFixture)
         File(fixtureDir, "login_page.html").writeText(loginFixture)
         File(fixtureDir, "video_detail.html").writeText(videoFixture)
+        File(fixtureDir, "home_page.html").writeText(homeFixture)
 
         // 生成后的 fixture 也必须能被解析
         val fixtureState = Parser.hanimeSearch(searchFixture)
@@ -104,6 +114,39 @@ class RealCaptureProbeTest {
         println(
             "PROBE video-fixture resolutions=${fixtureVideo.videoUrls.keys} tags=${fixtureVideo.tags.size} " +
                 "related=${fixtureVideo.relatedHanimes.size} bytes=${videoFixture.length}"
+        )
+
+        // 首页（未登录）
+        val realHome = (Parser.parseHomePageBody(realHomeHtml, isAvSite = false, isLoggedIn = false) as? UiState.Success)?.data
+            ?: error("real home page did not parse into Success")
+        println(
+            "PROBE real-home sections=" +
+                " latestRelease=${realHome.latestRelease.size} latestUpload=${realHome.latestHanime.size}" +
+                " ecchi=${realHome.ecchiAnime.size} shortEpisode=${realHome.shortEpisodeAnime.size}" +
+                " motion=${realHome.motionAnime.size} threeDCG=${realHome.threeDCG.size}" +
+                " twoPointFiveD=${realHome.twoPointFiveDAnime.size} twoD=${realHome.twoDAnime.size}" +
+                " ai=${realHome.aiGenerated.size} mmd=${realHome.mmd.size} cosplay=${realHome.cosplay.size}" +
+                " watchingNow=${realHome.watchingNow.size} trailer=${realHome.newAnimeTrailer.size}" +
+                " banner=${realHome.banner != null} bannerCode=${realHome.banner?.videoCode}" +
+                " csrf=${realHome.csrfToken != null}"
+        )
+
+        val homeFixtureParsed = (Parser.parseHomePageBody(homeFixture, isAvSite = false, isLoggedIn = false) as? UiState.Success)?.data
+            ?: error("generated home fixture did not parse into Success")
+        assertEquals(realHome.banner?.videoCode, homeFixtureParsed.banner?.videoCode)
+        // 生成时会把 URL 查询串裁到白名单（v / page），签名参数 secure= 会被去掉
+        assertEquals(
+            realHome.banner?.picUrl?.substringBefore('?'),
+            homeFixtureParsed.banner?.picUrl,
+        )
+        assertEquals("測試影片", homeFixtureParsed.banner?.title)
+        assertTrue(homeFixtureParsed.latestRelease.size in 1..2, "latestRelease=${homeFixtureParsed.latestRelease.size}")
+        assertTrue(homeFixtureParsed.ecchiAnime.size in 1..2, "ecchi=${homeFixtureParsed.ecchiAnime.size}")
+        assertTrue(homeFixtureParsed.watchingNow.size in 1..2, "watchingNow=${homeFixtureParsed.watchingNow.size}")
+        println(
+            "PROBE home-fixture latestRelease=${homeFixtureParsed.latestRelease.size}" +
+                " ecchi=${homeFixtureParsed.ecchiAnime.size} banner=${homeFixtureParsed.banner != null}" +
+                " bytes=${homeFixture.length}"
         )
     }
 
@@ -210,6 +253,44 @@ class RealCaptureProbeTest {
         body.select("div.video-thumb-container.horizontal-card").drop(2).forEach { it.remove() }
         body.selectFirst("#playlist-scroll")
             ?.children()?.drop(2)?.forEach { it.remove() }
+
+        val out = Jsoup.parse("<html><head><title>fixture</title></head><body></body></html>")
+        body.childNodes().toList().forEach { out.body().appendChild(it) }
+        return out.outerHtml()
+    }
+
+    /** 首页：保留全部模块（解析器按位置索引取），每个模块只留 2 张卡片，文本全部占位符。 */
+    private fun sanitizeHome(html: String): String {
+        val source = Jsoup.parse(html)
+        val body = source.body()
+
+        // banner 的视频 code 只存在于脚本里，先取出（脚本随后会被清掉）
+        val bannerCode = body.select("script")
+            .firstOrNull { it.data().contains("watch?v=") }
+            ?.data()
+            ?.let { Regex("watch\\?v=(\\d+)").find(it)?.groupValues?.get(1) }
+
+        body.select("script, style, noscript").remove()
+        removeComments(body)
+        dropNoiseAttributes(body)
+        sanitizeUrls(body)
+
+        val sections = body.select("div[id=home-rows-wrapper] > div")
+        sections.forEach { section ->
+            section.select("div[class^=horizontal-card]").drop(2).forEach { it.remove() }
+            section.select("div.video-thumb-container.horizontal-card").drop(2).forEach { it.remove() }
+        }
+
+        redactText(body, emptySet())
+        redactAttributes(body)
+
+        body.selectFirst("div[id=home-banner-wrapper]")
+            ?.previousElementSibling()?.selectFirst("img")?.attr("alt", "測試影片")
+        if (bannerCode != null) {
+            body.selectFirst("div[id=home-banner-wrapper]")
+                ?.appendElement("script")
+                ?.text("var sourceUrl = 'https://hanime1.me/watch?v=$bannerCode';")
+        }
 
         val out = Jsoup.parse("<html><head><title>fixture</title></head><body></body></html>")
         body.childNodes().toList().forEach { out.body().appendChild(it) }
