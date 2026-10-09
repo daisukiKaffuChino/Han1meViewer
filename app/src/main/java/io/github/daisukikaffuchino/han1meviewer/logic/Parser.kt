@@ -3,7 +3,6 @@ package io.github.daisukikaffuchino.han1meviewer.logic
 import android.annotation.SuppressLint
 import io.github.daisukikaffuchino.utils.LogUtil
 import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
-import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
 import io.github.daisukikaffuchino.han1meviewer.HanimeResolution
 import io.github.daisukikaffuchino.han1meviewer.LOCAL_DATE_FORMAT
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
@@ -22,6 +21,19 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.SubscriptionItem
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SubscriptionVideosItem
 import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccount
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoComments
+import io.github.daisukikaffuchino.han1meviewer.logic.parser.ParserRegex
+import io.github.daisukikaffuchino.han1meviewer.logic.parser.HanimeSearchParser
+import io.github.daisukikaffuchino.han1meviewer.logic.parser.childOrNull
+import io.github.daisukikaffuchino.han1meviewer.logic.parser.extractHanimeInfo
+import io.github.daisukikaffuchino.han1meviewer.logic.parser.extractVideoCardMeta
+import io.github.daisukikaffuchino.han1meviewer.logic.parser.fixAvCdnHost
+import io.github.daisukikaffuchino.han1meviewer.logic.parser.hanimeNormalItemVer2
+import io.github.daisukikaffuchino.han1meviewer.logic.parser.isAvSiteFromSettings
+import io.github.daisukikaffuchino.han1meviewer.logic.parser.logIfParseNull
+import io.github.daisukikaffuchino.han1meviewer.logic.parser.parseListMaxPage
+import io.github.daisukikaffuchino.han1meviewer.logic.parser.parseMaxPage
+import io.github.daisukikaffuchino.han1meviewer.logic.parser.parseSearchMaxPage
+import io.github.daisukikaffuchino.han1meviewer.logic.parser.throwIfParseNull
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.toVideoCode
@@ -38,17 +50,6 @@ import org.jsoup.select.Elements
  * @time 2023/07/31 031 16:43
  */
 object Parser {
-
-    /**
-     * 所需 Regex
-     */
-    object Regex {
-        val videoSource = Regex("""const source = '(.+)'""")
-        val viewAndUploadTime = Regex("""(觀看次數|观看次数)：(.+次) *(\d{4}-\d{2}-\d{2})""")
-
-        // AV 站的 CDN 節點（t26 / t27 / t30 等）可能已失效，需要統一切換成可用的 t33
-        val avCdnHost = Regex("""^(\s*(?:https?:)?//)t\d+\.cdn2020\.com(?=[/:]|\z)""", RegexOption.IGNORE_CASE)
-    }
 
     fun extractTokenFromLoginPage(body: String): String {
         val parseBody = Jsoup.parse(body).body()
@@ -212,164 +213,7 @@ object Parser {
         return userHomePageLink.contains("/login") || username.isNullOrBlank()
     }
 
-    fun Element?.extractHanimeInfo(selector: String = "div[class^=horizontal-card]"): MutableList<HanimeInfo> {
-        val resultList = mutableListOf<HanimeInfo>()
-        this?.select(selector)?.forEach { item ->
-            hanimeNormalItemVer2(item)?.let { hanimeInfo ->
-                resultList.add(hanimeInfo)
-            }
-        }
-        return resultList
-    }
-
-    private data class VideoCardMeta(
-        val artist: String = "",
-        val uploadTime: String = "",
-        val genre: String? = null,
-    )
-
-    private fun Element.extractVideoCardMeta(): VideoCardMeta {
-        val subtitleText = selectFirst("div.subtitle a, div.subtitle")
-            ?.text()
-            ?.trim()
-            .orEmpty()
-        if (subtitleText.isNotBlank()) {
-            val parts = subtitleText.split("•").map { it.trim() }.filter { it.isNotEmpty() }
-            return VideoCardMeta(
-                artist = parts.getOrNull(0).orEmpty(),
-                uploadTime = parts.getOrNull(1).orEmpty(),
-            )
-        }
-
-        val metaDataText = selectFirst("div.video-meta-data a, div.video-meta-data")
-            ?.text()
-            ?.trim()
-            .orEmpty()
-        if (metaDataText.isNotBlank()) {
-            val parts = metaDataText.split("•").map { it.trim() }.filter { it.isNotEmpty() }
-            return VideoCardMeta(
-                artist = parts.getOrNull(0).orEmpty(),
-                uploadTime = parts.getOrNull(1).orEmpty(),
-            )
-        }
-
-        return VideoCardMeta(
-            artist = selectFirst(".meta-author a, a.card-mobile-user")?.text()?.trim().orEmpty(),
-            uploadTime = selectFirst(".meta-stats span")?.text()?.trim().orEmpty(),
-            genre = selectFirst(".meta-stats a")?.text()?.trim(),
-        )
-    }
-
-    fun hanimeSearch(body: String): PagedUiState<HanimeSearchResult> {
-        val parseBody = Jsoup.parse(body).body()
-        val maxPage = parseSearchMaxPage(parseBody)
-        val allContentsClass =
-            parseBody.getElementsByClass("content-padding-new").firstOrNull()
-        val allSimplifiedContentsClass =
-            parseBody.getElementsByClass("home-rows-videos-wrapper").firstOrNull()
-
-        // emit!
-        if (allContentsClass != null) {
-            return hanimeSearchNormalVer2(allContentsClass, maxPage)
-        } else if (allSimplifiedContentsClass != null) {
-            return hanimeSearchSimplified(allSimplifiedContentsClass, maxPage)
-        }
-        return PagedUiState.Success(HanimeSearchResult(emptyList(), maxPage))
-    }
-
-    private fun hanimeNormalItemVer2(hanimeSearchItem: Element): HanimeInfo? {
-        val title =
-            hanimeSearchItem.selectFirst("div.title, h4.video-title")?.text()?.trim()
-                .logIfParseNull(Parser::hanimeNormalItemVer2.name, "title")
-        val coverUrl =
-            hanimeSearchItem.select("img").getOrNull(0)?.absUrl("src")
-                .logIfParseNull(Parser::hanimeNormalItemVer2.name, "coverUrl")
-        val videoCode =
-            hanimeSearchItem.select("a").getOrNull(0)?.absUrl("href")?.toVideoCode()
-                .logIfParseNull(Parser::hanimeNormalItemVer2.name, "videoCode")
-        if (title == null || coverUrl == null || videoCode == null) return null
-        val durationAndViews = hanimeSearchItem.select("div[class^=thumb-container]")
-        val duration = durationAndViews.select("div[class^=duration]").text()
-        val views = durationAndViews.select("div[class^=stat-item]").getOrNull(1)?.text()
-        val meta = hanimeSearchItem.extractVideoCardMeta()
-        val infoBoxes = hanimeSearchItem.selectFirst(".stats-container .stat-item")
-        val reviews = infoBoxes?.ownText()?.trim() ?: ""
-        return HanimeInfo(
-            title = title,
-            coverUrl = coverUrl,
-            videoCode = videoCode,
-            duration = duration.logIfParseNull(Parser::hanimeNormalItemVer2.name, "duration"),
-            currentArtist = meta.artist,
-            views = views.logIfParseNull(Parser::hanimeNormalItemVer2.name, "views"),
-            uploadTime = meta.uploadTime,
-            genre = meta.genre,
-            itemType = HanimeInfo.NORMAL,
-            reviews = reviews
-        )
-    }
-
-    // 每一个简化版视频单元
-    private fun hanimeSimplifiedItem(hanimeSearchItem: Element): HanimeInfo? {
-        val videoCode = hanimeSearchItem.attr("href").toVideoCode()
-            .logIfParseNull(Parser::hanimeSimplifiedItem.name, "videoCode")
-        val coverUrl = hanimeSearchItem.selectFirst("img")?.attr("src")
-            .logIfParseNull(Parser::hanimeSimplifiedItem.name, "coverUrl")
-        val title = hanimeSearchItem.selectFirst("div[class=home-rows-videos-title]")?.text()
-            .logIfParseNull(Parser::hanimeSimplifiedItem.name, "title")
-        if (videoCode == null || coverUrl == null || title == null) return null
-        return HanimeInfo(
-            title = title,
-            coverUrl = coverUrl,
-            videoCode = videoCode,
-            itemType = HanimeInfo.SIMPLIFIED
-        )
-    }
-
-    // 出来后是正常视频单元的页面用这个
-    private fun hanimeSearchNormalVer2(
-        allContentsClass: Element,
-        maxPage: Int,
-    ): PagedUiState<HanimeSearchResult> {
-        val hanimeSearchList = mutableListOf<HanimeInfo>()
-        val hanimeSearchItems =
-            allContentsClass.select("div[class^=horizontal-card]")
-        if (hanimeSearchItems.isEmpty()) {
-            return PagedUiState.NoMoreData
-        } else {
-            hanimeSearchItems.forEach { hanimeSearchItem ->
-                hanimeNormalItemVer2(hanimeSearchItem)?.let(hanimeSearchList::add)
-            }
-        }
-        LogUtil.d("search_result", "$hanimeSearchList")
-        return PagedUiState.Success(HanimeSearchResult(hanimeSearchList, maxPage))
-    }
-
-    // 出来后是简化版视频单元的页面用这个
-    private fun hanimeSearchSimplified(
-        allSimplifiedContentsClass: Element,
-        maxPage: Int,
-    ): PagedUiState<HanimeSearchResult> {
-        val hanimeSearchList = mutableListOf<HanimeInfo>()
-        val hanimeSearchItems = allSimplifiedContentsClass.children()
-        if (hanimeSearchItems.isEmpty()) {
-            return PagedUiState.NoMoreData
-        } else hanimeSearchItems.forEach { hanimeSearchItem ->
-            hanimeSimplifiedItem(hanimeSearchItem)?.let(hanimeSearchList::add)
-        }
-        return PagedUiState.Success(HanimeSearchResult(hanimeSearchList, maxPage))
-    }
-
-    /**
-     * AV 站的 CDN 節點可能已失效，這裡統一修正成可用的節點；其餘站點原樣返回。
-     */
-    private fun fixAvCdnHost(url: String, isAvSite: Boolean): String {
-        if (!isAvSite) return url
-        return Regex.avCdnHost.replace(url) { "${it.groupValues[1]}t33.cdn2020.com" }
-    }
-
-    /** 目标站点是否为 AV 站（影响 CDN 域名修正）。 */
-    private val isAvSiteFromSettings: Boolean
-        get() = SettingsRepository.baseUrl == HANIME_URL[3]
+    fun hanimeSearch(body: String): PagedUiState<HanimeSearchResult> = HanimeSearchParser.parse(body)
 
     fun hanimeVideo(body: String): UiState<HanimeVideo> =
         parseHanimeVideoBody(body, isAvSite = isAvSiteFromSettings)
@@ -405,7 +249,7 @@ object Parser {
         val introduction = videoCaptionText?.ownText()
         val uploadTimeWithViews = videoDetailWrapper?.selectFirst("div > div > div")?.text()
         val uploadTimeWithViewsGroups = uploadTimeWithViews?.let {
-            Regex.viewAndUploadTime.find(it)?.groups
+            ParserRegex.viewAndUploadTime.find(it)?.groups
         }
         val uploadTime = uploadTimeWithViewsGroups?.get(3)?.value?.let { time ->
             runCatching {
@@ -608,7 +452,7 @@ object Parser {
                     val data = script.data()
                     if (data.isBlank()) continue
                     val result =
-                        Regex.videoSource.find(data)?.groups?.get(1)?.value ?: continue
+                        ParserRegex.videoSource.find(data)?.groups?.get(1)?.value ?: continue
                     //hanimeResolution.parseResolution(null, result)
                     hanimeResolution.parseResolution(null, fixAvCdnHost(result, isAvSite))
                     break
@@ -1150,72 +994,4 @@ object Parser {
         )
     }
 
-    private fun parseMaxPage(parseBody: Element): Int {
-        return parseBody
-            .select("ul.pagination")
-            .lastOrNull()
-            ?.select("a.page-link[href]")
-            ?.mapNotNull {
-                Regex("""[?&]page=(\d+)""").find(it.attr("href"))?.groupValues?.get(1)?.toIntOrNull()
-            }
-            ?.maxOrNull() ?: 1
-    }
-
-    /**
-     * 搜索页的总页数藏在「跳到指定页」输入框中。
-     */
-    private fun parseSearchMaxPage(parseBody: Element): Int {
-        val input = parseBody.selectFirst("input#skip-page-input") ?: return 1
-        return Regex("""validateNumberInput\(this,\s*\d+,\s*(\d+)\)""")
-            .find(input.attr("oninput"))
-            ?.groupValues?.get(1)
-            ?.toIntOrNull()
-            ?: 1
-    }
-
-    /**
-     * 优先解析通用跳页输入框，失败后回退到订阅页的分页链接结构。
-     */
-    private fun parseListMaxPage(parseBody: Element): Int {
-        val searchMax = parseSearchMaxPage(parseBody)
-        return if (searchMax > 1) searchMax else parseMaxPage(parseBody)
-    }
-
-    /**
-     * 得到 Element 的 child，如果 index 超出範圍，就返回 null
-     */
-    private fun Element.childOrNull(index: Int): Element? {
-        return try {
-            child(index)
-        } catch (_: IndexOutOfBoundsException) {
-            null
-        }
-    }
-
-    /**
-     * 基本都是必需的參數，所以如果是 null，就直接丟出 [ParseException]
-     *
-     * @param funcName 這個參數是在哪個函數中被使用的
-     * @param varName 這個參數的名稱
-     * @return 如果 [this] 不是 null，就回傳 [this]
-     * @throws ParseException 如果 [this] 是 null，就丟出 [ParseException]
-     */
-    private fun <T> T?.throwIfParseNull(funcName: String, varName: String): T = this
-        ?: throw ParseException(funcName, varName)
-
-    /**
-     * 如果 [this] 是 null，就在 logcat 中顯示訊息
-     *
-     * @param funcName 這個參數是在哪個函數中被使用的
-     * @param varName 這個參數的名稱
-     * @return 回傳 [this]
-     */
-    private fun <T> T?.logIfParseNull(
-        funcName: String, varName: String, loginNeeded: Boolean = false,
-    ): T? = also {
-        if (it == null) {
-            val extra = if (loginNeeded) "（需要登入的欄位）" else ""
-            LogUtil.d("Parse::$funcName", "[$varName] is null. 這有點不正常$extra")
-        }
-    }
 }
