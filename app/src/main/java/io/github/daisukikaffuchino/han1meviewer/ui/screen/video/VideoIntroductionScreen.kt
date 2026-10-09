@@ -88,6 +88,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.VideoCardItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.ErrorContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.LoadingContent
+import io.github.daisukikaffuchino.han1meviewer.ui.component.toUiMessage
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyRow
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyVerticalGrid
@@ -193,7 +194,7 @@ fun VideoIntroductionScreen(
 
             state is UiState.Error -> ErrorContent(
                 title = stringResource(R.string.load_failed_retry),
-                message = state.throwable.message,
+                message = state.throwable.toUiMessage(),
                 onRetry = onRetry,
                 modifier = Modifier.align(Alignment.Center),
             )

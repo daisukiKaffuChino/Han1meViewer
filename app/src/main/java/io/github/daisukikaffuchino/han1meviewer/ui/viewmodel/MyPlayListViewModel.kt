@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
-import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.repository.MyListRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ModifiedPlaylistArgs
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
@@ -136,7 +136,7 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
         }
         val userId = SettingsRepository.savedUserId
         viewModelScope.launch {
-            NetworkRepo.getPlaylists(page, userId).collect { state ->
+            MyListRepository.getPlaylists(page, userId).collect { state ->
                 when (state) {
                     is UiState.Loading -> {
                         if (page == 1 || forceReload) {
@@ -196,7 +196,7 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
             } else {
                 _playlistStateFlow.value = PagedUiState.Loading
             }
-            NetworkRepo.getMyPlayListItems(page, listCode).collect { state ->
+            MyListRepository.getMyPlayListItems(page, listCode).collect { state ->
                 LogUtil.i("getPlaylistItems","state:$state")
                 when (state) {
                     is PagedUiState.Success -> {
@@ -249,7 +249,7 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
     // 从详情页删除某视频
     override fun deleteFromPlaylist(listCode: String, videoCode: String, position: Int) {
         viewModelScope.launch {
-            NetworkRepo.deleteMyListItems(listCode, videoCode, position, csrfToken).collect {
+            MyListRepository.deleteMyListItems(listCode, videoCode, position, csrfToken).collect {
                 _deleteFromPlaylistFlow.emit(it)
                 _playlistFlow.update { prevList ->
                     if (it is UiState.Success) {
@@ -266,7 +266,7 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
     override fun modifyPlaylist(listCode: String, title: String, desc: String, delete: Boolean) {
         LogUtil.i("modify_playlist","${listCode},${title},${desc}")
         viewModelScope.launch {
-            NetworkRepo.modifyPlaylist(listCode, title, desc, delete, csrfToken).collect {
+            MyListRepository.modifyPlaylist(listCode, title, desc, delete, csrfToken).collect {
                 _modifyPlaylistFlow.emit(it)
                 if (delete) {
                     clearMyListItems()
@@ -285,7 +285,7 @@ class MyPlayListViewModel : ViewModel(), PlaylistController {
     //创建Playlist
     override fun createPlaylist(title: String, description: String) {
         viewModelScope.launch {
-            NetworkRepo.createPlaylist(EMPTY_STRING, title, description, csrfToken).collect {
+            MyListRepository.createPlaylist(EMPTY_STRING, title, description, csrfToken).collect {
                 _createPlaylistFlow.emit(it)
             }
         }

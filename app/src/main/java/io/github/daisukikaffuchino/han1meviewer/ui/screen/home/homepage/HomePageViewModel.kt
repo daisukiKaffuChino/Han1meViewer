@@ -9,7 +9,7 @@ import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.AppUpdateChecker
 import io.github.daisukikaffuchino.han1meviewer.logic.AppUpdateState
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
-import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.repository.HomeRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.WatchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Announcement
@@ -106,7 +106,7 @@ class HomePageViewModel: ViewModel() {
             } else if (!isRefresh && current !is PagedUiState.Success) {
                 _homePageFlow.value = PagedUiState.Loading
             }
-            NetworkRepo.getHomePage().collect { networkState ->
+            HomeRepository.getHomePage().collect { networkState ->
                 when (networkState){
                     is UiState.Empty -> _homePageFlow.value = PagedUiState.Empty
                     is UiState.Error -> {

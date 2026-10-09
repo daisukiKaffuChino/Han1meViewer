@@ -36,6 +36,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PullRefreshOverlay
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
+import io.github.daisukikaffuchino.han1meviewer.ui.component.toUiMessage
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.subscription.SubscriptionContent
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.subscription.SubscriptionEvent
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.home.subscription.SubscriptionUiState
@@ -194,7 +195,7 @@ fun SubscriptionScreen(
                         EmptyContent(
                             hint = stringResource(
                                 R.string.load_failed_with_reason,
-                                (state as UiState.Error).throwable.message.orEmpty()
+                                (state as UiState.Error).throwable.toUiMessage()
                             ),
                             picRes = R.drawable.h_chan_sad
                         )

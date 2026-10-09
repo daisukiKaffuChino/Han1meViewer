@@ -15,7 +15,9 @@ import io.github.daisukikaffuchino.han1meviewer.HanimeResolution
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.LocalListRepository
-import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.repository.MyListRepository
+import io.github.daisukikaffuchino.han1meviewer.logic.repository.SubscriptionRepository
+import io.github.daisukikaffuchino.han1meviewer.logic.repository.VideoRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.WatchHistoryEntity
@@ -281,7 +283,7 @@ class VideoViewModel(
                     }
                 }
             } else {
-                NetworkRepo.getHanimeVideo(videoCode)
+                VideoRepository.getHanimeVideo(videoCode)
             }
             flow.collect { state ->
                 val emitState = when {
@@ -345,7 +347,7 @@ class VideoViewModel(
         currentUserId: String?,
     ) {
         viewModelScope.launch {
-            NetworkRepo.addToMyFavVideo(
+            MyListRepository.addToMyFavVideo(
                 videoCode, likeStatus, currentUserId, csrfToken
             ).collect { state ->
                 _addToFavVideoFlow.emit(state)
@@ -360,7 +362,7 @@ class VideoViewModel(
 
     fun rateVideo(video: HanimeVideo, isPositive: Boolean) {
         viewModelScope.launch {
-            NetworkRepo.rateVideo(
+            MyListRepository.rateVideo(
                 videoCode = videoCode,
                 isPositive = isPositive,
                 likeStatus = video.isFav,
@@ -388,7 +390,7 @@ class VideoViewModel(
         position: Int,
     ) {
         viewModelScope.launch {
-            NetworkRepo.addToMyList(listCode, videoCode, isChecked, position, csrfToken).collect {
+            MyListRepository.addToMyList(listCode, videoCode, isChecked, position, csrfToken).collect {
                 _modifyMyListFlow.emit(it)
                 _hanimeVideoFlow.update { prev ->
                     val myList = prev?.myList?.myListInfo.orEmpty().toMutableList()
@@ -485,7 +487,7 @@ class VideoViewModel(
         artistId: String,
     ) {
         viewModelScope.launch {
-            NetworkRepo.subscribeArtist(csrfToken, userId, artistId, true).collect { state ->
+            SubscriptionRepository.subscribeArtist(csrfToken, userId, artistId, true).collect { state ->
                 _subscribeArtistFlow.emit(state)
                 if (state is UiState.Success) {
                     _hanimeVideoFlow.update {
@@ -501,7 +503,7 @@ class VideoViewModel(
         artistId: String,
     ) {
         viewModelScope.launch {
-            NetworkRepo.subscribeArtist(csrfToken, userId, artistId, false).collect { state ->
+            SubscriptionRepository.subscribeArtist(csrfToken, userId, artistId, false).collect { state ->
                 _subscribeArtistFlow.emit(state)
                 if (state is UiState.Success) {
                     _hanimeVideoFlow.update {

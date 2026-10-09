@@ -45,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -63,6 +64,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.ErrorContent
+import io.github.daisukikaffuchino.han1meviewer.util.toUiMessage
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberRandomLoadingHint
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
@@ -91,8 +93,8 @@ fun AccountScreen(
     }
     val state by viewModel.accountState.collectAsStateWithLifecycle()
     val submittingState by viewModel.submittingState.collectAsStateWithLifecycle()
-    val modifyFailed = stringResource(R.string.modify_failed)
     val modifySuccess = stringResource(R.string.modify_success)
+    val context = LocalContext.current
     LaunchedEffect(Unit) {
         viewModel.loadAccount()
     }
@@ -109,7 +111,7 @@ fun AccountScreen(
             when (event.state) {
                 UiState.Empty -> Unit
                 is UiState.Error -> {
-                    SonnerToast.error(event.state.throwable.message ?: modifyFailed)
+                    SonnerToast.error(event.state.throwable.toUiMessage(context))
                 }
 
                 is UiState.Success -> {

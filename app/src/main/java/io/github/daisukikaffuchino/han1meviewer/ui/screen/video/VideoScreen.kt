@@ -15,6 +15,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.ErrorContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.LoadingContent
+import io.github.daisukikaffuchino.han1meviewer.ui.component.toUiMessage
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 
 @Composable
@@ -42,7 +43,7 @@ fun VideoScreen(
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         ErrorContent(
                             title = "视频加载失败",
-                            message = state.throwable.message,
+                            message = state.throwable.toUiMessage(),
                             onRetry = onRetry,
                         )
                     }

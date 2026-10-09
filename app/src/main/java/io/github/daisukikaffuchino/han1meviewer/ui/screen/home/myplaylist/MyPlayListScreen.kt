@@ -35,6 +35,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PullRefreshOverlay
 import io.github.daisukikaffuchino.han1meviewer.ui.component.appbar.HanimeScaffold
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
+import io.github.daisukikaffuchino.han1meviewer.ui.component.toUiMessage
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.PlaylistController
 import io.github.daisukikaffuchino.utils.SonnerToast
 import io.github.daisukikaffuchino.utils.VibrationUtil
@@ -176,7 +177,7 @@ fun PlaylistScreen(
                         EmptyContent(
                             hint = stringResource(
                                 R.string.load_failed_with_reason,
-                                (state as UiState.Error).throwable.message.orEmpty()
+                                (state as UiState.Error).throwable.toUiMessage()
                             ),
                             picRes = R.drawable.h_chan_sad
                         )

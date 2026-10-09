@@ -1,6 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.mylist
 
-import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.repository.MyListRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListType
@@ -41,7 +41,7 @@ abstract class MyListSubViewModel(
     ) {
         mutableIsLoadingMore.value = !isRefreshing && itemsFlow.value.isNotEmpty()
         scope.launch {
-            NetworkRepo.getMyListItems(userId, listType, page).collect { state ->
+            MyListRepository.getMyListItems(userId, listType, page).collect { state ->
                 itemsStateFlow.value = state
                 itemsFlow.update { prevList ->
                     when (state) {

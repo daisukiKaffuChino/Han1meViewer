@@ -10,7 +10,7 @@ import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo.HanimeAdvancedSearchRepo.toSearchOptionSet
-import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.repository.SearchRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.HanimeAdvancedSearchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.entity.SearchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
@@ -159,7 +159,7 @@ class SearchViewModel(
         duration: String?, tags: Set<String>, brands: Set<String>,
     ) {
         viewModelScope.launch {
-            NetworkRepo.getHanimeSearchResult(
+            SearchRepository.getHanimeSearchResult(
                 page, query, genre,
                 sort, broad, date ,
                 duration, tags, brands

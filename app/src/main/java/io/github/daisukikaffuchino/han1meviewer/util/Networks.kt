@@ -1,5 +1,6 @@
 package io.github.daisukikaffuchino.han1meviewer.util
 
+import android.content.Context
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.state.HanimeErrorKind
 import io.github.daisukikaffuchino.han1meviewer.logic.state.toHanimeError
@@ -47,11 +48,12 @@ inline fun <R> runSuspendCatching(block: () -> R): Result<R> {
 }
 
 /**
- * 将首页加载异常映射为对应的错误提示字符串资源。
+ * 把异常映射为对应的错误提示字符串资源。
  *
- * 优先按结构化错误类型判断常见网络问题，必要时回退到异常信息中的关键字匹配。
+ * 优先按结构化错误类型（[HanimeErrorKind]）判断，必要时回退到异常信息中的关键字匹配。
+ * 逻辑层不再自带本地化文案，用户可见文案统一走这里（配合 [toUiMessage]）。
  *
- * @receiver 首页加载过程中抛出的异常
+ * @receiver 网络 / 解析 / 账号等流程抛出的异常
  * @return 错误提示的字符串资源 ID
  */
 fun Throwable.toNetworkErrorMessageRes(): Int {
@@ -90,6 +92,26 @@ fun Throwable.toNetworkErrorMessageRes(): Int {
             R.string.cloudflare_network_mismatch
         }
 
+        kind == HanimeErrorKind.NotFound -> {
+            R.string.video_might_not_exist
+        }
+
+        kind == HanimeErrorKind.NotLoggedIn -> {
+            R.string.not_logged_in_currently
+        }
+
+        kind == HanimeErrorKind.InvalidCredentials -> {
+            R.string.account_or_password_wrong
+        }
+
+        kind == HanimeErrorKind.SessionExpired -> {
+            R.string.login_state_expired
+        }
+
+        kind == HanimeErrorKind.Parse -> {
+            R.string.parse_error_msg
+        }
+
         rawMessage.contains("connection reset") -> {
             R.string.home_error_connection_reset
         }
@@ -110,5 +132,20 @@ fun Throwable.toNetworkErrorMessageRes(): Int {
         else -> {
             R.string.home_error_generic
         }
+    }
+}
+
+/**
+ * 用户可见的错误文案。
+ *
+ * 已知错误类型一律用本地化资源（`kind -> R.string`），保证文案可控；
+ * 未分类错误若带原始信息则原样显示（例如服务端返回的表单错误）。
+ */
+fun Throwable.toUiMessage(context: Context): String {
+    val raw = message
+    return if (toHanimeError().kind == HanimeErrorKind.Unknown && !raw.isNullOrBlank()) {
+        raw
+    } else {
+        context.getString(toNetworkErrorMessageRes())
     }
 }

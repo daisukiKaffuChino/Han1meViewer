@@ -3,7 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.repository.SubscriptionRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MySubscriptions
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SubscriptionItem
 import io.github.daisukikaffuchino.han1meviewer.logic.model.SubscriptionVideosItem
@@ -52,7 +52,7 @@ class MySubscriptionsViewModel : ViewModel() {
         isLoadingMore = true
 
         viewModelScope.launch {
-            NetworkRepo.getMySubscriptions(page = currentPage)
+            SubscriptionRepository.getMySubscriptions(page = currentPage)
                 .onStart {
                     if (currentPage == 1) {
                         _subscriptionsState.value = UiState.Loading

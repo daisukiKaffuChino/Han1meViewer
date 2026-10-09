@@ -2,7 +2,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.repository.PreviewRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimePreview
 import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.util.TagLocalizer
@@ -33,7 +33,7 @@ class PreviewViewModel : ViewModel() {
                 _previewFlow.value = it
                 return@launch
             }
-            NetworkRepo.getHanimePreview(date).collect { preview ->
+            PreviewRepository.getHanimePreview(date).collect { preview ->
                 val localizedPreview = preview.withLocalizedTags()
                 _previewFlow.value = localizedPreview
                 if (localizedPreview !is UiState.Loading) {
@@ -48,7 +48,7 @@ class PreviewViewModel : ViewModel() {
         viewModelScope.launch {
             val preview = runCatching {
                 withContext(Dispatchers.IO) {
-                    NetworkRepo.getHanimePreview(date)
+                    PreviewRepository.getHanimePreview(date)
                         .catch { emit(UiState.Error(it)) }
                         .first { it !is UiState.Loading }
                 }

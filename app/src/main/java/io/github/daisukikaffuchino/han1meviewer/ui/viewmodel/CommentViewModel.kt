@@ -5,14 +5,16 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.ViewModel
 import io.github.daisukikaffuchino.han1meviewer.R
-import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.repository.CommentRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.CommentPlace
 import io.github.daisukikaffuchino.han1meviewer.logic.model.ReportReason
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoCommentArgs
 import io.github.daisukikaffuchino.han1meviewer.logic.model.VideoComments
 import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.video.CommentSortType
+import io.github.daisukikaffuchino.han1meviewer.util.toUiMessage
 import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel.csrfToken
+import io.github.daisukikaffuchino.utils.applicationContext
 import io.github.daisukikaffuchino.utils.loadAssetAs
 import io.github.daisukikaffuchino.utils.SonnerToast
 import io.github.daisukikaffuchino.utils.unsafeLazy
@@ -111,7 +113,7 @@ class CommentViewModel : ViewModel() {
     fun getComment(type: String, code: String) {
         viewModelScope.launch {
             _videoCommentStateFlow.value = UiState.Loading
-            NetworkRepo.getComments(type, code).collect { state ->
+            CommentRepository.getComments(type, code).collect { state ->
                 _videoCommentStateFlow.value = state
                 _videoCommentFlow.update { prevList ->
                     when (state) {
@@ -132,7 +134,7 @@ class CommentViewModel : ViewModel() {
         viewModelScope.launch {
             // 每次获取评论回复时，都会重新加载
             _videoReplyStateFlow.value = UiState.Loading
-            NetworkRepo.getCommentReply(commentId).collect { state ->
+            CommentRepository.getCommentReply(commentId).collect { state ->
                 _videoReplyStateFlow.value = state
                 _videoReplyFlow.update { prevList ->
                     when (state) {
@@ -152,7 +154,7 @@ class CommentViewModel : ViewModel() {
         text: String,
     ) {
         viewModelScope.launch {
-            NetworkRepo.postComment(csrfToken, currentUserId, targetUserId, type, text)
+            CommentRepository.postComment(csrfToken, currentUserId, targetUserId, type, text)
                 .collect(_postCommentFlow::emit)
         }
     }
@@ -162,7 +164,7 @@ class CommentViewModel : ViewModel() {
         text: String,
     ) {
         viewModelScope.launch {
-            NetworkRepo.postCommentReply(csrfToken, replyCommentId, text)
+            CommentRepository.postCommentReply(csrfToken, replyCommentId, text)
                 .collect(_postReplyFlow::emit)
         }
     }
@@ -194,7 +196,7 @@ class CommentViewModel : ViewModel() {
         unlikeCommentStatus: Boolean = false,
     ) {
         viewModelScope.launch {
-            NetworkRepo.likeComment(
+            CommentRepository.likeComment(
                 csrfToken,
                 commentPlace,
                 comment.post.foreignId,
@@ -267,7 +269,7 @@ class CommentViewModel : ViewModel() {
     ){
         viewModelScope.launch {
             LogUtil.i("ReportComment", "csrfToken:${csrfToken}")
-            NetworkRepo.reportComment(
+            CommentRepository.reportComment(
                 csrfToken = csrfToken,
                 reason = reason,
                 currentUserId = currentUserId,
@@ -280,7 +282,7 @@ class CommentViewModel : ViewModel() {
                         _reportMessage.emit(
                             Message(
                                 R.string.report_failed,
-                                listOf(state.throwable.message ?: "unknown")
+                                listOf(state.throwable.toUiMessage(applicationContext))
                             )
                         )
                     }

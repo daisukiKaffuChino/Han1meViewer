@@ -3,7 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
-import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.repository.MyListRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.NotLoggedInException
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
@@ -99,7 +99,7 @@ class OnlineWatchHistoryViewModel : ViewModel() {
         _isLoadingMore.value = !isRefreshing && _items.value.isNotEmpty()
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
-            NetworkRepo.getOnlineWatchHistories(userId, _selectedSort.value, page).collect { pageState ->
+            MyListRepository.getOnlineWatchHistories(userId, _selectedSort.value, page).collect { pageState ->
                 _state.value = pageState
                 _items.update { previousItems ->
                     when (pageState) {
@@ -155,7 +155,7 @@ class OnlineWatchHistoryViewModel : ViewModel() {
         val position = _items.value.indexOfFirst { it.videoCode == item.videoCode }
         if (position < 0) return
         viewModelScope.launch {
-            NetworkRepo.deleteOnlineWatchHistory(
+            MyListRepository.deleteOnlineWatchHistory(
                 videoCode = item.videoCode,
                 position = position,
                 csrfToken = csrfToken,

@@ -27,6 +27,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import io.github.daisukikaffuchino.han1meviewer.ui.component.LoadMoreFooter
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
+import io.github.daisukikaffuchino.han1meviewer.ui.component.toUiMessage
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PaginationPager
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.ErrorContent
@@ -86,7 +87,7 @@ fun PlaylistContent(
                 ErrorContent(
                     message = stringResource(
                         R.string.load_failed_with_reason,
-                        (state as UiState.Error).throwable.message.orEmpty(),
+                        (state as UiState.Error).throwable.toUiMessage(),
                     ),
                     onRetry = { onEvent(PlaylistEvent.OnRefresh) },
                 )

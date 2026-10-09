@@ -1,7 +1,7 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.mylist
 
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
-import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.repository.MyListRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.model.HanimeInfo
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListItems
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListType
@@ -32,7 +32,7 @@ class FavSubViewModel(scope: CoroutineScope) :
     override fun deleteMyFavVideo(videoCode: String, position: Int) {
         deleteItem(
             deleteCall = {
-                NetworkRepo.addToMyFavVideo(
+                MyListRepository.addToMyFavVideo(
                     videoCode = videoCode,
                     likeStatus = true,
                     currentUserId = SettingsRepository.savedUserId,

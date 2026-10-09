@@ -7,6 +7,8 @@ import io.github.daisukikaffuchino.han1meviewer.logic.model.ListsExport
 import io.github.daisukikaffuchino.han1meviewer.logic.model.MyListType
 import io.github.daisukikaffuchino.han1meviewer.logic.model.PlaylistExport
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Playlists
+import io.github.daisukikaffuchino.han1meviewer.logic.repository.MyListRepository
+import io.github.daisukikaffuchino.han1meviewer.logic.repository.VideoRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
 import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import kotlinx.coroutines.flow.Flow
@@ -57,7 +59,7 @@ object OnlineListsBackup {
 
         data.watchLater.forEachIndexed { index, item ->
             awaitWebsiteSuccess(
-                NetworkRepo.addToMyList(
+                MyListRepository.addToMyList(
                     listCode = "save",
                     videoCode = item.videoCode,
                     isChecked = true,
@@ -68,7 +70,7 @@ object OnlineListsBackup {
         }
         data.favorites.forEach { item ->
             awaitWebsiteSuccess(
-                NetworkRepo.addToMyFavVideo(
+                MyListRepository.addToMyFavVideo(
                     videoCode = item.videoCode,
                     likeStatus = false,
                     currentUserId = userId,
@@ -85,7 +87,7 @@ object OnlineListsBackup {
                 ?: existingPlaylists[playlist.title]
             if (listCode == null) {
                 awaitWebsiteSuccess(
-                    NetworkRepo.createPlaylist(
+                    MyListRepository.createPlaylist(
                         EMPTY_STRING,
                         playlist.title,
                         playlist.desc,
@@ -104,7 +106,7 @@ object OnlineListsBackup {
             }
             playlist.items.forEachIndexed { index, item ->
                 awaitWebsiteSuccess(
-                    NetworkRepo.addToMyList(
+                    MyListRepository.addToMyList(
                         listCode = listCode,
                         videoCode = item.videoCode,
                         isChecked = true,
@@ -133,7 +135,7 @@ object OnlineListsBackup {
         val result = mutableListOf<ListItemExport>()
         var page = 1
         while (true) {
-            val state = NetworkRepo.getMyListItems(userId, type, page)
+            val state = MyListRepository.getMyListItems(userId, type, page)
                 .first { it !is PagedUiState.Loading }
             when (state) {
                 is PagedUiState.Success -> {
@@ -154,7 +156,7 @@ object OnlineListsBackup {
         val result = mutableListOf<Playlists.Playlist>()
         var page = 1
         while (true) {
-            val state = NetworkRepo.getPlaylists(page, userId)
+            val state = MyListRepository.getPlaylists(page, userId)
                 .first { it !is UiState.Loading }
             when (state) {
                 is UiState.Success -> {
@@ -177,7 +179,7 @@ object OnlineListsBackup {
         var desc = ""
         var page = 1
         while (true) {
-            val state = NetworkRepo.getMyPlayListItems(page, listCode)
+            val state = MyListRepository.getMyPlayListItems(page, listCode)
                 .first { it !is PagedUiState.Loading }
             when (state) {
                 is PagedUiState.Success -> {
@@ -196,7 +198,7 @@ object OnlineListsBackup {
     }
 
     private suspend fun fetchCsrfToken(userId: String): String {
-        val state = NetworkRepo.getPlaylists(1, userId)
+        val state = MyListRepository.getPlaylists(1, userId)
             .first { it !is UiState.Loading }
         return when (state) {
             is UiState.Success -> state.data.csrfToken ?: error("Missing CSRF token")
@@ -207,7 +209,7 @@ object OnlineListsBackup {
     }
 
     private suspend fun fetchVideoCsrfToken(videoCode: String): String? {
-        val state = NetworkRepo.getHanimeVideo(videoCode)
+        val state = VideoRepository.getHanimeVideo(videoCode)
             .first { it !is UiState.Loading }
         return when (state) {
             is UiState.Success -> state.data.csrfToken
@@ -222,7 +224,7 @@ object OnlineListsBackup {
         videoCode: String,
         playlistTitle: String,
     ): String? {
-        val state = NetworkRepo.getHanimeVideo(videoCode)
+        val state = VideoRepository.getHanimeVideo(videoCode)
             .first { it !is UiState.Loading }
         return when (state) {
             is UiState.Success -> state.data.myList?.myListInfo

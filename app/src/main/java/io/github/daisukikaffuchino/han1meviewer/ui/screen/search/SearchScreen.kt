@@ -96,6 +96,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.IconButton
 import io.github.daisukikaffuchino.han1meviewer.ui.component.PaginationPager
 import io.github.daisukikaffuchino.han1meviewer.ui.component.VideoCardItem
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
+import io.github.daisukikaffuchino.han1meviewer.ui.component.toUiMessage
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyVerticalGrid
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeHomePageVideos
 import io.github.daisukikaffuchino.han1meviewer.ui.screen.rememberRandomLoadingHint
@@ -753,7 +754,7 @@ fun SearchStateIndicator(
         is PagedUiState.Error -> EmptyContent(
             hint = stringResource(
                 R.string.search_load_failed_with_reason,
-                state.throwable.message.orEmpty()
+                state.throwable.toUiMessage()
             ),
             picRes = R.drawable.h_chan_sad
         )

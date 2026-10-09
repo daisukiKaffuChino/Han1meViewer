@@ -25,7 +25,7 @@ import io.github.daisukikaffuchino.han1meviewer.HanimeConstants.HANIME_URL
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.USER_AGENT
-import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.repository.AuthRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.network.CloudflareVerificationCoordinator
 import io.github.daisukikaffuchino.han1meviewer.logic.network.ech.HyWebViewHelper
 import io.github.daisukikaffuchino.han1meviewer.logic.state.HanimeErrorKind
@@ -80,7 +80,7 @@ fun LoginRouteScreen(
             onLogin = { username, password ->
                 isLoggingIn = true
                 scope.launch {
-                    NetworkRepo.login(username, password).collect { state ->
+                    AuthRepository.login(username, password).collect { state ->
                         when (state) {
                             UiState.Loading -> Unit
                             UiState.Empty -> Unit

@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -50,6 +51,8 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.VideoCommentCard
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.ErrorContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.LoadingContent
+import io.github.daisukikaffuchino.han1meviewer.ui.component.toUiMessage
+import io.github.daisukikaffuchino.han1meviewer.util.toUiMessage as toUiMessageWithContext
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.ComponentPreview
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeCommentList
@@ -121,11 +124,12 @@ fun ChildCommentScreen(
         }
     }
 
+    val context = LocalContext.current
     LaunchedEffect(commentLikeStateFlow) {
         commentLikeStateFlow.collect { likeState ->
             when (likeState) {
                 is UiState.Error -> {
-                    snackbarHostState.showSnackbar(likeState.throwable.message ?: "unknown")
+                    snackbarHostState.showSnackbar(likeState.throwable.toUiMessageWithContext(context))
                 }
 
                 UiState.Loading -> Unit
@@ -213,7 +217,7 @@ fun ChildCommentScreen(
                 isLoading = initialLoading,
                 isError = initialError,
                 isEmpty = sortedComments.isEmpty(),
-                errorMessage = (state as? UiState.Error)?.throwable?.message ?: "",
+                errorMessage = (state as? UiState.Error)?.throwable?.toUiMessage() ?: "",
                 onRetry = onRefresh,
                 loading = {
                     LoadingContent(
@@ -226,7 +230,7 @@ fun ChildCommentScreen(
                 error = {
                     ErrorContent(
                         title = stringResource(R.string.load_reply_failed),
-                        message = (state as UiState.Error).throwable.message,
+                        message = (state as UiState.Error).throwable.toUiMessage(),
                         onRetry = onRefresh,
                         modifier = Modifier
                             .fillMaxWidth()

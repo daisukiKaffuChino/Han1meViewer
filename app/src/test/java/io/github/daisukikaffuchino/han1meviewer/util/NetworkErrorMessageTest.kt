@@ -2,7 +2,12 @@ package io.github.daisukikaffuchino.han1meviewer.util
 
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.CloudflareBlockedException
+import io.github.daisukikaffuchino.han1meviewer.logic.exception.HanimeNotFoundException
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.IPBlockedException
+import io.github.daisukikaffuchino.han1meviewer.logic.exception.InvalidCredentialsException
+import io.github.daisukikaffuchino.han1meviewer.logic.exception.LoginStateExpiredException
+import io.github.daisukikaffuchino.han1meviewer.logic.exception.NotLoggedInException
+import io.github.daisukikaffuchino.han1meviewer.logic.exception.ParseException
 import java.io.IOException
 import java.net.ConnectException
 import java.net.SocketException
@@ -53,6 +58,30 @@ class NetworkErrorMessageTest {
         assertEquals(
             R.string.cloudflare_network_mismatch,
             CloudflareBlockedException("x").toNetworkErrorMessageRes(),
+        )
+    }
+
+    @Test
+    fun `typed logic failures map to their message`() {
+        assertEquals(
+            R.string.video_might_not_exist,
+            HanimeNotFoundException("x").toNetworkErrorMessageRes(),
+        )
+        assertEquals(
+            R.string.not_logged_in_currently,
+            NotLoggedInException().toNetworkErrorMessageRes(),
+        )
+        assertEquals(
+            R.string.account_or_password_wrong,
+            InvalidCredentialsException("x").toNetworkErrorMessageRes(),
+        )
+        assertEquals(
+            R.string.login_state_expired,
+            LoginStateExpiredException().toNetworkErrorMessageRes(),
+        )
+        assertEquals(
+            R.string.parse_error_msg,
+            ParseException("x").toNetworkErrorMessageRes(),
         )
     }
 

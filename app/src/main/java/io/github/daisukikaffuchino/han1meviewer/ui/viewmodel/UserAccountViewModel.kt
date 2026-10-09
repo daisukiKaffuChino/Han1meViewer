@@ -3,7 +3,7 @@ package io.github.daisukikaffuchino.han1meviewer.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
-import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo
+import io.github.daisukikaffuchino.han1meviewer.logic.repository.AccountRepository
 import io.github.daisukikaffuchino.han1meviewer.logic.exception.NotLoggedInException
 import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccount
 import io.github.daisukikaffuchino.han1meviewer.logic.model.UserAccountAction
@@ -39,7 +39,7 @@ class UserAccountViewModel : ViewModel() {
         }
         viewModelScope.launch {
             _accountState.value = UiState.Loading
-            NetworkRepo.getUserAccountPage(userId).collect { state ->
+            AccountRepository.getUserAccountPage(userId).collect { state ->
                 _accountState.value = state
             }
         }
@@ -51,7 +51,7 @@ class UserAccountViewModel : ViewModel() {
         viewModelScope.launch {
             _submittingState.value = UserAccountSubmittingState.UpdatingProfile
             _actionFlow.emit(UserAccountActionEvent(UserAccountAction.ProfileUpdated, UiState.Loading))
-            NetworkRepo.updateUserAccountProfile(
+            AccountRepository.updateUserAccountProfile(
                 userId = account.userId,
                 csrfToken = account.csrfToken,
                 name = name,
@@ -74,7 +74,7 @@ class UserAccountViewModel : ViewModel() {
         viewModelScope.launch {
             _submittingState.value = UserAccountSubmittingState.UpdatingPassword
             _actionFlow.emit(UserAccountActionEvent(UserAccountAction.PasswordUpdated, UiState.Loading))
-            NetworkRepo.updateUserAccountPassword(
+            AccountRepository.updateUserAccountPassword(
                 userId = account.userId,
                 csrfToken = account.csrfToken,
                 oldPassword = oldPassword,
@@ -95,7 +95,7 @@ class UserAccountViewModel : ViewModel() {
         viewModelScope.launch {
             _submittingState.value = UserAccountSubmittingState.UpdatingAvatar
             _actionFlow.emit(UserAccountActionEvent(UserAccountAction.AvatarUpdated, UiState.Loading))
-            NetworkRepo.updateUserAccountAvatar(
+            AccountRepository.updateUserAccountAvatar(
                 userId = account.userId,
                 csrfToken = account.csrfToken,
                 avatarFile = avatarFile,

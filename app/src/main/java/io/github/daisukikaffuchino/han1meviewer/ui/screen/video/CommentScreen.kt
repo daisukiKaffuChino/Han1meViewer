@@ -67,6 +67,7 @@ import io.github.daisukikaffuchino.han1meviewer.ui.component.PageContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.VideoCommentCard
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.EmptyContent
 import io.github.daisukikaffuchino.han1meviewer.ui.component.content.ErrorContent
+import io.github.daisukikaffuchino.han1meviewer.ui.component.toUiMessage
 import io.github.daisukikaffuchino.han1meviewer.ui.component.lazy.LazyColumn
 import io.github.daisukikaffuchino.han1meviewer.ui.preview.fakeCommentList
 import io.github.daisukikaffuchino.han1meviewer.ui.theme.HanimeDefaults
@@ -268,12 +269,12 @@ fun CommentScreen(
                         isLoading = false,
                         isError = loadError,
                         isEmpty = sortedComments.isEmpty(),
-                        errorMessage = (state as? UiState.Error)?.throwable?.message ?: "",
+                        errorMessage = (state as? UiState.Error)?.throwable?.toUiMessage() ?: "",
                         onRetry = onRefresh,
                         error = {
                             ErrorContent(
                                 title = stringResource(R.string.load_failed_retry),
-                                message = (state as UiState.Error).throwable.message,
+                                message = (state as UiState.Error).throwable.toUiMessage(),
                                 onRetry = onRefresh,
                                 modifier = Modifier
                                     .align(Alignment.Center)

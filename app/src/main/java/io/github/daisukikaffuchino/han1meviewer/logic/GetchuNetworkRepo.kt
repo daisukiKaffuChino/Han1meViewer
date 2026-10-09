@@ -2,8 +2,8 @@ package io.github.daisukikaffuchino.han1meviewer.logic
 
 import io.github.daisukikaffuchino.utils.LogUtil
 import io.github.daisukikaffuchino.han1meviewer.EMPTY_STRING
-import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo.handleException
-import io.github.daisukikaffuchino.han1meviewer.logic.NetworkRepo.throwRequestException
+import io.github.daisukikaffuchino.han1meviewer.logic.network.NetworkErrorMapper.handleException
+import io.github.daisukikaffuchino.han1meviewer.logic.network.NetworkErrorMapper.throwRequestException
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HanimeNetwork
 import io.github.daisukikaffuchino.han1meviewer.logic.state.UiState
 import kotlinx.coroutines.Dispatchers
