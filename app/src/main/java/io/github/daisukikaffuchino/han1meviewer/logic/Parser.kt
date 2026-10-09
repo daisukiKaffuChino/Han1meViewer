@@ -58,7 +58,7 @@ object Parser {
     }
 
     fun homePageVer2(body: String): UiState<HomePage> {
-        val isAVSite = SettingsRepository.baseUrl == HANIME_URL[3]
+        val isAVSite = isAvSiteFromSettings
         val parseBody = Jsoup.parse(body).body()
         val csrfToken = parseBody.selectFirst("input[name=_token]")?.attr("value") // csrf token
         val homePageParse = parseBody.select("div[id=home-rows-wrapper] > div")
@@ -358,12 +358,19 @@ object Parser {
     /**
      * AV 站的 CDN 節點可能已失效，這裡統一修正成可用的節點；其餘站點原樣返回。
      */
-    private fun fixAvCdnHost(url: String): String {
-        if (SettingsRepository.baseUrl != HANIME_URL[3]) return url
+    private fun fixAvCdnHost(url: String, isAvSite: Boolean): String {
+        if (!isAvSite) return url
         return Regex.avCdnHost.replace(url) { "${it.groupValues[1]}t33.cdn2020.com" }
     }
 
-    fun hanimeVideoVer2(body: String): UiState<HanimeVideo> {
+    /** 目标站点是否为 AV 站（影响 CDN 域名修正）。 */
+    private val isAvSiteFromSettings: Boolean
+        get() = SettingsRepository.baseUrl == HANIME_URL[3]
+
+    fun hanimeVideo(body: String): UiState<HanimeVideo> =
+        parseHanimeVideoBody(body, isAvSite = isAvSiteFromSettings)
+
+    internal fun parseHanimeVideoBody(body: String, isAvSite: Boolean): UiState<HanimeVideo> {
         val parseBody = Jsoup.parse(body).body()
         val csrfToken = parseBody.selectFirst("input[name=_token]")?.attr("value") // csrf token
 
@@ -371,7 +378,7 @@ object Parser {
             parseBody.selectFirst("input[name=like-user-id]")?.attr("value") // current user id
 
         val title = parseBody.getElementById("shareBtn-title")?.text()
-            .throwIfParseNull(Parser::hanimeVideoVer2.name, "title")
+            .throwIfParseNull(Parser::hanimeVideo.name, "title")
 
         var likeStatus = parseBody.selectFirst("[name=like-status]")
             ?.attr("value")
@@ -421,10 +428,10 @@ object Parser {
         val myListInfo = mutableListOf<HanimeVideo.MyList.MyListInfo>()
         myListCheckboxWrapper.forEach {
             val listTitle = it.selectFirst("span")?.ownText()
-                .logIfParseNull(Parser::hanimeVideoVer2.name, "myListTitle", loginNeeded = true)
+                .logIfParseNull(Parser::hanimeVideo.name, "myListTitle", loginNeeded = true)
             val listInput = it.selectFirst("input")
             val listCode = listInput?.attr("id")
-                .logIfParseNull(Parser::hanimeVideoVer2.name, "myListCode", loginNeeded = true)
+                .logIfParseNull(Parser::hanimeVideo.name, "myListCode", loginNeeded = true)
             val isSelected = listInput?.hasAttr("checked") == true
             if (listTitle != null && listCode != null) {
                 myListInfo += HanimeVideo.MyList.MyListInfo(
@@ -449,12 +456,12 @@ object Parser {
                     children.forEach { child ->
                         val dataHref = child.attr("data-href")
                         val videoCode = dataHref.toVideoCode()
-                            .throwIfParseNull(Parser::hanimeVideoVer2.name, "videoCode")
+                            .throwIfParseNull(Parser::hanimeVideo.name, "videoCode")
                         val thumbContainer = child.selectFirst(".thumb-container")
                         val coverUrl = thumbContainer?.selectFirst("img.main-thumb")?.absUrl("src")
-                            .throwIfParseNull(Parser::hanimeVideoVer2.name, "playlistEachCoverUrl")
+                            .throwIfParseNull(Parser::hanimeVideo.name, "playlistEachCoverUrl")
                         val title = child.selectFirst("h4.video-title a")?.text()
-                            .throwIfParseNull(Parser::hanimeVideoVer2.name, "playlistEachTitle")
+                            .throwIfParseNull(Parser::hanimeVideo.name, "playlistEachTitle")
                         val duration = thumbContainer?.selectFirst(".duration")?.text()
                         val statItems = thumbContainer?.select(".stat-item")
                         val reviews = statItems?.firstOrNull()?.ownText()?.trim()
@@ -468,11 +475,11 @@ object Parser {
                                 title = title, coverUrl = coverUrl,
                                 videoCode = videoCode,
                                 duration = duration.logIfParseNull(
-                                    Parser::hanimeVideoVer2.name,
+                                    Parser::hanimeVideo.name,
                                     "$title duration"
                                 ),
                                 views = views.logIfParseNull(
-                                    Parser::hanimeVideoVer2.name,
+                                    Parser::hanimeVideo.name,
                                     "$title views"
                                 ),
                                 isPlaying = isPlaying,
@@ -493,7 +500,7 @@ object Parser {
                             return@forEach
                         }
                         val videoCode = parent.selectFirst("div > a")?.absUrl("href")?.toVideoCode()
-                            .throwIfParseNull(Parser::hanimeVideoVer2.name, "videoCode")
+                            .throwIfParseNull(Parser::hanimeVideo.name, "videoCode")
                         val cardMobilePanel = parent.selectFirst("div[class^=card-mobile-panel]")
                         val eachTitleCover = cardMobilePanel?.select("div > div > div > img")?.getOrNull(1)
                         val eachIsPlaying = cardMobilePanel?.select("div > div > div > div")
@@ -504,9 +511,9 @@ object Parser {
                         val eachDuration = cardMobileDuration?.firstOrNull()?.text()
                         val eachViews = cardMobileDuration?.getOrNull(2)?.text()
                         val playlistEachCoverUrl = eachTitleCover?.absUrl("src")
-                            .throwIfParseNull(Parser::hanimeVideoVer2.name, "playlistEachCoverUrl")
+                            .throwIfParseNull(Parser::hanimeVideo.name, "playlistEachCoverUrl")
                         val playlistEachTitle = eachTitleCover?.attr("alt")
-                            .throwIfParseNull(Parser::hanimeVideoVer2.name, "playlistEachTitle")
+                            .throwIfParseNull(Parser::hanimeVideo.name, "playlistEachTitle")
                         val artist = cardMobilePanel?.selectFirst("a.card-mobile-user")?.text()
                         val infoBoxes = cardMobilePanel?.select("div.card-mobile-duration.card-playlist-large")
                         val reviews = infoBoxes?.firstOrNull()?.ownText()?.trim()
@@ -515,11 +522,11 @@ object Parser {
                                 title = playlistEachTitle, coverUrl = playlistEachCoverUrl,
                                 videoCode = videoCode,
                                 duration = eachDuration.logIfParseNull(
-                                    Parser::hanimeVideoVer2.name,
+                                    Parser::hanimeVideo.name,
                                     "$playlistEachTitle duration"
                                 ),
                                 views = eachViews.logIfParseNull(
-                                    Parser::hanimeVideoVer2.name,
+                                    Parser::hanimeVideo.name,
                                     "$playlistEachTitle views"
                                 ),
                                 isPlaying = eachIsPlaying,
@@ -554,10 +561,10 @@ object Parser {
                     if (homeRowsVideosDiv != null) {
                         val eachVideoCode = eachContent.absUrl("href").toVideoCode() ?: continue
                         val eachCoverUrl = homeRowsVideosDiv.selectFirst("img")?.absUrl("src")
-                            .throwIfParseNull(Parser::hanimeVideoVer2.name, "eachCoverUrl")
+                            .throwIfParseNull(Parser::hanimeVideo.name, "eachCoverUrl")
                         val eachTitle =
                             homeRowsVideosDiv.selectFirst("div[class$=title]")?.text()
-                                .throwIfParseNull(Parser::hanimeVideoVer2.name, "eachTitle")
+                                .throwIfParseNull(Parser::hanimeVideo.name, "eachTitle")
                         relatedAnimeList.add(
                             HanimeInfo(
                                 title = eachTitle, coverUrl = eachCoverUrl,
@@ -586,7 +593,7 @@ object Parser {
         if (!videos.isNullOrEmpty()) {
             videos.forEach { source ->
                 val resolution = source.attr("size") + "P"
-                val sourceUrl = fixAvCdnHost(source.absUrl("src"))
+                val sourceUrl = fixAvCdnHost(source.absUrl("src"), isAvSite)
                 val videoType = source.attr("type")
                 hanimeResolution.parseResolution(resolution, sourceUrl, videoType)
             }
@@ -599,7 +606,7 @@ object Parser {
                     val result =
                         Regex.videoSource.find(data)?.groups?.get(1)?.value ?: continue
                     //hanimeResolution.parseResolution(null, result)
-                    hanimeResolution.parseResolution(null, fixAvCdnHost(result))
+                    hanimeResolution.parseResolution(null, fixAvCdnHost(result, isAvSite))
                     break
                 }
             }
@@ -638,13 +645,13 @@ object Parser {
             HanimeVideo(
                 title = title, coverUrl = videoCoverUrl,
                 chineseTitle = chineseTitle.logIfParseNull(
-                    Parser::hanimeVideoVer2.name,
+                    Parser::hanimeVideo.name,
                     "chineseTitle"
                 ),
-                uploadTime = uploadTime.logIfParseNull(Parser::hanimeVideoVer2.name, "uploadTime"),
-                views = views.logIfParseNull(Parser::hanimeVideoVer2.name, "views"),
+                uploadTime = uploadTime.logIfParseNull(Parser::hanimeVideo.name, "uploadTime"),
+                views = views.logIfParseNull(Parser::hanimeVideo.name, "views"),
                 introduction = introduction.logIfParseNull(
-                    Parser::hanimeVideoVer2.name,
+                    Parser::hanimeVideo.name,
                     "introduction"
                 ),
                 videoUrls = hanimeResolution.toResolutionLinkMap(),
@@ -652,7 +659,7 @@ object Parser {
                 myList = myList,
                 playlist = playlist,
                 relatedHanimes = relatedAnimeList,
-                artist = artist.logIfParseNull(Parser::hanimeVideoVer2.name, "artist"),
+                artist = artist.logIfParseNull(Parser::hanimeVideo.name, "artist"),
                 favTimes = likesCount,
                 isFav = likeStatus == "1",
                 unlikesCount = unlikesCount,

@@ -69,7 +69,7 @@ object NetworkRepo {
 
     fun getHanimeVideo(videoCode: String) = videoIOFlow(
         request = { HanimeNetwork.hanimeService.getHanimeVideo(videoCode) },
-        action = Parser::hanimeVideoVer2
+        action = Parser::hanimeVideo
     )
 
     fun getHanimePreview(date: String) = websiteIOFlow(

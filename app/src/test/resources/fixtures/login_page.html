@@ -1,10 +1,37 @@
-<!DOCTYPE html>
 <html>
-<body>
-<form method="POST" action="/login">
-    <input type="hidden" name="_token" value="csrf-token-abc">
-    <input type="text" name="email">
-    <input type="password" name="password">
-</form>
-</body>
+ <head>
+  <title>fixture</title>
+ </head>
+ <body>
+  <form method="POST" action="https://hanime1.me/login">
+   <input type="hidden" name="_token" value="csrf-token-abc">
+   <h4 style="font-size: 1.7em;">…</h4>
+   <div style="font-size: 1.1em;">
+    <span style="font-weight: 500;">…<span style="font-weight: bold">…</span>…</span>
+    <div class="form-group" style="margin-top: 20px;">
+     <input style="background-color: #131313; color: gray;" type="email" class="form-control" name="email" id="email" placeholder="" required value="">
+    </div>
+    <div class="form-group">
+     <input style="background-color: #131313; color: gray;" type="password" class="form-control" name="password" id="password" placeholder="" required value="">
+    </div>
+    <div style="margin-top: 20px; margin-bottom: 20px; font-size: 0.95em">
+     <a href="/password/reset" target="_blank" style="cursor: pointer; text-decoration: none; font-weight: 500;">…</a>
+    </div>
+    <button style="height: 45px; margin-top: 10px; font-size: 1em; background-color: red !important; border-color: red !important;" type="submit" class="btn btn-info" name="submit">…</button>
+    <div class="separator">…</div>
+    <div class="row" style="text-align: center; margin-top: -10px">
+     <div class="col-xs-12 col-sm-12 col-md-12">
+      <a href="https://hanime1.me/auth/google" style="text-decoration: none; color: crimson"> 
+       <div class="social-login-wrapper-right" style="padding: 10px; border: 1px solid #333333;">
+        <i style="float: left; margin-top: 0px; font-size: 1.60em;" class="fab fa-google"></i> <span style="font-size: 0.95em; font-weight: bold;">…</span>
+       </div> 
+      </a>
+     </div>
+    </div>
+    <div style="margin-top: 20px; font-size: 0.95em">
+     <span style="font-weight: 400">…</span>&nbsp;<a href="https://hanime1.me/register" style="cursor: pointer; text-decoration: none; font-weight: 500;">…</a>
+    </div>
+   </div>
+  </form>
+ </body>
 </html>

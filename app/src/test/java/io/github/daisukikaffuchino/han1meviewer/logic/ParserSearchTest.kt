@@ -13,6 +13,9 @@ import kotlin.test.assertTrue
  *
  * `Parser` 内部通过 [LogUtil] 调用 `android.util.Log`，测试里把 [LogUtil.enabled]
  * 置为 false 即可短路日志调用。
+ *
+ * fixture 说明：`search_normal.html` / `login_page.html` 由线上真实页面生成（脱敏：
+ * 标题、作者等文本替换为占位符，结构与 class/href 保持真实）；其余为按选择器构造的样例。
  */
 class ParserSearchTest {
 
@@ -32,21 +35,22 @@ class ParserSearchTest {
 
         val success = state as PagedUiState.Success
         val result = success.data
-        assertEquals(7, result.totalPages)
-        assertEquals(2, result.list.size)
+        assertEquals(239, result.totalPages)
+        assertEquals(3, result.list.size)
 
         val first = result.list[0]
-        assertEquals("123456", first.videoCode)
-        assertEquals("測試影片 A", first.title)
-        assertEquals("https://hanime1.me/cover/123456.jpg", first.coverUrl)
-        assertEquals("12:34", first.duration)
-        assertEquals("1.2萬次觀看", first.views)
-        assertEquals("作者A", first.currentArtist)
-        assertEquals("2024-03-10", first.uploadTime)
-        assertEquals("4.5", first.reviews)
+        assertEquals("408583", first.videoCode)
+        assertEquals("測試影片", first.title)
+        assertTrue(first.coverUrl.startsWith("https://vdownload.hembed.com/image/thumbnail/408583"))
+        assertEquals("06:00", first.duration)
+        assertEquals("6.2萬次", first.views)
+        assertEquals("作者X", first.currentArtist)
+        assertEquals("11小時前", first.uploadTime)
+        assertEquals("98%", first.reviews)
         assertEquals(HanimeInfo.NORMAL, first.itemType)
 
-        assertEquals("654321", result.list[1].videoCode)
+        assertEquals("408584", result.list[1].videoCode)
+        assertEquals("408581", result.list[2].videoCode)
     }
 
     @Test
