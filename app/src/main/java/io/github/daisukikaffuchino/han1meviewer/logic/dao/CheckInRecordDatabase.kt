@@ -99,7 +99,8 @@ abstract class CheckInRecordDatabase : RoomDatabase() {
                         MIGRATION_3_4,
                         MIGRATION_4_5,
                     )
-                    .fallbackToDestructiveMigration(true)
+                    // 不启用破坏性回退：缺迁移路径时宁可显式报错，也不要静默清空签到记录。
+                    // 1→5 的显式迁移已全部提供，正常升级不会走到这里。
                     .build()
                 INSTANCE = instance
                 instance
