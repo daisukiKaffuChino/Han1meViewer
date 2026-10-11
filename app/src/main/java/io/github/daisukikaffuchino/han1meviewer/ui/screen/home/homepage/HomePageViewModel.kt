@@ -1,6 +1,5 @@
 package io.github.daisukikaffuchino.han1meviewer.ui.screen.home.homepage
 
-import io.github.daisukikaffuchino.utils.LogUtil
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,10 +7,7 @@ import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
 import io.github.daisukikaffuchino.han1meviewer.R
 import io.github.daisukikaffuchino.han1meviewer.logic.AppUpdateChecker
 import io.github.daisukikaffuchino.han1meviewer.logic.AppUpdateState
-import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.repository.HomeRepository
-import io.github.daisukikaffuchino.han1meviewer.logic.entity.HKeyframeEntity
-import io.github.daisukikaffuchino.han1meviewer.logic.entity.WatchHistoryEntity
 import io.github.daisukikaffuchino.han1meviewer.logic.model.Announcement
 import io.github.daisukikaffuchino.han1meviewer.logic.state.HanimeErrorKind
 import io.github.daisukikaffuchino.han1meviewer.logic.state.PagedUiState
@@ -22,13 +18,10 @@ import io.github.daisukikaffuchino.han1meviewer.ui.viewmodel.AppViewModel
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HanimeScreen
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.HomeRoute
 import io.github.daisukikaffuchino.han1meviewer.ui.navigation.main.TopLevelBackStack
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 class HomePageViewModel: ViewModel() {
@@ -53,13 +46,6 @@ class HomePageViewModel: ViewModel() {
 
     private var homePageJob: Job? = null
     private var initializationJob: Job? = null
-
-    init {
-        viewModelScope.launch {
-            // 初始化默认已下载分组，防止[FOREIGN KEY constraint failed]
-            DatabaseRepo.HanimeDownload.insertDefaultGroup()
-        }
-    }
 
     fun initializeHomePage() {
         if (!SettingsRepository.usageNoticeAccepted || !SettingsRepository.usageSourceVerified) return
@@ -145,51 +131,4 @@ class HomePageViewModel: ViewModel() {
         }
     }
 
-    fun deleteWatchHistory(history: WatchHistoryEntity) {
-        viewModelScope.launch(Dispatchers.IO) {
-            DatabaseRepo.WatchHistory.delete(history)
-            LogUtil.d("delete_watch_hty", "$history DONE!")
-        }
-    }
-
-    fun deleteAllWatchHistories() {
-        viewModelScope.launch(Dispatchers.IO) {
-            DatabaseRepo.WatchHistory.deleteAll()
-            LogUtil.d("del_all_watch_hty", "DONE!")
-        }
-    }
-
-    fun loadAllWatchHistories() =
-        DatabaseRepo.WatchHistory.loadAll()
-            .catch { e -> LogUtil.e("HomePageViewModel", "加载观看历史失败", e) }
-            .flowOn(Dispatchers.IO)
-    private val _modifyHKeyframeFlow = MutableSharedFlow<Boolean>()
-    fun removeHKeyframe(videoCode: String, hKeyframe: HKeyframeEntity.Keyframe) {
-        viewModelScope.launch(Dispatchers.IO) {
-            DatabaseRepo.HKeyframe.removeKeyframe(videoCode, hKeyframe)
-            LogUtil.d("HKeyframe", "removeHKeyframe:$hKeyframe DONE!")
-            _modifyHKeyframeFlow.emit(true)
-        }
-    }
-    fun modifyHKeyframe(
-        videoCode: String,
-        oldKeyframe: HKeyframeEntity.Keyframe, keyframe: HKeyframeEntity.Keyframe,
-    ) {
-        viewModelScope.launch {
-            DatabaseRepo.HKeyframe.modifyKeyframe(videoCode, oldKeyframe, keyframe)
-            LogUtil.d("HKeyframe", "modifyHKeyframe:$keyframe DONE!")
-            _modifyHKeyframeFlow.emit(true)
-        }
-    }
-    fun deleteHKeyframes(entity: HKeyframeEntity) {
-        viewModelScope.launch(Dispatchers.IO) {
-            DatabaseRepo.HKeyframe.delete(entity)
-        }
-    }
-
-    fun updateHKeyframes(entity: HKeyframeEntity) {
-        viewModelScope.launch(Dispatchers.IO) {
-            DatabaseRepo.HKeyframe.update(entity)
-        }
-    }
 }

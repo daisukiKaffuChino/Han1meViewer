@@ -9,6 +9,7 @@ import android.os.Bundle
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationManagerCompat
 import io.github.daisukikaffuchino.han1meviewer.logic.SettingsRepository
+import io.github.daisukikaffuchino.han1meviewer.logic.DatabaseRepo
 import io.github.daisukikaffuchino.han1meviewer.logic.datastore.DataStoreManager
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HDns
 import io.github.daisukikaffuchino.han1meviewer.logic.network.HProxySelector
@@ -25,6 +26,10 @@ import coil3.ImageLoader
 import coil3.SingletonImageLoader
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import `is`.xyz.mpv.MPVLib
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import java.lang.ref.WeakReference
 import java.net.ProxySelector
@@ -41,6 +46,9 @@ class HanimeApplication : Application(), Application.ActivityLifecycleCallbacks,
     companion object {
         const val TAG = "HanimeApplication"
     }
+
+    /** 应用级后台作用域，用于与界面无关的一次性初始化。 */
+    private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private fun buildImageClient(): OkHttpClient =
         OkHttpClient.Builder()
@@ -85,6 +93,11 @@ class HanimeApplication : Application(), Application.ActivityLifecycleCallbacks,
         initNotificationChannel()
         MPVLib.create(applicationContext)
         MPVLib.init()
+
+        // 预置默认下载分组，避免首次插入下载项时触发 FOREIGN KEY 约束失败
+        applicationScope.launch {
+            DatabaseRepo.HanimeDownload.insertDefaultGroup()
+        }
 
         if (AnimeShaders.copyShaderAssets(applicationContext) <= 0) {
             LogUtil.w(TAG, "Shader 复制失败")
